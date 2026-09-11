@@ -14,9 +14,8 @@
     "jsx": "preserve",
     "incremental": true,
     "plugins": [{ "name": "next" }],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["apps/quote/src/*"]
+      "@/*": ["./apps/quote/src/*"]
     }
   },
   "include": [
@@ -25,7 +24,8 @@
     "app/**/*.tsx",
     "apps/quote/src/app/page.tsx",
     "apps/quote/src/components/marketing-sections.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules", "apps/quote/src/app/dashboard/**", "apps/quote/src/app/projects/**", "apps/quote/src/app/price-book/**", "apps/quote/src/lib/**"]
 }
