@@ -12,13 +12,13 @@ export function AppShell({ organizationName, role, plan = 'FREE', children }: Pr
   return (
     <main className="shell">
       <aside className="sidebar">
-        <Link href="/" className="brand linkReset">
+        <Link href="/dashboard" className="brand linkReset">
           <span className="brandMark">M</span>
           <span><strong>Makster</strong><small>Quote</small></span>
         </Link>
         <div className="workspaceName"><span>Мастерская</span><strong>{organizationName}</strong></div>
         <nav>
-          <Link className="navItem" href="/">Главная</Link>
+          <Link className="navItem" href="/dashboard">Главная</Link>
           <Link className="navItem" href="/projects/new">Новый расчёт</Link>
           <Link className="navItem" href="/price-book">Прайс-лист</Link>
           <span className="navItem disabled">Библиотека модулей</span>
