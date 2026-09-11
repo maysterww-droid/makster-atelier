@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
 import { requireWorkspace } from '@/lib/workspace';
+import { archiveProject, duplicateProject } from './actions';
 
 export const dynamic = 'force-dynamic';
 
-type Props = { searchParams: Promise<{ q?: string; status?: string }> };
+type Props = { searchParams: Promise<{ q?: string; status?: string; error?: string; archived?: string }> };
 
 const statusLabel: Record<string, string> = {
   draft: 'Черновик',
@@ -16,6 +17,14 @@ const statusLabel: Record<string, string> = {
   installed: 'Монтаж',
   completed: 'Завершён',
   archived: 'Архив',
+};
+
+const errorText: Record<string, string> = {
+  project: 'Проект не найден.',
+  permission: 'Недостаточно прав для этого действия.',
+  archive: 'Не удалось архивировать проект.',
+  source: 'Исходный проект для копирования не найден.',
+  'duplicate-create': 'Не удалось создать копию проекта.',
 };
 
 export default async function ProjectsPage({ searchParams }: Props) {
@@ -46,6 +55,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
 
   const clientNames = new Map((clients ?? []).map((client) => [client.id, client.display_name]));
   const rows = projects ?? [];
+  const canManage = ['owner', 'admin', 'sales', 'designer', 'technologist'].includes(role);
 
   return (
     <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan ?? 'free').toUpperCase()}>
@@ -55,6 +65,9 @@ export default async function ProjectsPage({ searchParams }: Props) {
       </header>
 
       <div className="pageContent">
+        {query.archived ? <div className="notice success">Проект перемещён в архив.</div> : null}
+        {query.error ? <div className="notice error">{errorText[query.error] ?? `Не удалось выполнить действие (${query.error}).`}</div> : null}
+
         <section className="panel formPanel">
           <form className="stackForm padded" method="get">
             <div className="formGrid3">
@@ -80,7 +93,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
                   <td><span className="pill">{statusLabel[project.status] ?? project.status}</span></td>
                   <td>{project.currency}</td>
                   <td>{new Intl.DateTimeFormat('ru-RU').format(new Date(project.updated_at))}</td>
-                  <td><Link className="textLink" href={`/projects/${project.id}`}>Открыть →</Link></td>
+                  <td><div className="topActions"><Link className="textLink" href={`/projects/${project.id}`}>Открыть →</Link>{canManage ? <><form action={duplicateProject}><input type="hidden" name="projectId" value={project.id}/><button type="submit" className="textLink">Копия</button></form><form action={archiveProject}><input type="hidden" name="projectId" value={project.id}/><button type="submit" className="textLink">Архив</button></form></> : null}</div></td>
                 </tr>)}</tbody>
               </table>
             </div>
