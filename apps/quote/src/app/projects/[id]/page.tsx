@@ -7,7 +7,7 @@ import CabinetEditor from './cabinet-editor';
 import { ProjectCommercial } from './project-commercial';
 
 export const dynamic = 'force-dynamic';
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; saved?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; saved?: string; duplicated?: string }> };
 
 export default async function ProjectPage({ params, searchParams }: Props) {
   const { id } = await params;
@@ -46,7 +46,8 @@ export default async function ProjectPage({ params, searchParams }: Props) {
   const taxBps = Number((project.settings as Record<string, unknown> | null)?.taxBps ?? 0);
 
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan ?? 'free').toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">{project.project_type.toUpperCase()} · {project.status.toUpperCase()}</span><h1>{project.name}</h1></div><div className="topActions"><Link href="/" className="textLink">← Проекты</Link><Link href="/price-book" className="secondary linkButton">Прайс-лист</Link><Link href={`/projects/${project.id}/quote`} className="secondary linkButton" target="_blank">Живой просмотр</Link></div></header>
+    <header className="topbar"><div><span className="eyebrow">{project.project_type.toUpperCase()} · {project.status.toUpperCase()}</span><h1>{project.name}</h1></div><div className="topActions"><Link href="/projects" className="textLink">← Проекты</Link><Link href="/price-book" className="secondary linkButton">Прайс-лист</Link><Link href={`/projects/${project.id}/quote`} className="secondary linkButton" target="_blank">Живой просмотр</Link></div></header>
+    {query.duplicated ? <div className="pageContent compact"><div className="notice success">Создана независимая копия проекта. Выпущенные предложения исходного проекта не копировались.</div></div> : null}
     {query.error ? <div className="pageContent compact"><div className="notice error">Не удалось выполнить действие ({query.error}). Проверьте данные и попробуйте снова.</div></div> : null}
     {query.saved === 'commercial' ? <div className="pageContent compact"><div className="notice success">Итог проекта и параметры предложения сохранены.</div></div> : null}
     {!priceBook?.length ? <div className="pageContent compact"><div className="notice warning">Прайс-лист пуст. <Link href="/price-book">Добавьте реальные цены</Link>, иначе стоимость останется нулевой.</div></div> : null}
