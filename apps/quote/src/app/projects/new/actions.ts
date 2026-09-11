@@ -4,9 +4,12 @@ import { redirect } from 'next/navigation';
 import { requireWorkspace } from '@/lib/workspace';
 
 const allowedTypes = new Set(['kitchen', 'wardrobe', 'cabinet', 'sideboard', 'built_in', 'mixed']);
+const projectRoles = new Set(['owner', 'admin', 'sales', 'designer', 'technologist']);
 
 export async function createProject(formData: FormData) {
-  const { supabase, organization } = await requireWorkspace();
+  const { supabase, organization, role } = await requireWorkspace();
+  if (!projectRoles.has(role)) redirect('/projects?error=permission');
+
   const name = String(formData.get('name') ?? '').trim();
   const requestedType = String(formData.get('projectType') ?? 'kitchen');
   const projectType = allowedTypes.has(requestedType) ? requestedType : 'mixed';
@@ -18,7 +21,7 @@ export async function createProject(formData: FormData) {
   const projectId = crypto.randomUUID();
   const snapshot = {
     source: 'makster-quote',
-    quoteVersion: '0.1.1',
+    quoteVersion: '0.1.7',
     cabinets: [],
     commercial: { currency },
     createdAt: new Date().toISOString(),
