@@ -16,9 +16,12 @@ export async function savePricingSettings(formData: FormData) {
   if (!['owner', 'admin'].includes(role)) redirect('/settings/pricing?error=permission');
 
   const targetMarginBps = percentToBps(formData, 'targetMarginPercent');
+  const minimumMarginBps = percentToBps(formData, 'minimumMarginPercent');
   const overheadBps = percentToBps(formData, 'overheadPercent');
   if (targetMarginBps === null) redirect('/settings/pricing?error=margin');
+  if (minimumMarginBps === null) redirect('/settings/pricing?error=minimum-margin');
   if (overheadBps === null) redirect('/settings/pricing?error=overhead');
+  if (minimumMarginBps > targetMarginBps) redirect('/settings/pricing?error=minimum-above-target');
 
   const current = organization.settings && typeof organization.settings === 'object' && !Array.isArray(organization.settings)
     ? organization.settings as Record<string, unknown>
@@ -32,8 +35,9 @@ export async function savePricingSettings(formData: FormData) {
     quote: {
       ...currentQuote,
       targetMarginBps,
+      minimumMarginBps,
       overheadBps,
-      pricingFormulaVersion: 'mq-margin-0.1.7',
+      pricingFormulaVersion: 'mq-margin-0.1.14',
     },
   };
 
