@@ -95,6 +95,7 @@ export async function publishCommercialQuote(formData: FormData) {
 
   const quoteSettings = (organization.settings?.quote ?? {}) as Record<string, unknown>;
   const workspaceMarginBps = Number(quoteSettings.targetMarginBps ?? 3500);
+  const minimumMarginBps = Math.max(0, Math.min(9_500, Number(quoteSettings.minimumMarginBps ?? 1500)));
   const overheadBps = Number(quoteSettings.overheadBps ?? 0);
   const commercialOptions = readCommercialOptions(project.settings, workspaceMarginBps);
   const targetMarginBps = commercialOptions.variantMarginsBps[commercialOptions.selectedVariant];
@@ -109,16 +110,13 @@ export async function publishCommercialQuote(formData: FormData) {
 
   if (pricing.cabinetCount === 0) redirect(`/projects/${projectId}?error=publish-empty`);
   if (pricing.incompleteCabinets > 0) redirect(`/projects/${projectId}?error=publish-incomplete`);
+  if (adjusted.marginBps < minimumMarginBps) redirect(`/projects/${projectId}?error=publish-margin-guard`);
 
   const issuedAt = new Date().toISOString();
   const technicalSnapshot = {
     source: 'makster-quote',
-    quoteVersion: '0.1.13',
-    project: {
-      name: project.name,
-      projectType: project.project_type,
-      currency: project.currency,
-    },
+    quoteVersion: '0.1.14',
+    project: { name: project.name, projectType: project.project_type, currency: project.currency },
     modules: cabinets.map((cabinet) => ({
       id: cabinet.id,
       moduleKey: cabinet.module_key,
@@ -150,24 +148,9 @@ export async function publishCommercialQuote(formData: FormData) {
     installation ? { category:'installation', name:installation.name, amountMinor:String(installation.purchase_price_minor), unit:'job' } : null,
     other ? { category:'other', name:other.name, amountMinor:String(other.purchase_price_minor), unit:'job' } : null,
   ];
-  const measuredExtras: QuoteSnapshotExtra[] = measured.lines.map((line) => ({
-    category: line.category,
-    name: line.name,
-    amountMinor: line.amountMinor.toString(),
-    quantity: line.quantity,
-    unit: line.unit,
-  }));
-  const manualExtras: QuoteSnapshotExtra[] = commercialOptions.manualCostLines.map((line) => ({
-    category: 'manual',
-    name: line.name,
-    amountMinor: line.costMinor.toString(),
-    unit: 'job',
-  }));
-  const extras: QuoteSnapshotExtra[] = [
-    ...fixedExtras.filter((value): value is QuoteSnapshotExtra => value !== null),
-    ...measuredExtras,
-    ...manualExtras,
-  ];
+  const measuredExtras: QuoteSnapshotExtra[] = measured.lines.map((line) => ({ category:line.category, name:line.name, amountMinor:line.amountMinor.toString(), quantity:line.quantity, unit:line.unit }));
+  const manualExtras: QuoteSnapshotExtra[] = commercialOptions.manualCostLines.map((line) => ({ category:'manual', name:line.name, amountMinor:line.costMinor.toString(), unit:'job' }));
+  const extras: QuoteSnapshotExtra[] = [...fixedExtras.filter((value): value is QuoteSnapshotExtra => value !== null), ...measuredExtras, ...manualExtras];
 
   const client = clientResult.data;
   const brand = readQuoteBrand(organization.settings, organization.name);
@@ -181,15 +164,7 @@ export async function publishCommercialQuote(formData: FormData) {
     project: { id:project.id, name:project.name, revisionNumber:frozenRevision.revisionNumber },
     client: { id:client.id, name:client.display_name, email:client.email ?? '', phone:client.phone ?? '', address:addressText(client.address) },
     supplier: brand,
-    modules: cabinets.map((cabinet) => ({
-      id: cabinet.id,
-      name: cabinet.name,
-      moduleKey: cabinet.module_key,
-      widthMm: Number(cabinet.width_mm),
-      heightMm: Number(cabinet.height_mm),
-      depthMm: Number(cabinet.depth_mm),
-      quantity: Number(cabinet.quantity ?? 1),
-    })),
+    modules: cabinets.map((cabinet) => ({ id:cabinet.id, name:cabinet.name, moduleKey:cabinet.module_key, widthMm:Number(cabinet.width_mm), heightMm:Number(cabinet.height_mm), depthMm:Number(cabinet.depth_mm), quantity:Number(cabinet.quantity ?? 1) })),
     extras,
     commercial: {
       variantKey: commercialOptions.selectedVariant,
@@ -201,60 +176,31 @@ export async function publishCommercialQuote(formData: FormData) {
       adjustmentMinor: adjusted.sellingAdjustmentMinor.toString(),
       actualMarginBps: adjusted.marginBps,
     },
-    terms: {
-      depositBps: commercial.depositBps,
-      productionLeadText: commercial.productionLeadText,
-      paymentTerms: commercial.paymentTerms,
-      warrantyText: commercial.warrantyText,
-      clientNote: commercial.clientNote,
-    },
-    amounts: {
-      netMinor: adjusted.netSalesMinor.toString(),
-      taxMinor: adjusted.taxMinor.toString(),
-      totalMinor: adjusted.grossSalesMinor.toString(),
-      depositMinor: depositMinor.toString(),
-      taxBps: commercial.taxBps,
-    },
+    terms: { depositBps:commercial.depositBps, productionLeadText:commercial.productionLeadText, paymentTerms:commercial.paymentTerms, warrantyText:commercial.warrantyText, clientNote:commercial.clientNote },
+    amounts: { netMinor:adjusted.netSalesMinor.toString(), taxMinor:adjusted.taxMinor.toString(), totalMinor:adjusted.grossSalesMinor.toString(), depositMinor:depositMinor.toString(), taxBps:commercial.taxBps },
   };
 
   const estimateJson = {
-    schemaVersion: 'mq-estimate-0.1.13',
+    schemaVersion: 'mq-estimate-0.1.14',
     projectId,
     projectRevision: frozenRevision.revisionNumber,
     projectRevisionCreated: frozenRevision.created,
     variant: snapshot.commercial,
+    profitGuardrail: { minimumMarginBps, passed: true },
     extras: extras.map((extra) => ({ ...extra })),
     costs: Object.fromEntries(Object.entries(pricing.costs).map(([key, value]) => [key, value?.toString() ?? '0'])),
     pricing: {
-      directCostMinor: adjusted.directCostMinor.toString(),
-      overheadMinor: adjusted.overheadMinor.toString(),
-      trueCostMinor: adjusted.trueCostMinor.toString(),
-      listNetSalesMinor: adjusted.listNetSalesMinor.toString(),
-      sellingAdjustmentMinor: adjusted.sellingAdjustmentMinor.toString(),
-      netSalesMinor: adjusted.netSalesMinor.toString(),
-      taxMinor: adjusted.taxMinor.toString(),
-      grossSalesMinor: adjusted.grossSalesMinor.toString(),
-      profitMinor: adjusted.profitMinor.toString(),
-      marginBps: adjusted.marginBps,
-      markupBps: adjusted.markupBps,
+      directCostMinor: adjusted.directCostMinor.toString(), overheadMinor: adjusted.overheadMinor.toString(), trueCostMinor: adjusted.trueCostMinor.toString(),
+      listNetSalesMinor: adjusted.listNetSalesMinor.toString(), sellingAdjustmentMinor: adjusted.sellingAdjustmentMinor.toString(), netSalesMinor: adjusted.netSalesMinor.toString(),
+      taxMinor: adjusted.taxMinor.toString(), grossSalesMinor: adjusted.grossSalesMinor.toString(), profitMinor: adjusted.profitMinor.toString(), marginBps: adjusted.marginBps, markupBps: adjusted.markupBps,
     },
     targetMarginBps,
+    minimumMarginBps,
     overheadBps,
   };
 
   const engineeringChecksum = sha256(technicalSnapshot);
-  const pricingFingerprint = sha256({
-    targetMarginBps,
-    overheadBps,
-    taxBps:commercial.taxBps,
-    selectedVariant: commercialOptions.selectedVariant,
-    adjustmentMode: commercialOptions.adjustmentMode,
-    adjustmentBps: commercialOptions.adjustmentBps,
-    delivery:delivery?.id ?? '',
-    installation:installation?.id ?? '',
-    other:other?.id ?? '',
-    extras,
-  });
+  const pricingFingerprint = sha256({ targetMarginBps, minimumMarginBps, overheadBps, taxBps:commercial.taxBps, selectedVariant:commercialOptions.selectedVariant, adjustmentMode:commercialOptions.adjustmentMode, adjustmentBps:commercialOptions.adjustmentBps, delivery:delivery?.id ?? '', installation:installation?.id ?? '', other:other?.id ?? '', extras });
   const estimateFingerprint = sha256(estimateJson);
   const quoteFingerprint = sha256(snapshot);
 
