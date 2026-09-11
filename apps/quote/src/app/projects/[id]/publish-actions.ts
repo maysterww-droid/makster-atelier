@@ -45,6 +45,15 @@ function addDays(iso: string, days: number) {
   return date.toISOString();
 }
 
+function readFrozenRevision(value: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const row = value as Record<string, unknown>;
+  const id = typeof row.id === 'string' ? row.id : '';
+  const revisionNumber = Number(row.revisionNumber);
+  if (!/^[0-9a-fA-F-]{36}$/.test(id) || !Number.isInteger(revisionNumber) || revisionNumber < 1) return null;
+  return { id, revisionNumber, created: row.created === true };
+}
+
 export async function publishCommercialQuote(formData: FormData) {
   const { supabase, organization, role } = await requireWorkspace();
   const projectId = clean(formData, 'projectId', 80);
@@ -52,22 +61,24 @@ export async function publishCommercialQuote(formData: FormData) {
 
   const { data: project, error: projectError } = await supabase
     .from('projects')
-    .select('id, name, project_type, currency, client_id, settings, current_revision_id')
+    .select('id, name, project_type, currency, client_id, settings')
     .eq('id', projectId)
     .eq('organization_id', organization.id)
     .maybeSingle();
   if (projectError || !project) redirect('/?error=project');
   if (!project.client_id) redirect(`/projects/${projectId}?error=publish-client`);
-  if (!project.current_revision_id) redirect(`/projects/${projectId}?error=publish-revision`);
 
-  const [revisionResult, clientResult, cabinetsResult, priceResult] = await Promise.all([
-    supabase.from('project_revisions').select('id, revision_number').eq('id', project.current_revision_id).eq('project_id', projectId).eq('organization_id', organization.id).maybeSingle(),
+  const [clientResult, cabinetsResult, priceResult] = await Promise.all([
     supabase.from('clients').select('id, display_name, email, phone, address').eq('id', project.client_id).eq('organization_id', organization.id).maybeSingle(),
-    supabase.from('quote_cabinets').select('id, module_key, name, width_mm, height_mm, depth_mm, quantity, engine_version, computed_cost_json').eq('project_id', projectId).eq('organization_id', organization.id).order('sort_order').order('created_at'),
+    supabase.from('quote_cabinets')
+      .select('id, module_key, name, sort_order, width_mm, height_mm, depth_mm, quantity, construction_json, material_refs_json, hardware_refs_json, computed_parts_json, engine_version, computed_cost_json')
+      .eq('project_id', projectId)
+      .eq('organization_id', organization.id)
+      .order('sort_order')
+      .order('created_at'),
     supabase.from('quote_price_book_items').select('id, category, name, unit, purchase_price_minor').eq('organization_id', organization.id).eq('active', true),
   ]);
 
-  if (revisionResult.error || !revisionResult.data) redirect(`/projects/${projectId}?error=publish-revision`);
   if (clientResult.error || !clientResult.data) redirect(`/projects/${projectId}?error=publish-client`);
   if (cabinetsResult.error || priceResult.error) redirect(`/projects/${projectId}?error=publish-data`);
 
@@ -100,6 +111,39 @@ export async function publishCommercialQuote(formData: FormData) {
   if (pricing.incompleteCabinets > 0) redirect(`/projects/${projectId}?error=publish-incomplete`);
 
   const issuedAt = new Date().toISOString();
+  const technicalSnapshot = {
+    source: 'makster-quote',
+    quoteVersion: '0.1.13',
+    project: {
+      name: project.name,
+      projectType: project.project_type,
+      currency: project.currency,
+    },
+    modules: cabinets.map((cabinet) => ({
+      id: cabinet.id,
+      moduleKey: cabinet.module_key,
+      name: cabinet.name,
+      sortOrder: Number(cabinet.sort_order ?? 0),
+      widthMm: Number(cabinet.width_mm),
+      heightMm: Number(cabinet.height_mm),
+      depthMm: Number(cabinet.depth_mm),
+      quantity: Number(cabinet.quantity ?? 1),
+      construction: cabinet.construction_json,
+      materialRefs: cabinet.material_refs_json,
+      hardwareRefs: cabinet.hardware_refs_json,
+      computedParts: cabinet.computed_parts_json,
+      engineVersion: cabinet.engine_version,
+    })),
+  };
+
+  const { data: frozenRaw, error: freezeError } = await supabase.rpc('quote_freeze_project_revision', {
+    p_project_id: projectId,
+    p_snapshot: technicalSnapshot,
+    p_change_set: [{ type: 'commercial_publish', at: issuedAt }],
+  });
+  const frozenRevision = readFrozenRevision(frozenRaw);
+  if (freezeError || !frozenRevision) redirect(`/projects/${projectId}?error=publish-revision`);
+
   const validUntil = addDays(issuedAt, commercial.validityDays);
   const fixedExtras: Array<QuoteSnapshotExtra | null> = [
     delivery ? { category:'delivery', name:delivery.name, amountMinor:String(delivery.purchase_price_minor), unit:'job' } : null,
@@ -134,7 +178,7 @@ export async function publishCommercialQuote(formData: FormData) {
     validUntil,
     locale: commercial.documentLocale,
     currency: project.currency,
-    project: { id:project.id, name:project.name, revisionNumber:revisionResult.data.revision_number },
+    project: { id:project.id, name:project.name, revisionNumber:frozenRevision.revisionNumber },
     client: { id:client.id, name:client.display_name, email:client.email ?? '', phone:client.phone ?? '', address:addressText(client.address) },
     supplier: brand,
     modules: cabinets.map((cabinet) => ({
@@ -174,9 +218,10 @@ export async function publishCommercialQuote(formData: FormData) {
   };
 
   const estimateJson = {
-    schemaVersion: 'mq-estimate-0.1.12',
+    schemaVersion: 'mq-estimate-0.1.13',
     projectId,
-    projectRevision: revisionResult.data.revision_number,
+    projectRevision: frozenRevision.revisionNumber,
+    projectRevisionCreated: frozenRevision.created,
     variant: snapshot.commercial,
     extras: extras.map((extra) => ({ ...extra })),
     costs: Object.fromEntries(Object.entries(pricing.costs).map(([key, value]) => [key, value?.toString() ?? '0'])),
@@ -197,7 +242,7 @@ export async function publishCommercialQuote(formData: FormData) {
     overheadBps,
   };
 
-  const engineeringChecksum = sha256(cabinets.map((cabinet) => ({ id:cabinet.id, engineVersion:cabinet.engine_version, computed: cabinet.computed_cost_json })));
+  const engineeringChecksum = sha256(technicalSnapshot);
   const pricingFingerprint = sha256({
     targetMarginBps,
     overheadBps,
@@ -218,8 +263,8 @@ export async function publishCommercialQuote(formData: FormData) {
     p_client_id: project.client_id,
     p_client_name: client.display_name,
     p_currency: project.currency,
-    p_project_revision_id: project.current_revision_id,
-    p_project_revision: revisionResult.data.revision_number,
+    p_project_revision_id: frozenRevision.id,
+    p_project_revision: frozenRevision.revisionNumber,
     p_valid_until: validUntil,
     p_direct_cost_minor: adjusted.directCostMinor.toString(),
     p_overhead_minor: adjusted.overheadMinor.toString(),
