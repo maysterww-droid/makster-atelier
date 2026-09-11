@@ -24,11 +24,12 @@ type Props = {
 };
 
 function selectedMinor(items: PriceRow[], id: string) {
-  return minorFromUnknown(items.find((item) => item.id === id)?.purchase_price_minor);
+  const item = items.find((row) => row.id === id && row.unit === 'job');
+  return minorFromUnknown(item?.purchase_price_minor);
 }
 
 function extraOptions(items: PriceRow[], category: string) {
-  return items.filter((item) => item.category === category);
+  return items.filter((item) => item.category === category && item.unit === 'job');
 }
 
 export function ProjectCommercial({ projectId, clientId, settings, clients, priceBook, cabinets, currency, targetMarginBps, overheadBps }: Props) {
@@ -75,12 +76,17 @@ export function ProjectCommercial({ projectId, clientId, settings, clients, pric
             <label>Монтаж<select name="installationItemId" defaultValue={commercial.installationItemId}><option value="">— не учитывать —</option>{installation.map((item) => <option key={item.id} value={item.id}>{item.name} · {formatMinor(minorFromUnknown(item.purchase_price_minor), currency)}</option>)}</select></label>
             <label>Прочие расходы<select name="otherItemId" defaultValue={commercial.otherItemId}><option value="">— не учитывать —</option>{other.map((item) => <option key={item.id} value={item.id}>{item.name} · {formatMinor(minorFromUnknown(item.purchase_price_minor), currency)}</option>)}</select></label>
           </div>
+          <p className="muted">В итог проекта попадают только позиции доставки, монтажа и прочих расходов с единицей «заказ». Почасовые и погонные ставки нельзя случайно применить как фиксированную сумму.</p>
           <div className="formGrid3">
             <label>Язык документа<select name="documentLocale" defaultValue={commercial.documentLocale}><option value="ru">Русский</option><option value="cs">Čeština</option><option value="de">Deutsch</option><option value="pl">Polski</option><option value="en">English</option></select></label>
             <label>Новый клиент — имя<input name="newClientName" placeholder="Заполните только если клиента ещё нет"/></label>
             <label>Новый клиент — email<input name="newClientEmail" type="email" placeholder="client@example.com"/></label>
           </div>
-          <div className="formGrid2"><label>Новый клиент — телефон<input name="newClientPhone"/></label><label>Комментарий для клиента<textarea name="clientNote" rows={3} defaultValue={commercial.clientNote} placeholder="Например: срок изготовления 5–6 недель после аванса."/></label></div>
+          <div className="formGrid3">
+            <label>Новый клиент — телефон<input name="newClientPhone"/></label>
+            <label>Новый клиент — адрес<input name="newClientAddress" placeholder="Улица, город, индекс"/></label>
+            <label>Комментарий для клиента<textarea name="clientNote" rows={3} defaultValue={commercial.clientNote} placeholder="Например: срок изготовления 5–6 недель после аванса."/></label>
+          </div>
           <div className="formActions"><Link href="/price-book" className="secondary linkButton">Настроить цены услуг</Link><button type="submit" className="primary">Сохранить итог проекта</button></div>
         </form>
       </div>
