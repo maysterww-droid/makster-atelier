@@ -9,6 +9,7 @@ import {
   ProductSection,
   WorkflowSection,
 } from '@/components/marketing-sections';
+import { MarketingStorytellingSuite } from '@/components/marketing-storytelling';
 import styles from './marketing.module.css';
 import './premium.css';
 
@@ -19,6 +20,7 @@ export default function MarketingPage() {
       <HeroSection />
       <WorkflowSection />
       <ProductSection />
+      <MarketingStorytellingSuite />
       <FeaturesSection />
       <PricingSection />
       <FAQSection />
