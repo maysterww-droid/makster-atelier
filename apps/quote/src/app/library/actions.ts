@@ -13,24 +13,42 @@ function uuid(value: FormDataEntryValue | null) {
   return /^[0-9a-fA-F-]{36}$/.test(text) ? text : '';
 }
 
+function quantityValue(value: FormDataEntryValue | null) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 1;
+  return Math.max(1, Math.min(999, Math.round(number)));
+}
+
 export async function addPresetToProject(formData: FormData) {
   const { supabase, organization, userId, role } = await requireWorkspace();
   if (!libraryRoles.has(role)) redirect('/library?error=permission');
 
   const projectId = uuid(formData.get('projectId'));
   const presetKey = String(formData.get('presetKey') ?? '').trim();
+  const quantity = quantityValue(formData.get('quantity'));
   const preset = quoteModulePreset(presetKey);
   if (!projectId) redirect('/library?error=project');
   if (!preset) redirect(`/library?project=${projectId}&error=preset`);
 
-  const { data: project, error: projectError } = await supabase
-    .from('projects')
-    .select('id, current_revision_id, settings')
-    .eq('id', projectId)
-    .eq('organization_id', organization.id)
-    .is('archived_at', null)
-    .maybeSingle();
+  const [{ data: project, error: projectError }, { data: lastModule, error: orderError }] = await Promise.all([
+    supabase
+      .from('projects')
+      .select('id, current_revision_id, settings')
+      .eq('id', projectId)
+      .eq('organization_id', organization.id)
+      .is('archived_at', null)
+      .maybeSingle(),
+    supabase
+      .from('quote_cabinets')
+      .select('sort_order')
+      .eq('project_id', projectId)
+      .eq('organization_id', organization.id)
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
   if (projectError || !project) redirect('/library?error=project');
+  if (orderError) redirect(`/library?project=${projectId}&error=order`);
 
   const quoteSettings = organization.settings?.quote && typeof organization.settings.quote === 'object' && !Array.isArray(organization.settings.quote)
     ? organization.settings.quote as Record<string, unknown>
@@ -64,16 +82,18 @@ export async function addPresetToProject(formData: FormData) {
 
   const preview = calculateCabinetPreview(input, [], { targetMarginBps, overheadBps, taxBps });
   const now = new Date().toISOString();
+  const sortOrder = Number(lastModule?.sort_order ?? 0) + 100;
   const { error } = await supabase.from('quote_cabinets').insert({
     organization_id: organization.id,
     project_id: projectId,
     project_revision_id: project.current_revision_id,
     module_key: preset.moduleKey,
     name: preset.name,
+    sort_order: sortOrder,
     width_mm: preset.widthMm,
     height_mm: preset.heightMm,
     depth_mm: preset.depthMm,
-    quantity: 1,
+    quantity,
     construction_json: {
       thicknessMm: preset.thicknessMm,
       gapMm: preset.gapMm,
