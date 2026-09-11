@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { applySellingAdjustment, COMMERCIAL_VARIANT_LABELS, manualCostTotal, readCommercialOptions } from '@/lib/project-commercial-options';
 import { calculateMeasuredExtras, readMeasuredExtraSettings } from '@/lib/project-measured-extras';
 import { calculateDepositMinor, calculateProjectPricing, minorFromUnknown, readProjectCommercialSettings } from '@/lib/project-pricing';
 import { readQuoteBrand } from '@/lib/quote-brand';
@@ -82,14 +83,18 @@ export async function publishCommercialQuote(formData: FormData) {
   if (measured.missing.length) redirect(`/projects/${projectId}?error=publish-extras`);
 
   const quoteSettings = (organization.settings?.quote ?? {}) as Record<string, unknown>;
-  const targetMarginBps = Number(quoteSettings.targetMarginBps ?? 3500);
+  const workspaceMarginBps = Number(quoteSettings.targetMarginBps ?? 3500);
   const overheadBps = Number(quoteSettings.overheadBps ?? 0);
+  const commercialOptions = readCommercialOptions(project.settings, workspaceMarginBps);
+  const targetMarginBps = commercialOptions.variantMarginsBps[commercialOptions.selectedVariant];
+  const manualTotal = manualCostTotal(commercialOptions.manualCostLines);
   const cabinets = cabinetsResult.data ?? [];
   const pricing = calculateProjectPricing(cabinets as never[], {
     deliveryMinor: minorFromUnknown(delivery?.purchase_price_minor),
     installationMinor: minorFromUnknown(installation?.purchase_price_minor),
-    otherMinor: minorFromUnknown(other?.purchase_price_minor) + measured.totalMinor,
+    otherMinor: minorFromUnknown(other?.purchase_price_minor) + measured.totalMinor + manualTotal,
   }, { targetMarginBps, overheadBps, taxBps: commercial.taxBps });
+  const adjusted = applySellingAdjustment(pricing.pricing, commercial.taxBps, commercialOptions.adjustmentMode, commercialOptions.adjustmentBps);
 
   if (pricing.cabinetCount === 0) redirect(`/projects/${projectId}?error=publish-empty`);
   if (pricing.incompleteCabinets > 0) redirect(`/projects/${projectId}?error=publish-incomplete`);
@@ -108,13 +113,23 @@ export async function publishCommercialQuote(formData: FormData) {
     quantity: line.quantity,
     unit: line.unit,
   }));
-  const extras: QuoteSnapshotExtra[] = [...fixedExtras.filter((value): value is QuoteSnapshotExtra => value !== null), ...measuredExtras];
+  const manualExtras: QuoteSnapshotExtra[] = commercialOptions.manualCostLines.map((line) => ({
+    category: 'manual',
+    name: line.name,
+    amountMinor: line.costMinor.toString(),
+    unit: 'job',
+  }));
+  const extras: QuoteSnapshotExtra[] = [
+    ...fixedExtras.filter((value): value is QuoteSnapshotExtra => value !== null),
+    ...measuredExtras,
+    ...manualExtras,
+  ];
 
   const client = clientResult.data;
   const brand = readQuoteBrand(organization.settings, organization.name);
-  const depositMinor = calculateDepositMinor(pricing.pricing.grossSalesMinor, commercial.depositBps);
+  const depositMinor = calculateDepositMinor(adjusted.grossSalesMinor, commercial.depositBps);
   const snapshot: QuoteSnapshot = {
-    schemaVersion: 'mq-quote-0.1.11',
+    schemaVersion: 'mq-quote-0.1.12',
     issuedAt,
     validUntil,
     locale: commercial.documentLocale,
@@ -132,6 +147,16 @@ export async function publishCommercialQuote(formData: FormData) {
       quantity: Number(cabinet.quantity ?? 1),
     })),
     extras,
+    commercial: {
+      variantKey: commercialOptions.selectedVariant,
+      variantLabel: COMMERCIAL_VARIANT_LABELS[commercialOptions.selectedVariant],
+      targetMarginBps,
+      adjustmentMode: commercialOptions.adjustmentMode,
+      adjustmentBps: commercialOptions.adjustmentBps,
+      listNetMinor: adjusted.listNetSalesMinor.toString(),
+      adjustmentMinor: adjusted.sellingAdjustmentMinor.toString(),
+      actualMarginBps: adjusted.marginBps,
+    },
     terms: {
       depositBps: commercial.depositBps,
       productionLeadText: commercial.productionLeadText,
@@ -140,37 +165,51 @@ export async function publishCommercialQuote(formData: FormData) {
       clientNote: commercial.clientNote,
     },
     amounts: {
-      netMinor: pricing.pricing.netSalesMinor.toString(),
-      taxMinor: pricing.pricing.taxMinor.toString(),
-      totalMinor: pricing.pricing.grossSalesMinor.toString(),
+      netMinor: adjusted.netSalesMinor.toString(),
+      taxMinor: adjusted.taxMinor.toString(),
+      totalMinor: adjusted.grossSalesMinor.toString(),
       depositMinor: depositMinor.toString(),
       taxBps: commercial.taxBps,
     },
   };
 
   const estimateJson = {
-    schemaVersion: 'mq-estimate-0.1.11',
+    schemaVersion: 'mq-estimate-0.1.12',
     projectId,
     projectRevision: revisionResult.data.revision_number,
+    variant: snapshot.commercial,
     extras: extras.map((extra) => ({ ...extra })),
     costs: Object.fromEntries(Object.entries(pricing.costs).map(([key, value]) => [key, value?.toString() ?? '0'])),
     pricing: {
-      directCostMinor: pricing.pricing.directCostMinor.toString(),
-      overheadMinor: pricing.pricing.overheadMinor.toString(),
-      trueCostMinor: pricing.pricing.trueCostMinor.toString(),
-      netSalesMinor: pricing.pricing.netSalesMinor.toString(),
-      taxMinor: pricing.pricing.taxMinor.toString(),
-      grossSalesMinor: pricing.pricing.grossSalesMinor.toString(),
-      profitMinor: pricing.pricing.profitMinor.toString(),
-      marginBps: pricing.pricing.marginBps,
-      markupBps: pricing.pricing.markupBps,
+      directCostMinor: adjusted.directCostMinor.toString(),
+      overheadMinor: adjusted.overheadMinor.toString(),
+      trueCostMinor: adjusted.trueCostMinor.toString(),
+      listNetSalesMinor: adjusted.listNetSalesMinor.toString(),
+      sellingAdjustmentMinor: adjusted.sellingAdjustmentMinor.toString(),
+      netSalesMinor: adjusted.netSalesMinor.toString(),
+      taxMinor: adjusted.taxMinor.toString(),
+      grossSalesMinor: adjusted.grossSalesMinor.toString(),
+      profitMinor: adjusted.profitMinor.toString(),
+      marginBps: adjusted.marginBps,
+      markupBps: adjusted.markupBps,
     },
     targetMarginBps,
     overheadBps,
   };
 
   const engineeringChecksum = sha256(cabinets.map((cabinet) => ({ id:cabinet.id, engineVersion:cabinet.engine_version, computed: cabinet.computed_cost_json })));
-  const pricingFingerprint = sha256({ targetMarginBps, overheadBps, taxBps:commercial.taxBps, delivery:delivery?.id ?? '', installation:installation?.id ?? '', other:other?.id ?? '', measured:extras.filter((extra) => ['worktop','plinth','filler','decor'].includes(extra.category)) });
+  const pricingFingerprint = sha256({
+    targetMarginBps,
+    overheadBps,
+    taxBps:commercial.taxBps,
+    selectedVariant: commercialOptions.selectedVariant,
+    adjustmentMode: commercialOptions.adjustmentMode,
+    adjustmentBps: commercialOptions.adjustmentBps,
+    delivery:delivery?.id ?? '',
+    installation:installation?.id ?? '',
+    other:other?.id ?? '',
+    extras,
+  });
   const estimateFingerprint = sha256(estimateJson);
   const quoteFingerprint = sha256(snapshot);
 
@@ -182,15 +221,15 @@ export async function publishCommercialQuote(formData: FormData) {
     p_project_revision_id: project.current_revision_id,
     p_project_revision: revisionResult.data.revision_number,
     p_valid_until: validUntil,
-    p_direct_cost_minor: pricing.pricing.directCostMinor.toString(),
-    p_overhead_minor: pricing.pricing.overheadMinor.toString(),
-    p_total_cost_minor: pricing.pricing.trueCostMinor.toString(),
-    p_net_sales_minor: pricing.pricing.netSalesMinor.toString(),
-    p_tax_minor: pricing.pricing.taxMinor.toString(),
-    p_gross_sales_minor: pricing.pricing.grossSalesMinor.toString(),
-    p_profit_minor: pricing.pricing.profitMinor.toString(),
-    p_margin_bps: pricing.pricing.marginBps,
-    p_markup_bps: pricing.pricing.markupBps,
+    p_direct_cost_minor: adjusted.directCostMinor.toString(),
+    p_overhead_minor: adjusted.overheadMinor.toString(),
+    p_total_cost_minor: adjusted.trueCostMinor.toString(),
+    p_net_sales_minor: adjusted.netSalesMinor.toString(),
+    p_tax_minor: adjusted.taxMinor.toString(),
+    p_gross_sales_minor: adjusted.grossSalesMinor.toString(),
+    p_profit_minor: adjusted.profitMinor.toString(),
+    p_margin_bps: adjusted.marginBps,
+    p_markup_bps: adjusted.markupBps,
     p_estimate_json: estimateJson,
     p_quote_json: snapshot,
     p_engineering_checksum: engineeringChecksum,
