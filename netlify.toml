@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--include=dev"
+
+# Makster Quote preview channel.
+# The site should be connected to the GitHub branch:
+# makster-quote-website-0.1
+# Netlify's Next.js runtime detects the .next output automatically.
