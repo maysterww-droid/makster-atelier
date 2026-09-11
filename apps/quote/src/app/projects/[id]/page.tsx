@@ -3,12 +3,20 @@ import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
 import { requireWorkspace } from '@/lib/workspace';
 import type { PriceBookItem } from '@/lib/engineering';
+import { addPresetToProject } from '@/app/library/actions';
 import CabinetEditor from './cabinet-editor';
 import { ModuleOrderPanel } from './module-order-panel';
 import { ProjectCommercial } from './project-commercial';
 
 export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; saved?: string; duplicated?: string }> };
+
+const quickPresets = [
+  { key: 'base-door-600', label: '600 · дверь' },
+  { key: 'base-drawer-600-3', label: '600 · 3 ящика' },
+  { key: 'base-drawer-800-3', label: '800 · 3 ящика' },
+  { key: 'sink-600', label: '600 · мойка' },
+];
 
 export default async function ProjectPage({ params, searchParams }: Props) {
   const { id } = await params;
@@ -56,6 +64,21 @@ export default async function ProjectPage({ params, searchParams }: Props) {
     {query.saved === 'module-deleted' ? <div className="pageContent compact"><div className="notice success">Модуль удалён из рабочего проекта. Ранее выпущенные предложения не изменены.</div></div> : null}
     {query.saved === 'module-moved' ? <div className="pageContent compact"><div className="notice success">Порядок модулей обновлён. Следующая выпущенная версия предложения будет использовать новый порядок.</div></div> : null}
     {!priceBook?.length ? <div className="pageContent compact"><div className="notice warning">Прайс-лист пуст. <Link href="/price-book">Добавьте реальные цены</Link>, иначе стоимость останется нулевой.</div></div> : null}
+
+    <section className="pageContent compact">
+      <div className="panel">
+        <div className="panelHeader"><div><span className="eyebrow">QUICK ADD · MQ 0.1.9</span><h2>Быстро добавить модуль</h2><p className="muted">Самые частые заготовки можно добавить прямо отсюда. Полный набор стандартных ширин — в библиотеке.</p></div><Link href={`/library?project=${project.id}`} className="textLink">Все пресеты →</Link></div>
+        <div className="formActions padded" style={{ flexWrap: 'wrap' }}>
+          {quickPresets.map((preset) => <form action={addPresetToProject} key={preset.key}>
+            <input type="hidden" name="projectId" value={project.id}/>
+            <input type="hidden" name="presetKey" value={preset.key}/>
+            <input type="hidden" name="quantity" value="1"/>
+            <button className="secondary" type="submit">+ {preset.label}</button>
+          </form>)}
+        </div>
+      </div>
+    </section>
+
     <ProjectCommercial projectId={project.id} clientId={project.client_id} settings={project.settings as Record<string, unknown>} clients={clientsResult.data ?? []} priceBook={(priceBook ?? []) as never[]} cabinets={(cabinets ?? []) as never[]} currency={project.currency} targetMarginBps={targetMarginBps} overheadBps={overheadBps} role={role} quoteHistory={quoteHistory} statusEvents={statusEvents}/>
     <ModuleOrderPanel projectId={project.id} cabinets={(cabinets ?? []) as never[]}/>
     <CabinetEditor projectId={project.id} currency={project.currency} cabinets={(cabinets ?? []) as never[]} priceBook={(priceBook ?? []) as PriceBookItem[]} targetMarginBps={targetMarginBps} overheadBps={overheadBps} taxBps={taxBps}/>
