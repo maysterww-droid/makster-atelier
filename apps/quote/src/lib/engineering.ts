@@ -1,6 +1,16 @@
 import { calculateQuote, type CostBreakdown, type QuotePricingResult } from './calculation';
 
-export type ModuleKey = 'b-door' | 'b-drawer' | 'generic';
+export type ModuleKey =
+  | 'b-door'
+  | 'b-drawer'
+  | 'b-oven'
+  | 'w-door'
+  | 't-door'
+  | 't-oven'
+  | 't-fridge'
+  | 'dishwasher'
+  | 'open'
+  | 'generic';
 export type BackMode = 'none' | 'overlay' | 'groove';
 export type MaterialRole = 'board' | 'front' | 'back';
 export type OperationKey =
@@ -42,6 +52,7 @@ export type CabinetInput = {
   shelfCount: number;
   stretcherDepthMm?: number;
   shelfSetbackMm?: number;
+  applianceOpeningHeightMm?: number;
   backMode: BackMode;
   backThicknessMm: number;
   backInsetMm: number;
@@ -122,6 +133,11 @@ export type CabinetCostPreview = {
   notes: string[];
   complete: boolean;
 };
+
+const BASE_STRETCHER_MODULES = new Set<ModuleKey>(['b-door', 'b-drawer', 'b-oven']);
+const STANDARD_HINGED_MODULES = new Set<ModuleKey>(['b-door', 'w-door', 't-door']);
+const FRONT_MODULES = new Set<ModuleKey>(['b-door', 'b-drawer', 'w-door', 't-door', 't-oven', 't-fridge', 'dishwasher']);
+const APPLIANCE_MODULES = new Set<ModuleKey>(['b-oven', 't-oven', 't-fridge', 'dishwasher']);
 
 function finitePositive(value: number, fallback: number) {
   return Number.isFinite(value) && value > 0 ? value : fallback;
@@ -271,42 +287,66 @@ function hingesPerDoor(heightMm: number) {
   return 5;
 }
 
+function defaultShelfCount(moduleKey: ModuleKey) {
+  if (moduleKey === 'b-door') return 1;
+  if (moduleKey === 'w-door' || moduleKey === 'open') return 2;
+  if (moduleKey === 't-door') return 4;
+  if (moduleKey === 't-oven') return 2;
+  if (moduleKey === 't-fridge') return 1;
+  return 0;
+}
+
+function frontThickness(input: CabinetInput, items: PriceBookItem[]) {
+  const item = itemById(items, input.frontItemId);
+  return finitePositive(parameterNumber(item, 'thicknessMm', input.thicknessMm), input.thicknessMm);
+}
+
+function frontEdge(input: CabinetInput, height: number, width: number) {
+  return input.frontEdgeIncluded ? 0 : 2 * (height + width);
+}
+
 function generateParts(input: CabinetInput, items: PriceBookItem[]) {
   const width = finitePositive(input.widthMm, 800);
   const height = finitePositive(input.heightMm, 720);
   const depth = finitePositive(input.depthMm, 560);
   const thickness = finitePositive(input.thicknessMm, 18);
   const gap = finiteNonNegative(input.gapMm, 2);
+  const parts: CabinetPart[] = [];
+  const frontT = frontThickness(input, items);
+
+  if (input.moduleKey === 'dishwasher') {
+    const frontHeight = Math.max(1, height - 2 * gap);
+    const frontWidth = Math.max(1, width - 2 * gap);
+    parts.push(makePart('dishwasher-front', 'Фасад ПММ', 'front', 1, frontHeight, frontWidth, frontT, frontEdge(input, frontHeight, frontWidth)));
+    return parts;
+  }
+
   const innerWidth = Math.max(1, width - 2 * thickness);
   const stretcherDepth = Math.min(depth, finitePositive(input.stretcherDepthMm ?? 100, 100));
-  const shelfSetback = Math.min(depth - 1, finiteNonNegative(input.shelfSetbackMm ?? 20, 20));
+  const shelfSetback = Math.min(Math.max(1, depth - 1), finiteNonNegative(input.shelfSetbackMm ?? 20, 20));
   const shelfDepth = Math.max(1, depth - shelfSetback);
-  const shelfCount = positiveInteger(input.shelfCount, input.moduleKey === 'b-door' ? 1 : 0, 10);
-  const parts: CabinetPart[] = [];
+  const shelfCount = positiveInteger(input.shelfCount, defaultShelfCount(input.moduleKey), 12);
 
   parts.push(makePart('side', 'Боковина', 'board', 2, height, depth, thickness, height));
   parts.push(makePart('bottom', 'Дно', 'board', 1, innerWidth, depth, thickness, innerWidth));
 
-  if (input.moduleKey === 'generic') {
-    parts.push(makePart('top', 'Верх', 'board', 1, innerWidth, depth, thickness, innerWidth));
-  } else {
+  if (BASE_STRETCHER_MODULES.has(input.moduleKey)) {
     parts.push(makePart('stretcher', 'Царга верхняя', 'board', 2, innerWidth, stretcherDepth, thickness, innerWidth));
+  } else {
+    parts.push(makePart('top', 'Верх', 'board', 1, innerWidth, depth, thickness, innerWidth));
   }
 
   if (shelfCount > 0) {
-    parts.push(makePart('shelf', 'Полка', 'board', shelfCount, innerWidth, shelfDepth, thickness, innerWidth));
+    const shelfLabel = input.moduleKey === 't-oven' ? 'Полка / перегородка' : 'Полка';
+    parts.push(makePart('shelf', shelfLabel, 'board', shelfCount, innerWidth, shelfDepth, thickness, innerWidth));
   }
 
-  const frontItem = itemById(items, input.frontItemId);
-  const frontThickness = finitePositive(parameterNumber(frontItem, 'thicknessMm', thickness), thickness);
-
-  if (input.moduleKey === 'b-door') {
+  if (STANDARD_HINGED_MODULES.has(input.moduleKey)) {
     const doors = Math.max(1, positiveInteger(input.doors, 1, 4));
     const frontHeight = Math.max(1, height - 2 * gap);
     const totalFrontWidth = Math.max(1, width - (doors + 1) * gap);
     const frontWidth = totalFrontWidth / doors;
-    const edgePerFront = input.frontEdgeIncluded ? 0 : 2 * (frontHeight + frontWidth);
-    parts.push(makePart('door-front', 'Фасад двери', 'front', doors, frontHeight, frontWidth, frontThickness, edgePerFront));
+    parts.push(makePart('door-front', 'Фасад двери', 'front', doors, frontHeight, frontWidth, frontT, frontEdge(input, frontHeight, frontWidth)));
   }
 
   if (input.moduleKey === 'b-drawer') {
@@ -314,8 +354,24 @@ function generateParts(input: CabinetInput, items: PriceBookItem[]) {
     const frontWidth = Math.max(1, width - 2 * gap);
     const totalFrontHeight = Math.max(1, height - (drawers + 1) * gap);
     const frontHeight = totalFrontHeight / drawers;
-    const edgePerFront = input.frontEdgeIncluded ? 0 : 2 * (frontHeight + frontWidth);
-    parts.push(makePart('drawer-front', 'Фасад ящика', 'front', drawers, frontHeight, frontWidth, frontThickness, edgePerFront));
+    parts.push(makePart('drawer-front', 'Фасад ящика', 'front', drawers, frontHeight, frontWidth, frontT, frontEdge(input, frontHeight, frontWidth)));
+  }
+
+  if (input.moduleKey === 't-oven') {
+    const opening = Math.min(height * 0.75, finitePositive(input.applianceOpeningHeightMm ?? 600, 600));
+    const availableHeight = Math.max(2, height - opening - 4 * gap);
+    const segmentHeight = availableHeight / 2;
+    const frontWidth = Math.max(1, width - 2 * gap);
+    parts.push(makePart('oven-front-top', 'Фасад над духовкой', 'front', 1, segmentHeight, frontWidth, frontT, frontEdge(input, segmentHeight, frontWidth)));
+    parts.push(makePart('oven-front-bottom', 'Фасад под духовкой', 'front', 1, segmentHeight, frontWidth, frontT, frontEdge(input, segmentHeight, frontWidth)));
+  }
+
+  if (input.moduleKey === 't-fridge') {
+    const segments = Math.max(1, positiveInteger(input.doors, 2, 3));
+    const frontWidth = Math.max(1, width - 2 * gap);
+    const totalFrontHeight = Math.max(1, height - (segments + 1) * gap);
+    const segmentHeight = totalFrontHeight / segments;
+    parts.push(makePart('fridge-front', 'Фасад холодильника', 'front', segments, segmentHeight, frontWidth, frontT, frontEdge(input, segmentHeight, frontWidth)));
   }
 
   if (input.backMode !== 'none') {
@@ -352,13 +408,29 @@ function operationCost(item: PriceBookItem | undefined, operation: PendingOperat
 }
 
 function buildHardware(input: CabinetInput, items: PriceBookItem[], warnings: string[]): HardwareUsage[] {
-  if (input.moduleKey === 'b-door') {
+  if (STANDARD_HINGED_MODULES.has(input.moduleKey)) {
     const doors = Math.max(1, positiveInteger(input.doors, 1, 4));
     const quantity = doors * hingesPerDoor(finitePositive(input.heightMm, 720));
     const item = itemById(items, input.hingeItemId);
     return [{
       key: 'hinge',
       label: 'Петли',
+      quantity,
+      priceBookItemId: item?.id,
+      itemName: item?.name,
+      costMinor: pieceCost(item, quantity, warnings, 'петли'),
+    }];
+  }
+
+  if (input.moduleKey === 't-oven') {
+    const height = finitePositive(input.heightMm, 2100);
+    const opening = Math.min(height * 0.75, finitePositive(input.applianceOpeningHeightMm ?? 600, 600));
+    const panelHeight = Math.max(1, (height - opening - 4 * finiteNonNegative(input.gapMm, 2)) / 2);
+    const quantity = 2 * hingesPerDoor(panelHeight);
+    const item = itemById(items, input.hingeItemId);
+    return [{
+      key: 'hinge',
+      label: 'Петли фасадов пенала',
       quantity,
       priceBookItemId: item?.id,
       itemName: item?.name,
@@ -453,6 +525,15 @@ export function calculateCabinetPreview(
   if (input.backMode === 'groove') {
     notes.push('Размер задней стенки в паз — коммерческая геометрия для калькуляции, не CNC-релиз. Точная привязка паза будет задаваться производственным профилем.');
   }
+  if (APPLIANCE_MODULES.has(input.moduleKey)) {
+    notes.push('Технический модуль техники считается как коммерческая мебельная оболочка/фасад. Точные монтажные зазоры зависят от модели техники и относятся к инженерной базе Makster Pro.');
+  }
+  if (input.moduleKey === 'dishwasher') {
+    notes.push('ПММ считается как отдельный мебельный фасад без собственного корпуса; соседние боковины относятся к соседним модулям или декоративным панелям.');
+  }
+  if (!FRONT_MODULES.has(input.moduleKey)) {
+    notes.push('Для этого типа модуля фасад не создаётся автоматически.');
+  }
 
   const detailCosts: CabinetDetailCosts = {
     carcass: carcassCost,
@@ -524,6 +605,6 @@ export function costPreviewToJson(preview: CabinetCostPreview) {
     warnings: preview.warnings,
     notes: preview.notes,
     complete: preview.complete,
-    engineVersion: 'mq-0.1.2-engineering',
+    engineVersion: 'mq-0.1.10-engineering',
   };
 }
