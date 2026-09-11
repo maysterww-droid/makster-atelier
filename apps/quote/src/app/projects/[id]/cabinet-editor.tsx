@@ -8,7 +8,7 @@ import {
   type PriceBookItem,
 } from '@/lib/engineering';
 import { formatMinor } from '@/lib/calculation';
-import { saveCabinet } from './actions';
+import { deleteCabinet, duplicateCabinet, saveCabinet } from './actions';
 
 type CabinetRow = {
   id: string;
@@ -213,7 +213,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     <form action={saveCabinet} className="panel editorPanel">
       <input type="hidden" name="projectId" value={projectId}/>
       <input type="hidden" name="cabinetId" value={cabinetId}/>
-      <div className="panelHeader"><div><span className="eyebrow">{cabinetId ? 'РЕДАКТИРОВАНИЕ' : 'НОВЫЙ МОДУЛЬ'} · ENGINEERING 0.1.2</span><h2>{name}</h2></div><button className="primary" type="submit">Сохранить</button></div>
+      <div className="panelHeader"><div><span className="eyebrow">{cabinetId ? 'РЕДАКТИРОВАНИЕ' : 'НОВЫЙ МОДУЛЬ'} · ENGINEERING 0.1.2</span><h2>{name}</h2></div><div className="topActions">{cabinetId ? <><button className="secondary" type="submit" formAction={duplicateCabinet}>Дублировать</button><button className="secondary" type="submit" formAction={deleteCabinet} onClick={(event) => { if (!window.confirm('Удалить этот модуль из текущего проекта? Выпущенные ранее предложения не изменятся.')) event.preventDefault(); }}>Удалить</button></> : null}<button className="primary" type="submit">Сохранить</button></div></div>
 
       <div className="formSection"><h3>Тип и размеры</h3><div className="fieldGrid">
         <label>Тип<select name="moduleKey" value={moduleKey} onChange={(event) => setModuleKey(event.target.value as ModuleKey)}><option value="b-drawer">Нижний с ящиками</option><option value="b-door">Нижний с дверью</option><option value="generic">Универсальный корпус</option></select></label>
