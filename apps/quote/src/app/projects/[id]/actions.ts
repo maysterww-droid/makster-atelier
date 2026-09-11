@@ -11,15 +11,25 @@ import {
 } from '@/lib/engineering';
 import { requireWorkspace } from '@/lib/workspace';
 
+const cabinetRoles = new Set(['owner', 'admin', 'sales', 'designer', 'technologist']);
+
 function numberField(formData: FormData, name: string, fallback: number) {
   const value = Number(formData.get(name));
   return Number.isFinite(value) ? value : fallback;
 }
 
+function idField(formData: FormData, name: string) {
+  const value = String(formData.get(name) ?? '').trim();
+  return /^[0-9a-fA-F-]{36}$/.test(value) ? value : '';
+}
+
 export async function saveCabinet(formData: FormData) {
-  const { supabase, organization, userId } = await requireWorkspace();
-  const projectId = String(formData.get('projectId') ?? '');
-  const cabinetId = String(formData.get('cabinetId') ?? '') || null;
+  const { supabase, organization, userId, role } = await requireWorkspace();
+  const projectId = idField(formData, 'projectId');
+  const cabinetId = idField(formData, 'cabinetId') || null;
+  if (!projectId) redirect('/projects?error=project');
+  if (!cabinetRoles.has(role)) redirect(`/projects/${projectId}?error=permission`);
+
   const moduleKeyRaw = String(formData.get('moduleKey') ?? 'b-door');
   const moduleKey = (['b-door', 'b-drawer', 'generic'].includes(moduleKeyRaw) ? moduleKeyRaw : 'generic') as ModuleKey;
   const backModeRaw = String(formData.get('backMode') ?? 'groove');
@@ -141,4 +151,67 @@ export async function saveCabinet(formData: FormData) {
   if (result.error) redirect(`/projects/${projectId}?error=save`);
   revalidatePath(`/projects/${projectId}`);
   revalidatePath('/');
+}
+
+export async function duplicateCabinet(formData: FormData) {
+  const { supabase, organization, userId, role } = await requireWorkspace();
+  const projectId = idField(formData, 'projectId');
+  const cabinetId = idField(formData, 'cabinetId');
+  if (!projectId || !cabinetId) redirect('/projects?error=module');
+  if (!cabinetRoles.has(role)) redirect(`/projects/${projectId}?error=permission`);
+
+  const { data: source, error } = await supabase
+    .from('quote_cabinets')
+    .select('project_revision_id, module_key, name, sort_order, width_mm, height_mm, depth_mm, quantity, construction_json, material_refs_json, hardware_refs_json, computed_parts_json, computed_cost_json, engine_version')
+    .eq('id', cabinetId)
+    .eq('project_id', projectId)
+    .eq('organization_id', organization.id)
+    .maybeSingle();
+  if (error || !source) redirect(`/projects/${projectId}?error=module-source`);
+
+  const { error: insertError } = await supabase.from('quote_cabinets').insert({
+    organization_id: organization.id,
+    project_id: projectId,
+    project_revision_id: source.project_revision_id,
+    module_key: source.module_key,
+    name: `${source.name} — копия`.slice(0, 200),
+    sort_order: Number(source.sort_order ?? 0) + 1,
+    width_mm: source.width_mm,
+    height_mm: source.height_mm,
+    depth_mm: source.depth_mm,
+    quantity: source.quantity,
+    construction_json: source.construction_json,
+    material_refs_json: source.material_refs_json,
+    hardware_refs_json: source.hardware_refs_json,
+    computed_parts_json: source.computed_parts_json,
+    computed_cost_json: source.computed_cost_json,
+    engine_version: source.engine_version,
+    created_by: userId,
+    updated_at: new Date().toISOString(),
+  });
+  if (insertError) redirect(`/projects/${projectId}?error=module-duplicate`);
+
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath('/');
+  redirect(`/projects/${projectId}?saved=module-duplicated`);
+}
+
+export async function deleteCabinet(formData: FormData) {
+  const { supabase, organization, role } = await requireWorkspace();
+  const projectId = idField(formData, 'projectId');
+  const cabinetId = idField(formData, 'cabinetId');
+  if (!projectId || !cabinetId) redirect('/projects?error=module');
+  if (!cabinetRoles.has(role)) redirect(`/projects/${projectId}?error=permission`);
+
+  const { error } = await supabase
+    .from('quote_cabinets')
+    .delete()
+    .eq('id', cabinetId)
+    .eq('project_id', projectId)
+    .eq('organization_id', organization.id);
+  if (error) redirect(`/projects/${projectId}?error=module-delete`);
+
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath('/');
+  redirect(`/projects/${projectId}?saved=module-deleted`);
 }
