@@ -17,15 +17,16 @@ import './premium.css';
 import './warm-cleanup-v2.css';
 import './premium-polish.css';
 import './luxury-pass.css';
+import './clarity-pass.css';
 
 export default function MarketingPage() {
   return (
     <main className={`${styles.site} mq-premium`}>
       <MarketingHeader />
       <PremiumHero />
-      <LuxuryVisual />
       <WorkflowSection />
       <ProductSection />
+      <LuxuryVisual />
       <MarketingStorytellingSuite />
       <FeaturesSection />
       <ConversionSuite />
