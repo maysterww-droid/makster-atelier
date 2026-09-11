@@ -1,0 +1,117 @@
+.mq-premium{
+  --paper:#f7f1e8;
+  --cream:#eee2d5;
+  --ink:#211914;
+  --muted:#75685e;
+  --line:#dfd0c0;
+  --green:#8a5837;
+  --mint:#c79a70;
+  --dark:#24170f;
+}
+
+/* Force the whole hero into a warm material palette. */
+.mq-premium>section:first-of-type{
+  background:
+    radial-gradient(circle at 62% 58%,rgba(197,146,100,.12),transparent 28%),
+    radial-gradient(circle at 86% 20%,rgba(222,190,154,.12),transparent 24%)!important;
+}
+
+.mq-premium [class*="heroGlow"]{
+  background:radial-gradient(circle,
+    rgba(183,119,72,.18) 0%,
+    rgba(216,171,128,.12) 34%,
+    rgba(247,241,232,0) 72%)!important;
+  filter:blur(14px)!important;
+}
+
+.mq-premium [class*="hero"] [class*="eyebrow"],
+.mq-premium [class*="sectionHead"] [class*="eyebrow"],
+.mq-premium [class*="workflow"] article>span,
+.mq-premium [class*="featureGrid"] article>span,
+.mq-premium [class*="faqList"] summary span{
+  color:#746257!important;
+}
+
+.mq-premium [class*="heroCopy"]>p,
+.mq-premium [class*="sectionHead"] p,
+.mq-premium [class*="workflow"] p,
+.mq-premium [class*="featureGrid"] p,
+.mq-premium [class*="productCards"] p,
+.mq-premium [class*="faqLayout"] p,
+.mq-premium [class*="footer"] p{
+  color:#786a60!important;
+}
+
+.mq-premium [class*="trustRow"] span{
+  color:#76665b!important;
+  border-color:#ded0c2!important;
+  background:#fbf7f2!important;
+}
+
+/* Pricing uses warm taupe/brass only. */
+.mq-premium [class*="pricingSection"]{
+  background:
+    radial-gradient(circle at 74% 16%,rgba(165,103,63,.12),transparent 28%),
+    linear-gradient(145deg,#21150f,#2b1b13)!important;
+}
+
+.mq-premium [class*="pricingSection"] [class*="eyebrow"],
+.mq-premium [class*="pricingSection"] [class*="sectionHead"] p,
+.mq-premium [class*="pricingGrid"] article>small{
+  color:#b8a79a!important;
+}
+
+.mq-premium [class*="pricingGrid"] article{
+  border-color:rgba(215,181,150,.22)!important;
+  background:rgba(255,244,234,.035)!important;
+}
+
+.mq-premium [class*="pricingGrid"] li{
+  color:#ddd1c8!important;
+}
+
+.mq-premium [class*="pricingGrid"] li::before{
+  color:#d7a16f!important;
+}
+
+.mq-premium [class*="pricingGrid"] [class*="planBadge"]{
+  background:#dfb78f!important;
+  color:#3d281b!important;
+}
+
+.mq-premium [class*="finalCta"]{
+  background:linear-gradient(145deg,#75442a,#925c38 48%,#6d3d25)!important;
+}
+
+.mq-premium [class*="finalCta"] [class*="eyebrow"]{
+  color:#f0d0af!important;
+}
+
+.mq-premium [class*="finalCta"] p{
+  color:#f2ddca!important;
+}
+
+/* Warm neutral microcopy throughout UI previews. */
+.mq-premium [class*="previewTop"] small,
+.mq-premium [class*="previewStats"] span,
+.mq-premium [class*="cabinetList"] small,
+.mq-premium [class*="costCard"] small,
+.mq-premium [class*="shotList"] small,
+.mq-premium [class*="editorCard"] small,
+.mq-premium [class*="priceRows"] small,
+.mq-premium [class*="documentMock"] small,
+.mq-premium [class*="docTotal"] span,
+.mq-premium [class*="windowBar"] em{
+  color:#88786d!important;
+}
+
+@media(max-width:780px){
+  .mq-premium>section:first-of-type{
+    background:
+      radial-gradient(circle at 76% 58%,rgba(194,134,87,.11),transparent 26%),
+      linear-gradient(180deg,#f8f3ec 0%,#f7f1e8 100%)!important;
+  }
+  .mq-premium [class*="heroGlow"]{
+    background:radial-gradient(circle,rgba(185,120,73,.14),rgba(218,174,132,.08) 38%,transparent 72%)!important;
+  }
+}
