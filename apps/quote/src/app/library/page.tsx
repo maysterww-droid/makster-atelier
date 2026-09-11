@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
-import { QUOTE_MODULE_PRESETS } from '@/lib/module-presets';
+import { QUOTE_MODULE_PRESETS, type QuoteModulePreset } from '@/lib/module-presets';
 import { requireWorkspace } from '@/lib/workspace';
 import { addPresetToProject } from './actions';
 
@@ -11,13 +11,31 @@ const groupLabel: Record<string, string> = {
   'base-door': 'Нижние с дверями',
   'base-drawer': 'Нижние с ящиками',
   sink: 'Под мойку',
+  'wall-door': 'Верхние шкафы',
+  tall: 'Пеналы',
+  appliance: 'Техника / ниши',
+  open: 'Открытые модули',
 };
 
 const groupHint: Record<string, string> = {
   'base-door': 'Стандартные ширины для обычных нижних шкафов.',
   'base-drawer': 'Быстрые модули с 2 или 3 ящиками.',
   sink: 'Без полки и задней стенки — для зоны мойки.',
+  'wall-door': 'Навесные шкафы высотой 720 мм и глубиной 350 мм.',
+  tall: 'Высокие хозяйственные пеналы для кухни и встроенных зон.',
+  appliance: 'Мебельная оболочка и фасады под духовку, ПММ и встроенный холодильник.',
+  open: 'Открытые верхние и нижние модули без мебельного фасада.',
 };
+
+function presetFeature(preset: QuoteModulePreset) {
+  if (preset.moduleKey === 'b-drawer') return `${preset.drawers} ящика`;
+  if (preset.moduleKey === 'dishwasher') return 'только мебельный фасад';
+  if (preset.moduleKey === 'b-oven') return 'ниша под духовку';
+  if (preset.moduleKey === 't-oven') return `проём ${preset.applianceOpeningHeightMm ?? 600} мм`;
+  if (preset.moduleKey === 't-fridge') return `${preset.doors} фасада по высоте`;
+  if (preset.moduleKey === 'open') return `${preset.shelfCount} полки · без фасада`;
+  return `${preset.doors} ${preset.doors === 1 ? 'дверь' : 'двери'} · ${preset.shelfCount} полки`;
+}
 
 export default async function LibraryPage({ searchParams }: Props) {
   const query = await searchParams;
@@ -39,7 +57,7 @@ export default async function LibraryPage({ searchParams }: Props) {
 
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan ?? 'free').toUpperCase()}>
     <header className="topbar">
-      <div><span className="eyebrow">STANDARD MODULE LIBRARY · 0.1.9</span><h1>Библиотека модулей</h1></div>
+      <div><span className="eyebrow">STANDARD MODULE LIBRARY · 0.1.10</span><h1>Библиотека модулей</h1></div>
       <div className="topActions">{selectedProject ? <Link href={`/projects/${selectedProject.id}`} className="secondary linkButton">Открыть проект</Link> : null}<Link href="/" className="textLink">← Главная</Link></div>
     </header>
 
@@ -47,13 +65,13 @@ export default async function LibraryPage({ searchParams }: Props) {
       {query.error ? <div className="notice error">Не удалось добавить модуль ({query.error}).</div> : null}
 
       <section className="metricGrid" style={{ marginBottom: 18 }}>
-        <article className="metricCard"><span>Готовых пресетов</span><strong>{QUOTE_MODULE_PRESETS.length}</strong><small>нижние шкафы, ящики и мойки</small></article>
-        <article className="metricCard"><span>Групп</span><strong>{groups.length}</strong><small>для быстрого набора проекта</small></article>
+        <article className="metricCard"><span>Готовых пресетов</span><strong>{QUOTE_MODULE_PRESETS.length}</strong><small>нижние, верхние, пеналы, техника и открытые</small></article>
+        <article className="metricCard"><span>Групп</span><strong>{groups.length}</strong><small>для быстрого набора кухни</small></article>
         <article className="metricCard"><span>Активный проект</span><strong style={{ fontSize: 18 }}>{selectedProject?.name ?? 'не выбран'}</strong><small>{selectedProject?.project_type ?? 'создайте первый проект'}</small></article>
       </section>
 
       <section className="panel" style={{ marginBottom: 18 }}>
-        <div className="panelHeader"><div><span className="eyebrow">ЦЕЛЕВОЙ ПРОЕКТ</span><h2>Куда добавить модули</h2><p className="muted">Пресет создаёт геометрию и конструкцию. Материал, фасад, кромку и фурнитуру выбираем уже в проекте по вашему Price Book.</p></div></div>
+        <div className="panelHeader"><div><span className="eyebrow">ЦЕЛЕВОЙ ПРОЕКТ</span><h2>Куда добавить модули</h2><p className="muted">Пресет создаёт коммерческую геометрию и конструкцию. Материал, фасад, кромку и фурнитуру выбираем уже в проекте по вашему Price Book.</p></div></div>
         <form method="get" className="stackForm padded">
           <label>Проект<select name="project" defaultValue={selectedProject?.id ?? ''}>{!projects?.length ? <option value="">Нет активных проектов</option> : null}{(projects ?? []).map((project) => <option key={project.id} value={project.id}>{project.name} · {project.project_type}</option>)}</select></label>
           <div className="formActions"><button className="secondary" type="submit">Выбрать проект</button><Link href="/projects/new" className="primary linkButton">+ Новый проект</Link></div>
@@ -73,7 +91,7 @@ export default async function LibraryPage({ searchParams }: Props) {
               <small>{preset.description}</small>
               <div className="costRows" style={{ padding: '10px 0 0' }}>
                 <div><span>Размер</span><strong>{preset.widthMm} × {preset.heightMm} × {preset.depthMm} мм</strong></div>
-                {preset.moduleKey === 'b-drawer' ? <div><span>Ящиков</span><strong>{preset.drawers}</strong></div> : <div><span>Дверей</span><strong>{preset.doors}</strong></div>}
+                <div><span>Конструкция</span><strong>{presetFeature(preset)}</strong></div>
                 <div><span>Задняя стенка</span><strong>{preset.backMode === 'none' ? 'нет' : preset.backMode === 'groove' ? 'в паз' : 'накладная'}</strong></div>
               </div>
               {selectedProject ? <form action={addPresetToProject} className="stackForm" style={{ marginTop: 12 }}>
@@ -87,8 +105,8 @@ export default async function LibraryPage({ searchParams }: Props) {
         </section>;
       })}
 
-      <div className="notice success"><strong>Быстрый набор.</strong> Можно сразу добавить несколько одинаковых модулей через поле «Количество». Они попадут в конец текущего порядка проекта, а стоимость умножится автоматически.</div>
-      <div className="notice warning" style={{ marginTop: 12 }}><strong>Граница Quote.</strong> Эти пресеты нужны для быстрого коммерческого расчёта. Точная производственная библиотека с техникой, присадкой, Blum-правилами и CNC остаётся слоем Makster Pro.</div>
+      <div className="notice success"><strong>Быстрый набор кухни.</strong> Теперь библиотека покрывает базовый коммерческий состав: низ, верх, пеналы, мойка, духовка, ПММ, встроенный холодильник и открытые секции.</div>
+      <div className="notice warning" style={{ marginTop: 12 }}><strong>Граница Quote.</strong> Для техники здесь считается мебельная оболочка, фасад и типовая геометрия. Точные монтажные зазоры конкретной модели техники, присадка, Blum-правила и CNC остаются инженерным слоем Makster Pro.</div>
     </div>
   </AppShell>;
 }
