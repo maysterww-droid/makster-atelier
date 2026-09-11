@@ -2,11 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { readCommercialOptions, type CommercialVariantKey, type SellingAdjustmentMode } from '@/lib/project-commercial-options';
 import { readProjectCommercialSettings, type DocumentLocale } from '@/lib/project-pricing';
 import { requireWorkspace } from '@/lib/workspace';
 
 const allowedRoles = new Set(['owner', 'admin', 'sales', 'designer', 'technologist']);
 const allowedLocales = new Set<DocumentLocale>(['ru', 'en', 'cs', 'de', 'pl']);
+const allowedVariants = new Set<CommercialVariantKey>(['base', 'standard', 'premium']);
+const allowedAdjustments = new Set<SellingAdjustmentMode>(['none', 'discount', 'surcharge']);
 
 function cleanText(formData: FormData, name: string, max: number) {
   return String(formData.get(name) ?? '').trim().slice(0, max);
@@ -15,6 +18,18 @@ function cleanText(formData: FormData, name: string, max: number) {
 function measuredNumber(formData: FormData, name: string) {
   const value = Number(String(formData.get(name) ?? '0').replace(',', '.'));
   return Number.isFinite(value) ? Math.max(0, Math.min(10_000, value)) : -1;
+}
+
+function percentToBps(formData: FormData, name: string, fallbackBps: number, maxPercent = 95) {
+  const raw = String(formData.get(name) ?? '').trim();
+  if (!raw) return fallbackBps;
+  const value = Number(raw.replace(',', '.'));
+  if (!Number.isFinite(value) || value < 0 || value > maxPercent) return -1;
+  return Math.round(value * 100);
+}
+
+function record(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
 
 export async function saveProjectCommercial(formData: FormData) {
@@ -30,13 +45,30 @@ export async function saveProjectCommercial(formData: FormData) {
     .maybeSingle();
   if (projectError || !project) redirect('/?error=project');
 
+  const rootSettings = record(project.settings);
+  const currentQuoteCommercial = record(rootSettings.quoteCommercial);
   const current = readProjectCommercialSettings(project.settings);
+  const quoteSettings = record(organization.settings?.quote);
+  const defaultMarginBps = Number(quoteSettings.targetMarginBps ?? 3500);
+  const currentOptions = readCommercialOptions(project.settings, defaultMarginBps);
+
   const taxPercent = Number(String(formData.get('taxPercent') ?? '0').replace(',', '.'));
   const validityDaysRaw = Number(formData.get('validityDays') ?? 14);
   const depositPercent = Number(String(formData.get('depositPercent') ?? '0').replace(',', '.'));
   if (!Number.isFinite(taxPercent) || taxPercent < 0 || taxPercent > 1000) redirect(`/projects/${projectId}?error=tax`);
   if (!Number.isFinite(validityDaysRaw) || validityDaysRaw < 1 || validityDaysRaw > 365) redirect(`/projects/${projectId}?error=validity`);
   if (!Number.isFinite(depositPercent) || depositPercent < 0 || depositPercent > 100) redirect(`/projects/${projectId}?error=deposit`);
+
+  const baseMarginBps = percentToBps(formData, 'baseMarginPercent', currentOptions.variantMarginsBps.base);
+  const standardMarginBps = percentToBps(formData, 'standardMarginPercent', currentOptions.variantMarginsBps.standard);
+  const premiumMarginBps = percentToBps(formData, 'premiumMarginPercent', currentOptions.variantMarginsBps.premium);
+  const adjustmentBps = percentToBps(formData, 'adjustmentPercent', currentOptions.adjustmentBps, 50);
+  if ([baseMarginBps, standardMarginBps, premiumMarginBps, adjustmentBps].some((value) => value < 0)) redirect(`/projects/${projectId}?error=pricing-options`);
+
+  const selectedVariantRaw = cleanText(formData, 'selectedVariant', 20) as CommercialVariantKey;
+  const selectedVariant = allowedVariants.has(selectedVariantRaw) ? selectedVariantRaw : currentOptions.selectedVariant;
+  const adjustmentModeRaw = cleanText(formData, 'adjustmentMode', 20) as SellingAdjustmentMode;
+  const adjustmentMode = allowedAdjustments.has(adjustmentModeRaw) ? adjustmentModeRaw : currentOptions.adjustmentMode;
 
   const worktopLengthM = measuredNumber(formData, 'worktopLengthM');
   const plinthLengthM = measuredNumber(formData, 'plinthLengthM');
@@ -119,14 +151,11 @@ export async function saveProjectCommercial(formData: FormData) {
   ];
   if (measuredRequirements.some(({ quantity, field }) => quantity > 0 && !extraValues[field])) redirect(`/projects/${projectId}?error=extras-price`);
 
-  const rootSettings = project.settings && typeof project.settings === 'object' && !Array.isArray(project.settings)
-    ? project.settings as Record<string, unknown>
-    : {};
-
   const nextSettings = {
     ...rootSettings,
     taxBps: Math.round(taxPercent * 100),
     quoteCommercial: {
+      ...currentQuoteCommercial,
       deliveryItemId: extraValues.deliveryItemId,
       installationItemId: extraValues.installationItemId,
       otherItemId: extraValues.otherItemId,
@@ -138,6 +167,10 @@ export async function saveProjectCommercial(formData: FormData) {
       fillerAreaM2,
       decorItemId: extraValues.decorItemId,
       decorAreaM2,
+      selectedVariant,
+      variantMarginsBps: { base: baseMarginBps, standard: standardMarginBps, premium: premiumMarginBps },
+      adjustmentMode,
+      adjustmentBps,
       taxBps: Math.round(taxPercent * 100),
       validityDays: Math.round(validityDaysRaw),
       documentLocale,
