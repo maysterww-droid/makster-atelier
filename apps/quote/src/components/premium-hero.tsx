@@ -45,8 +45,6 @@ function QuoteCockpit() {
           </div>
         </div>
       </div>
-      <div className={`${styles.floatCard} ${styles.floatMargin}`}><small>PROJECT MARGIN</small><b>34.8%</b><span>на текущей версии</span></div>
-      <div className={`${styles.floatCard} ${styles.floatBook}`}><small>PRICE BOOK</small><b>214</b><span>активных позиций</span></div>
     </div>
   );
 }
@@ -58,7 +56,7 @@ export function PremiumHero() {
       <div className={styles.heroCopy}>
         <span className={styles.eyebrow}>MAKSTER QUOTE · FURNITURE PRICING OS</span>
         <h1>Считайте мебель так, как вы её <em>реально производите.</em></h1>
-        <p>Конструкция, ваш Price Book, реальная себестоимость и предложение клиенту — в одной цепочке. Цена рождается из проекта, а не из догадок.</p>
+        <p>Конструкция, Price Book, себестоимость и предложение клиенту — в одной цепочке.</p>
         <div className={styles.actions}>
           <Link href="/login" className={styles.primary}>Начать закрытый пилот <span>→</span></Link>
           <a href="#product" className={styles.secondary}>Посмотреть продукт</a>
@@ -69,7 +67,11 @@ export function PremiumHero() {
           <span><b>03</b> Client-ready PDF</span>
         </div>
       </div>
-      <QuoteCockpit />
+      <div className={styles.visualStage}>
+        <div className={styles.projectLabel}><small>REAL PROJECT CONTEXT</small><b>Kitchen / Praha</b></div>
+        <div className={styles.stageCaption}><span>Walnut · stone · brass</span><b>196 900 Kč</b></div>
+        <QuoteCockpit />
+      </div>
     </section>
   );
 }
