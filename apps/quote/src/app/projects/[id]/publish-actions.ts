@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { calculateMeasuredExtras, readMeasuredExtraSettings } from '@/lib/project-measured-extras';
 import { calculateDepositMinor, calculateProjectPricing, minorFromUnknown, readProjectCommercialSettings } from '@/lib/project-pricing';
 import { readQuoteBrand } from '@/lib/quote-brand';
 import type { QuoteSnapshot, QuoteSnapshotExtra } from '@/lib/quote-snapshot';
@@ -70,12 +71,15 @@ export async function publishCommercialQuote(formData: FormData) {
   if (cabinetsResult.error || priceResult.error) redirect(`/projects/${projectId}?error=publish-data`);
 
   const commercial = readProjectCommercialSettings(project.settings);
+  const measuredSettings = readMeasuredExtraSettings(project.settings);
   const priceBook = priceResult.data ?? [];
   const selectedExtra = (id: string, category: 'delivery' | 'installation' | 'other') =>
     priceBook.find((item) => item.id === id && item.category === category && item.unit === 'job');
   const delivery = selectedExtra(commercial.deliveryItemId, 'delivery');
   const installation = selectedExtra(commercial.installationItemId, 'installation');
   const other = selectedExtra(commercial.otherItemId, 'other');
+  const measured = calculateMeasuredExtras(measuredSettings, priceBook);
+  if (measured.missing.length) redirect(`/projects/${projectId}?error=publish-extras`);
 
   const quoteSettings = (organization.settings?.quote ?? {}) as Record<string, unknown>;
   const targetMarginBps = Number(quoteSettings.targetMarginBps ?? 3500);
@@ -84,7 +88,7 @@ export async function publishCommercialQuote(formData: FormData) {
   const pricing = calculateProjectPricing(cabinets as never[], {
     deliveryMinor: minorFromUnknown(delivery?.purchase_price_minor),
     installationMinor: minorFromUnknown(installation?.purchase_price_minor),
-    otherMinor: minorFromUnknown(other?.purchase_price_minor),
+    otherMinor: minorFromUnknown(other?.purchase_price_minor) + measured.totalMinor,
   }, { targetMarginBps, overheadBps, taxBps: commercial.taxBps });
 
   if (pricing.cabinetCount === 0) redirect(`/projects/${projectId}?error=publish-empty`);
@@ -92,17 +96,25 @@ export async function publishCommercialQuote(formData: FormData) {
 
   const issuedAt = new Date().toISOString();
   const validUntil = addDays(issuedAt, commercial.validityDays);
-  const extras: QuoteSnapshotExtra[] = [
-    delivery ? { category:'delivery' as const, name:delivery.name, amountMinor:String(delivery.purchase_price_minor) } : null,
-    installation ? { category:'installation' as const, name:installation.name, amountMinor:String(installation.purchase_price_minor) } : null,
-    other ? { category:'other' as const, name:other.name, amountMinor:String(other.purchase_price_minor) } : null,
-  ].filter((value): value is QuoteSnapshotExtra => value !== null);
+  const fixedExtras: Array<QuoteSnapshotExtra | null> = [
+    delivery ? { category:'delivery', name:delivery.name, amountMinor:String(delivery.purchase_price_minor), unit:'job' } : null,
+    installation ? { category:'installation', name:installation.name, amountMinor:String(installation.purchase_price_minor), unit:'job' } : null,
+    other ? { category:'other', name:other.name, amountMinor:String(other.purchase_price_minor), unit:'job' } : null,
+  ];
+  const measuredExtras: QuoteSnapshotExtra[] = measured.lines.map((line) => ({
+    category: line.category,
+    name: line.name,
+    amountMinor: line.amountMinor.toString(),
+    quantity: line.quantity,
+    unit: line.unit,
+  }));
+  const extras: QuoteSnapshotExtra[] = [...fixedExtras.filter((value): value is QuoteSnapshotExtra => value !== null), ...measuredExtras];
 
   const client = clientResult.data;
   const brand = readQuoteBrand(organization.settings, organization.name);
   const depositMinor = calculateDepositMinor(pricing.pricing.grossSalesMinor, commercial.depositBps);
   const snapshot: QuoteSnapshot = {
-    schemaVersion: 'mq-quote-0.1.4',
+    schemaVersion: 'mq-quote-0.1.11',
     issuedAt,
     validUntil,
     locale: commercial.documentLocale,
@@ -137,9 +149,10 @@ export async function publishCommercialQuote(formData: FormData) {
   };
 
   const estimateJson = {
-    schemaVersion: 'mq-estimate-0.1.4',
+    schemaVersion: 'mq-estimate-0.1.11',
     projectId,
     projectRevision: revisionResult.data.revision_number,
+    extras: extras.map((extra) => ({ ...extra })),
     costs: Object.fromEntries(Object.entries(pricing.costs).map(([key, value]) => [key, value?.toString() ?? '0'])),
     pricing: {
       directCostMinor: pricing.pricing.directCostMinor.toString(),
@@ -157,7 +170,7 @@ export async function publishCommercialQuote(formData: FormData) {
   };
 
   const engineeringChecksum = sha256(cabinets.map((cabinet) => ({ id:cabinet.id, engineVersion:cabinet.engine_version, computed: cabinet.computed_cost_json })));
-  const pricingFingerprint = sha256({ targetMarginBps, overheadBps, taxBps:commercial.taxBps, delivery:delivery?.id ?? '', installation:installation?.id ?? '', other:other?.id ?? '' });
+  const pricingFingerprint = sha256({ targetMarginBps, overheadBps, taxBps:commercial.taxBps, delivery:delivery?.id ?? '', installation:installation?.id ?? '', other:other?.id ?? '', measured:extras.filter((extra) => ['worktop','plinth','filler','decor'].includes(extra.category)) });
   const estimateFingerprint = sha256(estimateJson);
   const quoteFingerprint = sha256(snapshot);
 
