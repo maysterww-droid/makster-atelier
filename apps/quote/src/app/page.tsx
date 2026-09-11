@@ -6,7 +6,7 @@ import {
 } from '@/components/marketing-sections';
 import { PremiumHero } from '@/components/premium-hero';
 import { LuxuryVisual } from '@/components/luxury-visual';
-import { ProductDemo } from '@/components/product-demo';
+import { EmbeddedQuote } from '@/components/embedded-quote';
 import { SalesPricing } from '@/components/sales-sections';
 import { VisualStory } from '@/components/visual-story';
 import styles from './marketing.module.css';
@@ -25,7 +25,7 @@ export default function MarketingPage() {
     <main className={`${styles.site} mq-premium`}>
       <MarketingHeader />
       <PremiumHero />
-      <ProductDemo />
+      <EmbeddedQuote />
       <LuxuryVisual />
       <VisualStory />
       <SalesPricing />
