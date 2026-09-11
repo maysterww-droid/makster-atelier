@@ -12,10 +12,14 @@ export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; saved?: string; duplicated?: string }> };
 
 const quickPresets = [
-  { key: 'base-door-600', label: '600 · дверь' },
-  { key: 'base-drawer-600-3', label: '600 · 3 ящика' },
-  { key: 'base-drawer-800-3', label: '800 · 3 ящика' },
-  { key: 'sink-600', label: '600 · мойка' },
+  { key: 'base-door-600', label: 'Низ 600 · дверь' },
+  { key: 'base-drawer-600-3', label: 'Низ 600 · 3 ящика' },
+  { key: 'wall-door-600', label: 'Верх 600' },
+  { key: 'sink-600', label: 'Мойка 600' },
+  { key: 'base-oven-600', label: 'Духовка 600' },
+  { key: 'dishwasher-600', label: 'ПММ 600' },
+  { key: 'tall-oven-600', label: 'Пенал духовки' },
+  { key: 'tall-fridge-600', label: 'Пенал холодильника' },
 ];
 
 export default async function ProjectPage({ params, searchParams }: Props) {
@@ -59,7 +63,7 @@ export default async function ProjectPage({ params, searchParams }: Props) {
     {query.duplicated ? <div className="pageContent compact"><div className="notice success">Создана независимая копия проекта. Выпущенные предложения исходного проекта не копировались.</div></div> : null}
     {query.error ? <div className="pageContent compact"><div className="notice error">Не удалось выполнить действие ({query.error}). Проверьте данные и попробуйте снова.</div></div> : null}
     {query.saved === 'commercial' ? <div className="pageContent compact"><div className="notice success">Итог проекта и параметры предложения сохранены.</div></div> : null}
-    {query.saved === 'module-added' ? <div className="pageContent compact"><div className="notice success"><strong>Модуль добавлен из библиотеки.</strong> Теперь выберите для него реальные материалы, кромку и фурнитуру из Price Book и сохраните расчёт.</div></div> : null}
+    {query.saved === 'module-added' ? <div className="pageContent compact"><div className="notice success"><strong>Модуль добавлен из библиотеки.</strong> Выберите для него реальные материалы, фасад, кромку и фурнитуру из Price Book и сохраните расчёт.</div></div> : null}
     {query.saved === 'module-duplicated' ? <div className="pageContent compact"><div className="notice success">Модуль продублирован вместе с размерами, материалами, фурнитурой и рассчитанной стоимостью.</div></div> : null}
     {query.saved === 'module-deleted' ? <div className="pageContent compact"><div className="notice success">Модуль удалён из рабочего проекта. Ранее выпущенные предложения не изменены.</div></div> : null}
     {query.saved === 'module-moved' ? <div className="pageContent compact"><div className="notice success">Порядок модулей обновлён. Следующая выпущенная версия предложения будет использовать новый порядок.</div></div> : null}
@@ -67,7 +71,7 @@ export default async function ProjectPage({ params, searchParams }: Props) {
 
     <section className="pageContent compact">
       <div className="panel">
-        <div className="panelHeader"><div><span className="eyebrow">QUICK ADD · MQ 0.1.9</span><h2>Быстро добавить модуль</h2><p className="muted">Самые частые заготовки можно добавить прямо отсюда. Полный набор стандартных ширин — в библиотеке.</p></div><Link href={`/library?project=${project.id}`} className="textLink">Все пресеты →</Link></div>
+        <div className="panelHeader"><div><span className="eyebrow">QUICK ADD · MQ 0.1.10</span><h2>Быстро добавить модуль</h2><p className="muted">Основные элементы кухни можно добавить прямо из проекта. Все ширины, открытые секции и дополнительные пеналы — в полной библиотеке.</p></div><Link href={`/library?project=${project.id}`} className="textLink">Все пресеты →</Link></div>
         <div className="formActions padded" style={{ flexWrap: 'wrap' }}>
           {quickPresets.map((preset) => <form action={addPresetToProject} key={preset.key}>
             <input type="hidden" name="projectId" value={project.id}/>
