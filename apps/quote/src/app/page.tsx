@@ -1,15 +1,13 @@
 import {
   FAQSection,
-  FeaturesSection,
   FinalCTA,
   MarketingFooter,
   MarketingHeader,
-  PricingSection,
 } from '@/components/marketing-sections';
 import { PremiumHero } from '@/components/premium-hero';
-import { ConversionSuite } from '@/components/conversion-suite';
 import { LuxuryVisual } from '@/components/luxury-visual';
 import { ProductDemo } from '@/components/product-demo';
+import { SalesAudience, SalesCapabilities, SalesPricing } from '@/components/sales-sections';
 import styles from './marketing.module.css';
 import './premium.css';
 import './warm-cleanup-v2.css';
@@ -27,9 +25,9 @@ export default function MarketingPage() {
       <PremiumHero />
       <ProductDemo />
       <LuxuryVisual />
-      <FeaturesSection />
-      <ConversionSuite />
-      <PricingSection />
+      <SalesCapabilities />
+      <SalesAudience />
+      <SalesPricing />
       <FAQSection />
       <FinalCTA />
       <MarketingFooter />
