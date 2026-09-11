@@ -12,15 +12,26 @@ export type QuoteSnapshotModule = {
 };
 
 export type QuoteSnapshotExtra = {
-  category: 'delivery' | 'installation' | 'other' | 'worktop' | 'plinth' | 'filler' | 'decor';
+  category: 'delivery' | 'installation' | 'other' | 'worktop' | 'plinth' | 'filler' | 'decor' | 'manual';
   name: string;
   amountMinor: string;
   quantity?: number;
   unit?: 'm' | 'm2' | 'job';
 };
 
+export type QuoteSnapshotCommercial = {
+  variantKey: 'base' | 'standard' | 'premium';
+  variantLabel: string;
+  targetMarginBps: number;
+  adjustmentMode: 'none' | 'discount' | 'surcharge';
+  adjustmentBps: number;
+  listNetMinor: string;
+  adjustmentMinor: string;
+  actualMarginBps: number;
+};
+
 export type QuoteSnapshot = {
-  schemaVersion: 'mq-quote-0.1.4' | 'mq-quote-0.1.11';
+  schemaVersion: 'mq-quote-0.1.4' | 'mq-quote-0.1.11' | 'mq-quote-0.1.12';
   quoteId?: string;
   quoteVersion?: number;
   issuedAt: string;
@@ -32,6 +43,7 @@ export type QuoteSnapshot = {
   supplier: QuoteBrandSettings;
   modules: QuoteSnapshotModule[];
   extras: QuoteSnapshotExtra[];
+  commercial?: QuoteSnapshotCommercial;
   terms: { depositBps:number; productionLeadText:string; paymentTerms:string; warrantyText:string; clientNote:string };
   amounts: { netMinor:string; taxMinor:string; totalMinor:string; depositMinor:string; taxBps:number };
 };
@@ -42,7 +54,7 @@ function record(value: unknown): Record<string, unknown> {
 
 export function readQuoteSnapshot(value: unknown): QuoteSnapshot | null {
   const root = record(value);
-  if (root.schemaVersion !== 'mq-quote-0.1.4' && root.schemaVersion !== 'mq-quote-0.1.11') return null;
+  if (root.schemaVersion !== 'mq-quote-0.1.4' && root.schemaVersion !== 'mq-quote-0.1.11' && root.schemaVersion !== 'mq-quote-0.1.12') return null;
   if (!root.project || !root.client || !root.supplier || !root.amounts || !root.terms) return null;
   if (!Array.isArray(root.modules) || !Array.isArray(root.extras)) return null;
   return value as QuoteSnapshot;
