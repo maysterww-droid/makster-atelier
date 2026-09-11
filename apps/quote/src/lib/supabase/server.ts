@@ -12,14 +12,13 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, _headers) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options);
             });
           } catch {
-            // Server Components cannot always write cookies. The root Proxy
-            // refreshes sessions before protected routes are rendered.
+            // Server Components cannot always write cookies. Root Proxy handles refreshes.
           }
         },
       },
