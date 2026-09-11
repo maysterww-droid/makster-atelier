@@ -4,10 +4,10 @@ on:
   pull_request:
     paths:
       - 'app/**'
-      - 'apps/quote/src/app/page.tsx'
-      - 'apps/quote/src/app/marketing.module.css'
-      - 'apps/quote/src/components/marketing-sections.tsx'
+      - 'apps/quote/src/app/**'
+      - 'apps/quote/src/components/**'
       - 'package.json'
+      - 'next.config.ts'
       - 'tsconfig.json'
       - '.github/workflows/quote-website-preview-ci.yml'
 
@@ -27,3 +27,10 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Build root Next.js preview
         run: npm run build
+      - name: Build Cloudflare Pages static preview
+        env:
+          CF_PAGES: '1'
+        run: |
+          rm -rf .next out
+          npm run build
+          test -f out/index.html
