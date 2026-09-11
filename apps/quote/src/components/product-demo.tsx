@@ -34,7 +34,8 @@ export function ProductDemo() {
   };
 
   return (
-    <section className={styles.section} id="demo">
+    <section className={styles.section} id="workflow">
+      <span id="product" aria-hidden="true" />
       <div className={styles.head}>
         <div>
           <span className={styles.eyebrow}>LIVE PRODUCT DEMO</span>
