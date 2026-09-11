@@ -17,6 +17,7 @@ import './clarity-pass.css';
 import './visual-hook.css';
 import './product-demo-first.css';
 import './product-demo-mobile.css';
+import './sales-visibility-fix.css';
 
 export default function MarketingPage() {
   return (
