@@ -88,6 +88,8 @@ export type OperationUsage = {
   costMinor: bigint;
 };
 
+type PendingOperation = Omit<OperationUsage, 'priceBookItemId' | 'itemName' | 'costMinor'>;
+
 export type CabinetUsage = {
   boardM2: number;
   frontM2: number;
@@ -336,7 +338,7 @@ function findOperationItem(items: PriceBookItem[], key: OperationKey) {
   return items.find((item) => item.category === 'operation' && parameterString(item, 'operationKey') === key);
 }
 
-function operationCost(item: PriceBookItem | undefined, operation: Omit<OperationUsage, 'priceBookItemId' | 'itemName' | 'costMinor'>, warnings: string[]) {
+function operationCost(item: PriceBookItem | undefined, operation: PendingOperation, warnings: string[]) {
   if (!item) {
     warnings.push(`В прайс-листе нет операции: ${operation.label}.`);
     return 0n;
@@ -391,14 +393,15 @@ function buildOperations(input: CabinetInput, parts: CabinetPart[], hardware: Ha
     ? (2 * (backPart.lengthMm + backPart.widthMm)) / 1000
     : 0;
 
-  const raw: Array<Omit<OperationUsage, 'priceBookItemId' | 'itemName' | 'costMinor'>> = [
+  const candidates: PendingOperation[] = [
     { key: 'cutting', label: OPERATION_LABELS.cutting, quantity: partCount, unit: 'pcs' },
     { key: 'edge-banding', label: OPERATION_LABELS['edge-banding'], quantity: edgeM, unit: 'm' },
     { key: 'carcass-drilling', label: OPERATION_LABELS['carcass-drilling'], quantity: carcassPartCount, unit: 'pcs' },
     { key: 'hinge-cup', label: OPERATION_LABELS['hinge-cup'], quantity: hingeQty, unit: 'pcs' },
     { key: 'drawer-drilling', label: OPERATION_LABELS['drawer-drilling'], quantity: drawerQty, unit: 'pcs' },
     { key: 'back-groove', label: OPERATION_LABELS['back-groove'], quantity: backGrooveM, unit: 'm' },
-  ].filter((operation) => operation.quantity > 0.0001);
+  ];
+  const raw = candidates.filter((operation) => operation.quantity > 0.0001);
 
   return raw.map((operation) => {
     const item = findOperationItem(items, operation.key);
