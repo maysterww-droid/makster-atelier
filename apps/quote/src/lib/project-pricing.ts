@@ -11,6 +11,10 @@ export type ProjectCommercialSettings = {
   documentLocale: DocumentLocale;
   clientNote: string;
   issuedAt: string | null;
+  depositBps: number;
+  productionLeadText: string;
+  paymentTerms: string;
+  warrantyText: string;
 };
 
 export type StoredCabinetCost = {
@@ -55,6 +59,7 @@ export function readProjectCommercialSettings(settings: unknown): ProjectCommerc
   const requestedLocale = typeof quote.documentLocale === 'string' ? quote.documentLocale : 'ru';
   const taxBps = Math.max(0, Math.min(100_000, safeInteger(quote.taxBps, safeInteger(root.taxBps, 0))));
   const validityDays = Math.max(1, Math.min(365, safeInteger(quote.validityDays, 14)));
+  const depositBps = Math.max(0, Math.min(10_000, safeInteger(quote.depositBps, 0)));
 
   return {
     deliveryItemId: typeof quote.deliveryItemId === 'string' ? quote.deliveryItemId : '',
@@ -65,6 +70,10 @@ export function readProjectCommercialSettings(settings: unknown): ProjectCommerc
     documentLocale: DOCUMENT_LOCALES.has(requestedLocale as DocumentLocale) ? requestedLocale as DocumentLocale : 'ru',
     clientNote: typeof quote.clientNote === 'string' ? quote.clientNote : '',
     issuedAt: typeof quote.issuedAt === 'string' ? quote.issuedAt : null,
+    depositBps,
+    productionLeadText: typeof quote.productionLeadText === 'string' ? quote.productionLeadText : '',
+    paymentTerms: typeof quote.paymentTerms === 'string' ? quote.paymentTerms : '',
+    warrantyText: typeof quote.warrantyText === 'string' ? quote.warrantyText : '',
   };
 }
 
@@ -111,4 +120,9 @@ export function calculateProjectPricing(
     completeCabinets,
     incompleteCabinets: cabinets.length - completeCabinets,
   };
+}
+
+export function calculateDepositMinor(totalMinor: bigint, depositBps: number) {
+  const bps = BigInt(Math.max(0, Math.min(10_000, Math.round(depositBps))));
+  return (totalMinor * bps + 5_000n) / 10_000n;
 }
