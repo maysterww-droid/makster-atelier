@@ -16,7 +16,6 @@ export type DeliveryActionState = {
   warning?: string;
 };
 
-export const initialDeliveryState: DeliveryActionState = { status:'idle', message:'' };
 const deliveryRoles = new Set(['owner','admin','sales','technologist']);
 
 function text(formData: FormData, name: string, max = 500) {
