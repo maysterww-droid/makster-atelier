@@ -2,6 +2,11 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith('/api/webhooks/lemonsqueezy')) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -28,11 +33,9 @@ export async function updateSession(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
-  const pathname = request.nextUrl.pathname;
   const isPublicRoute = pathname.startsWith('/login')
     || pathname.startsWith('/auth')
-    || pathname.startsWith('/q/')
-    || pathname === '/api/webhooks/lemonsqueezy';
+    || pathname.startsWith('/q/');
 
   if (!claims && !isPublicRoute) {
     const url = request.nextUrl.clone();
