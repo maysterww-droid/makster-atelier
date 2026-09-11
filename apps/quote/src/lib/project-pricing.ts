@@ -19,6 +19,7 @@ export type ProjectCommercialSettings = {
 
 export type StoredCabinetCost = {
   computed_cost_json: Record<string, unknown> | null;
+  quantity?: number | string | null;
 };
 
 export type ProjectPricingResult = {
@@ -77,10 +78,14 @@ export function readProjectCommercialSettings(settings: unknown): ProjectCommerc
   };
 }
 
+function cabinetQuantity(cabinet: StoredCabinetCost) {
+  return Math.max(1, Math.min(999, safeInteger(cabinet.quantity, 1)));
+}
+
 function cabinetCost(cabinet: StoredCabinetCost, key: keyof CostBreakdown) {
   const computed = record(cabinet.computed_cost_json);
   const costs = record(computed.costs);
-  return minorFromUnknown(costs[key]);
+  return minorFromUnknown(costs[key]) * BigInt(cabinetQuantity(cabinet));
 }
 
 function cabinetComplete(cabinet: StoredCabinetCost) {
@@ -106,7 +111,8 @@ export function calculateProjectPricing(
     other: sum('other') + (extras.otherMinor ?? 0n),
   };
 
-  const completeCabinets = cabinets.filter(cabinetComplete).length;
+  const cabinetCount = cabinets.reduce((total, cabinet) => total + cabinetQuantity(cabinet), 0);
+  const completeCabinets = cabinets.reduce((total, cabinet) => total + (cabinetComplete(cabinet) ? cabinetQuantity(cabinet) : 0), 0);
 
   return {
     costs,
@@ -116,9 +122,9 @@ export function calculateProjectPricing(
       targetMarginBps: options.targetMarginBps,
       taxBps: options.taxBps ?? 0,
     }),
-    cabinetCount: cabinets.length,
+    cabinetCount,
     completeCabinets,
-    incompleteCabinets: cabinets.length - completeCabinets,
+    incompleteCabinets: cabinetCount - completeCabinets,
   };
 }
 
