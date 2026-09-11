@@ -12,6 +12,8 @@ const operationKeys = new Set([
   'drawer-drilling',
   'back-groove',
 ]);
+const allowedCategories = new Set(['board', 'front', 'edge', 'hardware', 'operation', 'labour', 'delivery', 'installation', 'overhead', 'other']);
+const allowedUnits = new Set(['sheet', 'm2', 'm', 'pcs', 'set', 'hour', 'job']);
 
 function moneyToMinor(raw: string) {
   const normalized = raw.trim().replace(/\s/g, '').replace(',', '.');
@@ -20,54 +22,60 @@ function moneyToMinor(raw: string) {
   return Number(BigInt(whole) * 100n + BigInt((fraction + '00').slice(0, 2)));
 }
 
-export async function addPriceBookItem(formData: FormData) {
-  const { supabase, organization, role } = await requireWorkspace();
-  if (!['owner', 'admin'].includes(role)) redirect('/price-book?error=permission');
-
+function readPriceFields(formData: FormData) {
   const category = String(formData.get('category') ?? '').trim();
-  const name = String(formData.get('name') ?? '').trim();
+  const name = String(formData.get('name') ?? '').trim().slice(0, 300);
   const unit = String(formData.get('unit') ?? 'pcs').trim();
-  const manufacturer = String(formData.get('manufacturer') ?? '').trim() || null;
-  const sku = String(formData.get('sku') ?? '').trim() || null;
+  const manufacturer = String(formData.get('manufacturer') ?? '').trim().slice(0, 200) || null;
+  const sku = String(formData.get('sku') ?? '').trim().slice(0, 200) || null;
   const priceRaw = String(formData.get('price') ?? '');
-  const allowedCategories = new Set(['board', 'front', 'edge', 'hardware', 'operation', 'labour', 'delivery', 'installation', 'overhead', 'other']);
-  const allowedUnits = new Set(['sheet', 'm2', 'm', 'pcs', 'set', 'hour', 'job']);
 
-  if (!allowedCategories.has(category) || !allowedUnits.has(unit) || !name || !priceRaw) redirect('/price-book?error=fields');
+  if (!allowedCategories.has(category) || !allowedUnits.has(unit) || !name || !priceRaw) throw new Error('fields');
 
-  let purchasePriceMinor: number;
-  try { purchasePriceMinor = moneyToMinor(priceRaw); } catch { redirect('/price-book?error=price'); }
-
+  const purchasePriceMinor = moneyToMinor(priceRaw);
   const parameters: Record<string, number | string> = {};
   const thicknessMm = Number(formData.get('thicknessMm') ?? 0);
-  if (thicknessMm > 0) parameters.thicknessMm = thicknessMm;
+  if (Number.isFinite(thicknessMm) && thicknessMm > 0) parameters.thicknessMm = thicknessMm;
 
   if (unit === 'sheet') {
     const sheetWidthMm = Number(formData.get('sheetWidthMm') ?? 0);
     const sheetHeightMm = Number(formData.get('sheetHeightMm') ?? 0);
     const wastePct = Number(formData.get('wastePct') ?? 0);
-    if (!(sheetWidthMm > 0 && sheetHeightMm > 0)) redirect('/price-book?error=sheet');
+    if (!(sheetWidthMm > 0 && sheetHeightMm > 0)) throw new Error('sheet');
     parameters.sheetWidthMm = sheetWidthMm;
     parameters.sheetHeightMm = sheetHeightMm;
-    parameters.wastePct = Math.max(0, wastePct || 0);
+    parameters.wastePct = Math.max(0, Number.isFinite(wastePct) ? wastePct : 0);
   }
 
   if (category === 'operation') {
     const operationKey = String(formData.get('operationKey') ?? '').trim();
-    if (!operationKeys.has(operationKey)) redirect('/price-book?error=operation');
+    if (!operationKeys.has(operationKey)) throw new Error('operation');
     parameters.operationKey = operationKey;
+  }
+
+  return { category, name, unit, manufacturer, sku, purchasePriceMinor, parameters };
+}
+
+export async function addPriceBookItem(formData: FormData) {
+  const { supabase, organization, role } = await requireWorkspace();
+  if (!['owner', 'admin'].includes(role)) redirect('/price-book?error=permission');
+
+  let fields: ReturnType<typeof readPriceFields>;
+  try { fields = readPriceFields(formData); } catch (error) {
+    const code = error instanceof Error ? error.message : 'fields';
+    redirect(`/price-book?error=${encodeURIComponent(code)}`);
   }
 
   const { error } = await supabase.from('quote_price_book_items').insert({
     organization_id: organization.id,
-    category,
-    name,
-    manufacturer,
-    sku,
-    unit,
+    category: fields.category,
+    name: fields.name,
+    manufacturer: fields.manufacturer,
+    sku: fields.sku,
+    unit: fields.unit,
     currency: organization.currency,
-    purchase_price_minor: purchasePriceMinor,
-    parameters_json: parameters,
+    purchase_price_minor: fields.purchasePriceMinor,
+    parameters_json: fields.parameters,
     source: 'manual',
     active: true,
   });
@@ -75,6 +83,46 @@ export async function addPriceBookItem(formData: FormData) {
   if (error) redirect('/price-book?error=create');
   revalidatePath('/price-book');
   revalidatePath('/');
+}
+
+export async function updatePriceBookItem(formData: FormData) {
+  const { supabase, organization, role } = await requireWorkspace();
+  if (!['owner', 'admin'].includes(role)) redirect('/price-book?error=permission');
+
+  const itemId = String(formData.get('itemId') ?? '').trim();
+  if (!/^[0-9a-fA-F-]{36}$/.test(itemId)) redirect('/price-book?error=item');
+
+  let fields: ReturnType<typeof readPriceFields>;
+  try { fields = readPriceFields(formData); } catch (error) {
+    const code = error instanceof Error ? error.message : 'fields';
+    redirect(`/price-book/${itemId}?error=${encodeURIComponent(code)}`);
+  }
+
+  const { data: updated, error } = await supabase
+    .from('quote_price_book_items')
+    .update({
+      category: fields.category,
+      name: fields.name,
+      manufacturer: fields.manufacturer,
+      sku: fields.sku,
+      unit: fields.unit,
+      currency: organization.currency,
+      purchase_price_minor: fields.purchasePriceMinor,
+      parameters_json: fields.parameters,
+      source: 'manual',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', itemId)
+    .eq('organization_id', organization.id)
+    .eq('active', true)
+    .select('id')
+    .maybeSingle();
+
+  if (error || !updated) redirect(`/price-book/${itemId}?error=update`);
+  revalidatePath('/price-book');
+  revalidatePath(`/price-book/${itemId}`);
+  revalidatePath('/');
+  redirect('/price-book');
 }
 
 export async function deactivatePriceBookItem(formData: FormData) {
