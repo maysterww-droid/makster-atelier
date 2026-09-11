@@ -12,6 +12,11 @@ function cleanText(formData: FormData, name: string, max: number) {
   return String(formData.get(name) ?? '').trim().slice(0, max);
 }
 
+function measuredNumber(formData: FormData, name: string) {
+  const value = Number(String(formData.get(name) ?? '0').replace(',', '.'));
+  return Number.isFinite(value) ? Math.max(0, Math.min(10_000, value)) : -1;
+}
+
 export async function saveProjectCommercial(formData: FormData) {
   const { supabase, organization, userId, role } = await requireWorkspace();
   const projectId = cleanText(formData, 'projectId', 80);
@@ -32,6 +37,12 @@ export async function saveProjectCommercial(formData: FormData) {
   if (!Number.isFinite(taxPercent) || taxPercent < 0 || taxPercent > 1000) redirect(`/projects/${projectId}?error=tax`);
   if (!Number.isFinite(validityDaysRaw) || validityDaysRaw < 1 || validityDaysRaw > 365) redirect(`/projects/${projectId}?error=validity`);
   if (!Number.isFinite(depositPercent) || depositPercent < 0 || depositPercent > 100) redirect(`/projects/${projectId}?error=deposit`);
+
+  const worktopLengthM = measuredNumber(formData, 'worktopLengthM');
+  const plinthLengthM = measuredNumber(formData, 'plinthLengthM');
+  const fillerAreaM2 = measuredNumber(formData, 'fillerAreaM2');
+  const decorAreaM2 = measuredNumber(formData, 'decorAreaM2');
+  if ([worktopLengthM, plinthLengthM, fillerAreaM2, decorAreaM2].some((value) => value < 0)) redirect(`/projects/${projectId}?error=extras-quantity`);
 
   const localeRaw = cleanText(formData, 'documentLocale', 10) as DocumentLocale;
   const documentLocale: DocumentLocale = allowedLocales.has(localeRaw) ? localeRaw : 'ru';
@@ -70,9 +81,13 @@ export async function saveProjectCommercial(formData: FormData) {
   }
 
   const requestedExtras = [
-    { field: 'deliveryItemId', category: 'delivery' },
-    { field: 'installationItemId', category: 'installation' },
-    { field: 'otherItemId', category: 'other' },
+    { field: 'deliveryItemId', category: 'delivery', unit: 'job' },
+    { field: 'installationItemId', category: 'installation', unit: 'job' },
+    { field: 'otherItemId', category: 'other', unit: 'job' },
+    { field: 'worktopItemId', category: 'worktop', unit: 'm' },
+    { field: 'plinthItemId', category: 'plinth', unit: 'm' },
+    { field: 'fillerItemId', category: 'filler', unit: 'm2' },
+    { field: 'decorItemId', category: 'decor', unit: 'm2' },
   ] as const;
   const extraIds = requestedExtras.map(({ field }) => cleanText(formData, field, 80)).filter(Boolean);
   const validIds = new Map<string, { category: string; unit: string }>();
@@ -89,12 +104,20 @@ export async function saveProjectCommercial(formData: FormData) {
   }
 
   const extraValues: Record<string, string> = {};
-  for (const { field, category } of requestedExtras) {
+  for (const { field, category, unit } of requestedExtras) {
     const id = cleanText(formData, field, 80);
     const row = id ? validIds.get(id) : undefined;
-    if (id && (!row || row.category !== category || row.unit !== 'job')) redirect(`/projects/${projectId}?error=extras-unit`);
+    if (id && (!row || row.category !== category || row.unit !== unit)) redirect(`/projects/${projectId}?error=extras-unit`);
     extraValues[field] = id;
   }
+
+  const measuredRequirements = [
+    { quantity: worktopLengthM, field: 'worktopItemId' },
+    { quantity: plinthLengthM, field: 'plinthItemId' },
+    { quantity: fillerAreaM2, field: 'fillerItemId' },
+    { quantity: decorAreaM2, field: 'decorItemId' },
+  ];
+  if (measuredRequirements.some(({ quantity, field }) => quantity > 0 && !extraValues[field])) redirect(`/projects/${projectId}?error=extras-price`);
 
   const rootSettings = project.settings && typeof project.settings === 'object' && !Array.isArray(project.settings)
     ? project.settings as Record<string, unknown>
@@ -107,6 +130,14 @@ export async function saveProjectCommercial(formData: FormData) {
       deliveryItemId: extraValues.deliveryItemId,
       installationItemId: extraValues.installationItemId,
       otherItemId: extraValues.otherItemId,
+      worktopItemId: extraValues.worktopItemId,
+      worktopLengthM,
+      plinthItemId: extraValues.plinthItemId,
+      plinthLengthM,
+      fillerItemId: extraValues.fillerItemId,
+      fillerAreaM2,
+      decorItemId: extraValues.decorItemId,
+      decorAreaM2,
       taxBps: Math.round(taxPercent * 100),
       validityDays: Math.round(validityDaysRaw),
       documentLocale,
