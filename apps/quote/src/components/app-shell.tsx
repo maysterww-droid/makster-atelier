@@ -23,7 +23,7 @@ export function AppShell({ organizationName, role, plan = 'FREE', children }: Pr
           <Link className="navItem" href="/price-book">Прайс-лист</Link>
           <span className="navItem disabled">Библиотека модулей</span>
           <span className="navItem disabled">Фурнитура</span>
-          <span className="navItem disabled">Документы</span>
+          <Link className="navItem" href="/settings/quote">Документы / реквизиты</Link>
         </nav>
         <div className="planCard"><span>Тариф</span><strong>{plan}</strong><small>{role}</small></div>
         <form action="/auth/signout" method="post"><button className="navItem signOut" type="submit">Выйти</button></form>
