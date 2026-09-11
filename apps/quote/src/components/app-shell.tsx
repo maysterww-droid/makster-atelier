@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { MaksterQuoteLogo } from './brand-logo';
 
 type Props = {
   organizationName: string;
@@ -13,8 +14,7 @@ export function AppShell({ organizationName, role, plan = 'FREE', children }: Pr
     <main className="shell">
       <aside className="sidebar">
         <Link href="/dashboard" className="brand linkReset">
-          <span className="brandMark">M</span>
-          <span><strong>Makster</strong><small>Quote</small></span>
+          <MaksterQuoteLogo variant="light" />
         </Link>
         <div className="workspaceName"><span>Мастерская</span><strong>{organizationName}</strong></div>
         <nav>
