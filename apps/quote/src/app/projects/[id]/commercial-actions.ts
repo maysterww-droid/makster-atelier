@@ -28,8 +28,10 @@ export async function saveProjectCommercial(formData: FormData) {
   const current = readProjectCommercialSettings(project.settings);
   const taxPercent = Number(String(formData.get('taxPercent') ?? '0').replace(',', '.'));
   const validityDaysRaw = Number(formData.get('validityDays') ?? 14);
+  const depositPercent = Number(String(formData.get('depositPercent') ?? '0').replace(',', '.'));
   if (!Number.isFinite(taxPercent) || taxPercent < 0 || taxPercent > 1000) redirect(`/projects/${projectId}?error=tax`);
   if (!Number.isFinite(validityDaysRaw) || validityDaysRaw < 1 || validityDaysRaw > 365) redirect(`/projects/${projectId}?error=validity`);
+  if (!Number.isFinite(depositPercent) || depositPercent < 0 || depositPercent > 100) redirect(`/projects/${projectId}?error=deposit`);
 
   const localeRaw = cleanText(formData, 'documentLocale', 10) as DocumentLocale;
   const documentLocale: DocumentLocale = allowedLocales.has(localeRaw) ? localeRaw : 'ru';
@@ -90,9 +92,7 @@ export async function saveProjectCommercial(formData: FormData) {
   for (const { field, category } of requestedExtras) {
     const id = cleanText(formData, field, 80);
     const row = id ? validIds.get(id) : undefined;
-    if (id && (!row || row.category !== category || row.unit !== 'job')) {
-      redirect(`/projects/${projectId}?error=extras-unit`);
-    }
+    if (id && (!row || row.category !== category || row.unit !== 'job')) redirect(`/projects/${projectId}?error=extras-unit`);
     extraValues[field] = id;
   }
 
@@ -112,6 +112,10 @@ export async function saveProjectCommercial(formData: FormData) {
       documentLocale,
       clientNote: cleanText(formData, 'clientNote', 2000),
       issuedAt: current.issuedAt ?? new Date().toISOString(),
+      depositBps: Math.round(depositPercent * 100),
+      productionLeadText: cleanText(formData, 'productionLeadText', 300),
+      paymentTerms: cleanText(formData, 'paymentTerms', 1200),
+      warrantyText: cleanText(formData, 'warrantyText', 1200),
     },
   };
 
