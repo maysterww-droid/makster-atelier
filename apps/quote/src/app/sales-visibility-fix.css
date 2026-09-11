@@ -1,4 +1,5 @@
 .mq-premium{overflow-x:hidden!important}
+html,body{max-width:100%!important;overflow-x:hidden!important}
 
 /* Sales sections own their backgrounds. Legacy marketing selectors must not repaint them. */
 .mq-premium #features,
@@ -57,63 +58,152 @@
 .mq-premium #pricing [class*="futurePlans"] p{color:#69584d!important}
 
 @media(max-width:780px){
-  .mq-premium #features{padding-top:64px!important;padding-bottom:68px!important}
+  .mq-premium,
+  .mq-premium #features,
+  .mq-premium #for-whom,
+  .mq-premium #pricing{
+    width:100%!important;
+    max-width:100%!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    transform:none!important;
+  }
+  .mq-premium #features{padding:64px 18px 68px!important}
+  .mq-premium #for-whom{padding:68px 18px 72px!important}
+  .mq-premium #pricing{padding:68px 18px 76px!important}
+
+  .mq-premium #features > *,
+  .mq-premium #for-whom > *,
+  .mq-premium #pricing > *{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    transform:none!important;
+  }
+
   .mq-premium #features [class*="capHead"] h2,
   .mq-premium #for-whom [class*="audienceHead"] h2,
   .mq-premium #pricing [class*="pricingHead"] h2{
-    font-size:clamp(48px,13.5vw,62px)!important;
-    line-height:.93!important;
-    letter-spacing:-.055em!important;
-  }
-  .mq-premium #features [class*="capBands"] article{
-    grid-template-columns:56px 1fr!important;
-    gap:14px!important;
-    padding:28px 0!important;
-  }
-  .mq-premium #features [class*="capBands"] article>span{
-    font-size:38px!important;
-    line-height:1!important;
-  }
-  .mq-premium #features [class*="capBands"] small{
-    font-size:11px!important;
-    letter-spacing:.15em!important;
-  }
-  .mq-premium #features [class*="capBands"] h3{
-    font-size:32px!important;
-    line-height:1.02!important;
-    margin-top:8px!important;
-  }
-  .mq-premium #features [class*="capBands"] article>b{
-    grid-column:2!important;
-    font-size:15px!important;
-    line-height:1.45!important;
+    font-size:clamp(46px,12.5vw,58px)!important;
+    line-height:.94!important;
+    letter-spacing:-.052em!important;
+    max-width:100%!important;
+    overflow-wrap:anywhere!important;
   }
 
-  .mq-premium #for-whom{padding-top:68px!important;padding-bottom:72px!important}
-  .mq-premium #for-whom [class*="scaleRail"] article{padding:29px 0!important;gap:9px!important}
+  /* The visual calculation must never exceed the phone viewport. */
+  .mq-premium #features [class*="moneyMachine"]{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    margin:30px 0 0!important;
+    padding:10px!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:10px!important;
+    border-radius:20px!important;
+    overflow:hidden!important;
+  }
+  .mq-premium #features [class*="projectSide"],
+  .mq-premium #features [class*="resultSide"],
+  .mq-premium #features [class*="costResult"],
+  .mq-premium #features [class*="clientResult"],
+  .mq-premium #features [class*="cabinetScene"],
+  .mq-premium #features [class*="materialLine"]{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+  .mq-premium #features [class*="projectSide"]{padding:14px!important;border-radius:16px!important;overflow:hidden!important}
+  .mq-premium #features [class*="projectTop"] b{font-size:18px!important;line-height:1.15!important;white-space:normal!important}
+  .mq-premium #features [class*="cabinetScene"]{
+    height:160px!important;
+    padding:0 8px 22px!important;
+    grid-template-columns:1.05fr .82fr .82fr .82fr!important;
+    gap:5px!important;
+    overflow:hidden!important;
+  }
+  .mq-premium #features [class*="cabinetScene"] [class*="tall"]{height:104px!important}
+  .mq-premium #features [class*="cabinetScene"] [class*="base"],
+  .mq-premium #features [class*="cabinetScene"] [class*="drawer"]{height:68px!important}
+  .mq-premium #features [class*="worktop"]{left:8px!important;right:8px!important;bottom:86px!important;height:8px!important}
+  .mq-premium #features [class*="cabinetScene"] strong{font-size:12px!important;white-space:nowrap!important}
+
+  .mq-premium #features [class*="materialLine"]{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:8px!important;
+    padding:12px!important;
+  }
+  .mq-premium #features [class*="materialLine"] span{font-size:10px!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .mq-premium #features [class*="materialLine"] b{font-size:13px!important;white-space:nowrap!important}
+  .mq-premium #features [class*="materialLine"] span:nth-of-type(2),
+  .mq-premium #features [class*="materialLine"] b:nth-of-type(2){display:none!important}
+
+  .mq-premium #features [class*="arrowPulse"]{height:52px!important;width:100%!important}
+  .mq-premium #features [class*="arrowPulse"] i{width:48px!important;height:48px!important;font-size:24px!important;transform:rotate(90deg)!important}
+  .mq-premium #features [class*="resultSide"]{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+  .mq-premium #features [class*="costResult"],
+  .mq-premium #features [class*="clientResult"]{padding:18px!important;border-radius:16px!important;overflow:hidden!important}
+  .mq-premium #features [class*="costResult"]>strong,
+  .mq-premium #features [class*="clientResult"]>strong{
+    font-size:clamp(35px,10.5vw,46px)!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    letter-spacing:-.045em!important;
+  }
+  .mq-premium #features [class*="costResult"]>div,
+  .mq-premium #features [class*="clientResult"]>div{gap:16px!important;min-width:0!important}
+  .mq-premium #features [class*="costResult"] span,
+  .mq-premium #features [class*="clientResult"] span{font-size:15px!important}
+  .mq-premium #features [class*="costResult"] b,
+  .mq-premium #features [class*="clientResult"] b{font-size:24px!important;white-space:nowrap!important}
+
+  .mq-premium #features [class*="capBands"]{margin-top:28px!important;width:100%!important;max-width:100%!important}
+  .mq-premium #features [class*="capBands"] article{
+    grid-template-columns:50px minmax(0,1fr)!important;
+    gap:14px!important;
+    padding:28px 0!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+  .mq-premium #features [class*="capBands"] article>span{font-size:36px!important;line-height:1!important}
+  .mq-premium #features [class*="capBands"] small{font-size:11px!important;letter-spacing:.15em!important}
+  .mq-premium #features [class*="capBands"] h3{font-size:30px!important;line-height:1.03!important;margin-top:8px!important;overflow-wrap:anywhere!important}
+  .mq-premium #features [class*="capBands"] article>b{grid-column:2!important;font-size:15px!important;line-height:1.45!important}
+
+  .mq-premium #for-whom [class*="scaleRail"] article{padding:29px 0!important;gap:9px!important;min-width:0!important}
   .mq-premium #for-whom [class*="scaleRail"] article>span{font-size:11px!important}
   .mq-premium #for-whom [class*="scaleRail"] h3{font-size:27px!important}
   .mq-premium #for-whom [class*="scaleRail"] strong{font-size:39px!important;line-height:1!important}
   .mq-premium #for-whom [class*="scaleRail"] p{font-size:15px!important;line-height:1.4!important}
+  .mq-premium #for-whom [class*="pilotHero"]{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;grid-template-columns:minmax(0,1fr)!important;padding:22px!important}
   .mq-premium #for-whom [class*="pilotCopy"]>span{font-size:11px!important}
-  .mq-premium #for-whom [class*="pilotCopy"] h3{font-size:50px!important;line-height:.95!important}
+  .mq-premium #for-whom [class*="pilotCopy"] h3{font-size:48px!important;line-height:.95!important}
   .mq-premium #for-whom [class*="pilotCopy"] p{font-size:16px!important;line-height:1.45!important}
-  .mq-premium #for-whom [class*="pilotPrice"] strong{font-size:76px!important}
+  .mq-premium #for-whom [class*="pilotPrice"] strong{font-size:72px!important}
   .mq-premium #for-whom [class*="pilotPrice"] span{font-size:13px!important}
-  .mq-premium #for-whom [class*="pilotButton"]{font-size:16px!important;min-height:62px!important}
-  .mq-premium #for-whom [class*="pilotTrack"]{display:grid!important;grid-template-columns:1fr 1fr!important;overflow:visible!important;gap:10px!important}
+  .mq-premium #for-whom [class*="pilotButton"]{font-size:16px!important;min-height:62px!important;width:100%!important}
+  .mq-premium #for-whom [class*="pilotTrack"]{display:grid!important;grid-template-columns:1fr 1fr!important;overflow:visible!important;gap:10px!important;width:100%!important}
   .mq-premium #for-whom [class*="pilotTrack"] i{display:none!important}
-  .mq-premium #for-whom [class*="pilotTrack"] span{font-size:13px!important;white-space:normal!important;padding:10px 0!important}
+  .mq-premium #for-whom [class*="pilotTrack"] span{font-size:13px!important;white-space:normal!important;padding:10px 0!important;min-width:0!important}
 
-  .mq-premium #pricing{padding-top:68px!important;padding-bottom:76px!important}
-  .mq-premium #pricing [class*="pricingMain"]{margin-top:30px!important}
-  .mq-premium #pricing [class*="pilotOffer"]{padding:26px!important;min-height:390px!important;border-radius:24px!important}
+  .mq-premium #pricing [class*="pricingMain"]{margin-top:30px!important;width:100%!important;min-width:0!important}
+  .mq-premium #pricing [class*="pilotOffer"]{padding:24px!important;min-height:380px!important;border-radius:22px!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
   .mq-premium #pricing [class*="pilotOffer"]>span{font-size:12px!important}
-  .mq-premium #pricing [class*="pilotOffer"]>strong{font-size:104px!important;line-height:.82!important;margin:30px 0 28px!important}
-  .mq-premium #pricing [class*="pilotOffer"] h3{font-size:38px!important;line-height:1.02!important}
+  .mq-premium #pricing [class*="pilotOffer"]>strong{font-size:clamp(82px,25vw,102px)!important;line-height:.82!important;margin:30px 0 28px!important;white-space:nowrap!important}
+  .mq-premium #pricing [class*="pilotOffer"] h3{font-size:36px!important;line-height:1.02!important}
   .mq-premium #pricing [class*="pilotOffer"] p{font-size:16px!important;line-height:1.45!important;color:#d7c7bc!important}
-  .mq-premium #pricing [class*="pilotOffer"] a{font-size:16px!important;min-height:60px!important;padding:0 20px!important}
-  .mq-premium #pricing [class*="futurePlans"] article{padding:30px 2px!important}
+  .mq-premium #pricing [class*="pilotOffer"] a{font-size:16px!important;min-height:60px!important;padding:0 20px!important;width:100%!important;box-sizing:border-box!important}
+  .mq-premium #pricing [class*="futurePlans"]{width:100%!important;min-width:0!important}
+  .mq-premium #pricing [class*="futurePlans"] article{padding:30px 2px!important;min-width:0!important}
   .mq-premium #pricing [class*="futurePlans"] article>span{font-size:11px!important}
   .mq-premium #pricing [class*="futurePlans"] h3{font-size:31px!important}
   .mq-premium #pricing [class*="futurePlans"] strong{font-size:40px!important}
