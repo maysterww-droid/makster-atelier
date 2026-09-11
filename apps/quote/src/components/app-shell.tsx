@@ -29,6 +29,7 @@ export function AppShell({ organizationName, role, plan = 'FREE', children }: Pr
           <Link className="navItem" href="/price-book">Прайс-лист</Link>
           <span className="navItem disabled">Библиотека модулей</span>
           <span className="navItem disabled">Фурнитура</span>
+          <Link className="navItem" href="/settings/pricing">Маржа и накладные</Link>
           <Link className="navItem" href="/settings/quote">Документы / реквизиты</Link>
           <Link className="navItem" href="/settings/billing">Тариф и оплата</Link>
           {canManageSystem ? <Link className="navItem" href="/settings/readiness">Готовность системы</Link> : null}
