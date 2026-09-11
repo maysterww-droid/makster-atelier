@@ -4,6 +4,15 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireWorkspace } from '@/lib/workspace';
 
+const operationKeys = new Set([
+  'cutting',
+  'edge-banding',
+  'carcass-drilling',
+  'hinge-cup',
+  'drawer-drilling',
+  'back-groove',
+]);
+
 function moneyToMinor(raw: string) {
   const normalized = raw.trim().replace(/\s/g, '').replace(',', '.');
   if (!/^\d+(?:\.\d{0,2})?$/.test(normalized)) throw new Error('Invalid price');
@@ -29,7 +38,10 @@ export async function addPriceBookItem(formData: FormData) {
   let purchasePriceMinor: number;
   try { purchasePriceMinor = moneyToMinor(priceRaw); } catch { redirect('/price-book?error=price'); }
 
-  const parameters: Record<string, number> = {};
+  const parameters: Record<string, number | string> = {};
+  const thicknessMm = Number(formData.get('thicknessMm') ?? 0);
+  if (thicknessMm > 0) parameters.thicknessMm = thicknessMm;
+
   if (unit === 'sheet') {
     const sheetWidthMm = Number(formData.get('sheetWidthMm') ?? 0);
     const sheetHeightMm = Number(formData.get('sheetHeightMm') ?? 0);
@@ -38,6 +50,12 @@ export async function addPriceBookItem(formData: FormData) {
     parameters.sheetWidthMm = sheetWidthMm;
     parameters.sheetHeightMm = sheetHeightMm;
     parameters.wastePct = Math.max(0, wastePct || 0);
+  }
+
+  if (category === 'operation') {
+    const operationKey = String(formData.get('operationKey') ?? '').trim();
+    if (!operationKeys.has(operationKey)) redirect('/price-book?error=operation');
+    parameters.operationKey = operationKey;
   }
 
   const { error } = await supabase.from('quote_price_book_items').insert({
