@@ -15,7 +15,7 @@ export default async function ProjectPage({ params, searchParams }: Props) {
   const { supabase, organization, role } = await requireWorkspace();
   const [projectResult, cabinetsResult, priceResult, subscriptionResult, clientsResult, quotesResult] = await Promise.all([
     supabase.from('projects').select('id, name, project_type, status, currency, client_id, settings, current_revision_id').eq('id', id).eq('organization_id', organization.id).maybeSingle(),
-    supabase.from('quote_cabinets').select('id, module_key, name, width_mm, height_mm, depth_mm, construction_json, material_refs_json, hardware_refs_json, computed_cost_json').eq('project_id', id).eq('organization_id', organization.id).order('sort_order').order('created_at'),
+    supabase.from('quote_cabinets').select('id, module_key, name, width_mm, height_mm, depth_mm, quantity, construction_json, material_refs_json, hardware_refs_json, computed_cost_json').eq('project_id', id).eq('organization_id', organization.id).order('sort_order').order('created_at'),
     supabase.from('quote_price_book_items').select('id, category, name, unit, currency, purchase_price_minor, parameters_json').eq('organization_id', organization.id).eq('active', true).order('name'),
     supabase.from('quote_subscriptions').select('plan').eq('organization_id', organization.id).maybeSingle(),
     supabase.from('clients').select('id, display_name, email, phone').eq('organization_id', organization.id).is('archived_at', null).order('display_name'),
