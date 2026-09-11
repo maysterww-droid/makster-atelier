@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import { generateClientLink, initialDeliveryState, sendQuoteEmail } from './delivery-actions';
+import { generateClientLink, sendQuoteEmail, type DeliveryActionState } from './delivery-actions';
 
 type Props = {
   projectId: string;
@@ -10,7 +10,9 @@ type Props = {
   emailConfigured: boolean;
 };
 
-function Result({ state }: { state: typeof initialDeliveryState }) {
+const initialDeliveryState: DeliveryActionState = { status:'idle', message:'' };
+
+function Result({ state }: { state: DeliveryActionState }) {
   const [copied, setCopied] = useState(false);
   if (state.status === 'idle') return null;
   return <div className={`deliveryResult ${state.status}`}>
