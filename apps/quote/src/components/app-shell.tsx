@@ -9,6 +9,8 @@ type Props = {
 };
 
 export function AppShell({ organizationName, role, plan = 'FREE', children }: Props) {
+  const canManageSystem = role === 'owner' || role === 'admin';
+
   return (
     <main className="shell">
       <aside className="sidebar">
@@ -28,6 +30,7 @@ export function AppShell({ organizationName, role, plan = 'FREE', children }: Pr
           <span className="navItem disabled">Фурнитура</span>
           <Link className="navItem" href="/settings/quote">Документы / реквизиты</Link>
           <Link className="navItem" href="/settings/billing">Тариф и оплата</Link>
+          {canManageSystem ? <Link className="navItem" href="/settings/readiness">Готовность системы</Link> : null}
         </nav>
         <div className="planCard"><span>Тариф</span><strong>{plan}</strong><small>{role}</small></div>
         <form action="/auth/signout" method="post"><button className="navItem signOut" type="submit">Выйти</button></form>
