@@ -12,32 +12,42 @@ const statusLabel: Record<string, string> = {
 
 export default async function DashboardPage() {
   const { supabase, organization, role } = await requireWorkspace();
-  const [{ data: projects, error: projectsError }, { data: subscription }, priceBookResult] = await Promise.all([
-    supabase.from('projects').select('id, name, project_type, status, currency, updated_at').eq('organization_id', organization.id).is('archived_at', null).order('updated_at', { ascending: false }).limit(12),
+  const [projectsResult, subscriptionResult, priceBookResult, quotesResult, clientsResult] = await Promise.all([
+    supabase.from('projects').select('id, name, project_type, status, currency, updated_at', { count: 'exact' }).eq('organization_id', organization.id).is('archived_at', null).order('updated_at', { ascending: false }).limit(12),
     supabase.from('quote_subscriptions').select('plan, status').eq('organization_id', organization.id).maybeSingle(),
     supabase.from('quote_price_book_items').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).eq('active', true),
+    supabase.from('client_commercial_quotes').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id),
+    supabase.from('clients').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).is('archived_at', null),
   ]);
 
-  if (projectsError) throw new Error(`Не удалось загрузить проекты: ${projectsError.message}`);
-  const rows = projects ?? [];
+  if (projectsResult.error) throw new Error(`Не удалось загрузить проекты: ${projectsResult.error.message}`);
+  if (priceBookResult.error) throw new Error(`Не удалось загрузить прайс-лист: ${priceBookResult.error.message}`);
+  if (quotesResult.error) throw new Error(`Не удалось загрузить предложения: ${quotesResult.error.message}`);
+  if (clientsResult.error) throw new Error(`Не удалось загрузить клиентов: ${clientsResult.error.message}`);
+
+  const rows = projectsResult.data ?? [];
+  const subscription = subscriptionResult.data;
+  const projectCount = projectsResult.count ?? rows.length;
   const priceCount = priceBookResult.count ?? 0;
-  const draftCount = rows.filter((p) => p.status === 'draft' || p.status === 'active').length;
+  const quoteCount = quotesResult.count ?? 0;
+  const clientCount = clientsResult.count ?? 0;
 
   return (
     <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan ?? 'free').toUpperCase()}>
       <header className="topbar">
-        <div><span className="eyebrow">MAKSTER QUOTE · MQ 0.1.1</span><h1>Главная</h1></div>
+        <div><span className="eyebrow">MAKSTER QUOTE · WORKSPACE</span><h1>Главная</h1></div>
         <Link href="/projects/new" className="primary linkButton">+ Новый расчёт</Link>
       </header>
       <div className="pageContent">
         {priceCount === 0 ? <div className="notice warning"><strong>Прайс-лист пуст.</strong> До добавления своих закупочных цен Makster не будет подставлять вымышленные стоимости. <Link href="/price-book">Заполнить прайс-лист →</Link></div> : null}
         <section className="metricGrid">
-          <article className="metricCard"><span>Проектов</span><strong>{rows.length}</strong><small>последние активные</small></article>
-          <article className="metricCard"><span>В работе</span><strong>{draftCount}</strong><small>черновики и активные</small></article>
-          <article className="metricCard"><span>Прайс-лист</span><strong>{priceCount}</strong><small>активных позиций</small></article>
+          <article className="metricCard"><span>Проектов</span><strong>{projectCount}</strong><small><Link href="/projects" className="textLink">все проекты →</Link></small></article>
+          <article className="metricCard"><span>Предложений</span><strong>{quoteCount}</strong><small><Link href="/quotes" className="textLink">pipeline →</Link></small></article>
+          <article className="metricCard"><span>Клиентов</span><strong>{clientCount}</strong><small><Link href="/clients" className="textLink">база клиентов →</Link></small></article>
+          <article className="metricCard"><span>Прайс-лист</span><strong>{priceCount}</strong><small><Link href="/price-book" className="textLink">активные цены →</Link></small></article>
         </section>
         <section className="panel">
-          <div className="panelHeader"><div><span className="eyebrow">ПРОЕКТЫ</span><h2>Последние расчёты</h2></div><Link href="/projects/new" className="textLink">Создать →</Link></div>
+          <div className="panelHeader"><div><span className="eyebrow">ПРОЕКТЫ</span><h2>Последние расчёты</h2></div><Link href="/projects" className="textLink">Все проекты →</Link></div>
           {rows.length === 0 ? (
             <div className="emptyState"><h3>Пока нет ни одного расчёта</h3><p>Создайте первый проект. Makster сохранит его в общей базе и подготовит для будущего перехода в Makster Pro.</p><Link href="/projects/new" className="primary linkButton">Создать первый расчёт</Link></div>
           ) : (
