@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { MaksterQuoteLogo } from './brand-logo';
 import styles from './premium-polish.module.css';
 
 function QuoteCockpit() {
@@ -11,7 +12,7 @@ function QuoteCockpit() {
       </div>
       <div className={styles.cockpitBody}>
         <aside>
-          <div className={styles.miniBrand}>M</div>
+          <MaksterQuoteLogo compact variant="light" />
           <span className={styles.activeNav}>Обзор</span>
           <span>Конструкция</span>
           <span>Price Book</span>
@@ -59,7 +60,7 @@ export function PremiumHero() {
         <p><strong>Makster Quote</strong> считает конструкцию, себестоимость и цену клиенту по вашим реальным закупочным ценам.</p>
         <div className={styles.actions}>
           <Link href="/login" className={styles.primary}>Открыть Makster Quote <span>→</span></Link>
-          <a href="#workflow" className={styles.secondary}>Показать процесс</a>
+          <a href="#workflow" className={styles.secondary}>Показать программу</a>
         </div>
       </div>
       <div className={styles.visualStage}>
