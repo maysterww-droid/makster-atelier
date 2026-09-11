@@ -24,6 +24,7 @@ export function AppShell({ organizationName, role, plan = 'FREE', children }: Pr
           <Link className="navItem" href="/projects">Проекты</Link>
           <Link className="navItem" href="/projects/new">Новый расчёт</Link>
           <Link className="navItem" href="/quotes">Предложения</Link>
+          <Link className="navItem" href="/analytics">Аналитика</Link>
           <Link className="navItem" href="/clients">Клиенты</Link>
           <Link className="navItem" href="/price-book">Прайс-лист</Link>
           <span className="navItem disabled">Библиотека модулей</span>
