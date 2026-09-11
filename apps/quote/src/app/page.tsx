@@ -7,7 +7,8 @@ import {
 import { PremiumHero } from '@/components/premium-hero';
 import { LuxuryVisual } from '@/components/luxury-visual';
 import { ProductDemo } from '@/components/product-demo';
-import { SalesAudience, SalesCapabilities, SalesPricing } from '@/components/sales-sections';
+import { SalesPricing } from '@/components/sales-sections';
+import { VisualStory } from '@/components/visual-story';
 import styles from './marketing.module.css';
 import './premium.css';
 import './warm-cleanup-v2.css';
@@ -26,8 +27,7 @@ export default function MarketingPage() {
       <PremiumHero />
       <ProductDemo />
       <LuxuryVisual />
-      <SalesCapabilities />
-      <SalesAudience />
+      <VisualStory />
       <SalesPricing />
       <FAQSection />
       <FinalCTA />
