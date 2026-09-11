@@ -1,3 +1,4 @@
+import { MaksterQuoteLogo } from './brand-logo';
 import styles from './visual-story.module.css';
 
 export function VisualStory() {
@@ -21,10 +22,7 @@ export function VisualStory() {
             <div className={styles.worktop}/>
           </div>
           <div className={styles.tags}>
-            <span>EGGER U702</span>
-            <span>BLUM LEGRABOX</span>
-            <span>18 mm</span>
-            <span>8 модулей</span>
+            <span>EGGER U702</span><span>BLUM LEGRABOX</span><span>18 mm</span><span>8 модулей</span>
           </div>
         </div>
       </div>
@@ -41,8 +39,7 @@ export function VisualStory() {
             <div style={{'--w':'20%'} as React.CSSProperties}><span>Накладные</span><b>9 000</b><i/></div>
           </div>
           <div className={styles.costTotal}>
-            <small>СЕБЕСТОИМОСТЬ</small>
-            <strong>128 460 Kč</strong>
+            <small>СЕБЕСТОИМОСТЬ</small><strong>128 460 Kč</strong>
             <div className={styles.marginRing}><span>34.8%</span><small>маржа</small></div>
           </div>
         </div>
@@ -54,20 +51,11 @@ export function VisualStory() {
         <div className={styles.sceneLabel}><span>03</span><b>КЛИЕНТУ</b></div>
         <div className={styles.outputBoard}>
           <div className={styles.document}>
-            <div className={styles.docTop}><b>M</b><span>MAKSTER QUOTE</span><small>MQ-0082</small></div>
-            <div className={styles.docKitchen}>
-              <i/><i/><i/><i/><div/>
-            </div>
-            <small>KITCHEN PRAHA</small>
-            <strong>196 900 Kč</strong>
-            <div className={styles.docLine}/>
-            <p>Предложение клиенту</p>
+            <div className={styles.docTop}><MaksterQuoteLogo compact /><small>MQ-0082</small></div>
+            <div className={styles.docKitchen}><i/><i/><i/><i/><div/></div>
+            <small>KITCHEN PRAHA</small><strong>196 900 Kč</strong><div className={styles.docLine}/><p>Предложение клиенту</p>
           </div>
-          <div className={styles.ready}>
-            <span>PDF</span>
-            <b>ГОТОВ ✓</b>
-            <small>Отправить клиенту →</small>
-          </div>
+          <div className={styles.ready}><span>PDF</span><b>ГОТОВ ✓</b><small>Отправить клиенту →</small></div>
         </div>
       </div>
     </section>
