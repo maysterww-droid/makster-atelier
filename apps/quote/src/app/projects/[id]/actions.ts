@@ -24,6 +24,7 @@ export async function saveCabinet(formData: FormData) {
   const moduleKey = (['b-door', 'b-drawer', 'generic'].includes(moduleKeyRaw) ? moduleKeyRaw : 'generic') as ModuleKey;
   const backModeRaw = String(formData.get('backMode') ?? 'groove');
   const backMode = (['none', 'overlay', 'groove'].includes(backModeRaw) ? backModeRaw : 'groove') as BackMode;
+  const quantity = Math.max(1, Math.min(999, Math.round(numberField(formData, 'quantity', 1))));
 
   const { data: project, error: projectError } = await supabase
     .from('projects')
@@ -93,7 +94,7 @@ export async function saveCabinet(formData: FormData) {
     width_mm: input.widthMm,
     height_mm: input.heightMm,
     depth_mm: input.depthMm,
-    quantity: 1,
+    quantity,
     construction_json: {
       thicknessMm: input.thicknessMm,
       gapMm: input.gapMm,
