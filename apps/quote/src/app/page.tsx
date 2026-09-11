@@ -17,6 +17,7 @@ import './premium-polish.css';
 import './luxury-pass.css';
 import './clarity-pass.css';
 import './visual-hook.css';
+import './product-demo-first.css';
 
 export default function MarketingPage() {
   return (
