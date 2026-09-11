@@ -29,7 +29,10 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
   const pathname = request.nextUrl.pathname;
-  const isPublicRoute = pathname.startsWith('/login') || pathname.startsWith('/auth') || pathname.startsWith('/q/');
+  const isPublicRoute = pathname.startsWith('/login')
+    || pathname.startsWith('/auth')
+    || pathname.startsWith('/q/')
+    || pathname === '/api/webhooks/lemonsqueezy';
 
   if (!claims && !isPublicRoute) {
     const url = request.nextUrl.clone();
