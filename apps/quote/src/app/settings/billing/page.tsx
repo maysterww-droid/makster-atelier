@@ -44,6 +44,10 @@ export default async function BillingPage({ searchParams }: Props) {
   const currentPlan = (subscription?.plan ?? 'free') as QuotePlan;
   const currentStatus = subscription?.status ?? 'inactive';
   const canManage = ['owner', 'admin'].includes(role);
+  const hasManagedSubscription = subscription?.provider === 'lemonsqueezy'
+    && Boolean(subscription.provider_subscription_id)
+    && currentStatus !== 'expired'
+    && currentStatus !== 'inactive';
   const periodEnd = subscription?.current_period_end
     ? new Intl.DateTimeFormat('ru-RU', { dateStyle: 'medium' }).format(new Date(subscription.current_period_end))
     : null;
@@ -56,12 +60,13 @@ export default async function BillingPage({ searchParams }: Props) {
 
     <div className="pageContent">
       {query.checkout === 'success' ? <div className="notice success"><strong>Оплата завершена.</strong> Подписка обновится после подтверждённого webhook от Lemon Squeezy.</div> : null}
-      {query.error ? <div className="notice error">Не удалось выполнить действие с подпиской ({query.error}).</div> : null}
+      {query.error === 'existing-subscription' ? <div className="notice warning">У мастерской уже есть подписка Lemon Squeezy. Для смены тарифа используйте управление подпиской, чтобы не создать вторую параллельную подписку.</div> : null}
+      {query.error && query.error !== 'existing-subscription' ? <div className="notice error">Не удалось выполнить действие с подпиской ({query.error}).</div> : null}
 
       <section className="metricGrid">
         <article className="metricCard"><span>Текущий тариф</span><strong>{PLAN_LABELS[currentPlan]}</strong><small>для этой мастерской</small></article>
         <article className="metricCard"><span>Статус</span><strong>{statusLabel[currentStatus] ?? currentStatus}</strong><small>{periodEnd ? `до ${periodEnd}` : 'без даты окончания'}</small></article>
-        <article className="metricCard"><span>Billing backend</span><strong>{webhookConfigured() ? 'Ready' : 'Setup'}</strong><small>{subscription?.test_mode ? 'Lemon Squeezy test mode' : 'production-ready state'}</small></article>
+        <article className="metricCard"><span>Billing backend</span><strong>{webhookConfigured() ? 'Ready' : 'Setup'}</strong><small>{subscription?.test_mode ? 'Lemon Squeezy test mode' : (subscription ? 'live billing state' : 'ожидает настройки')}</small></article>
       </section>
 
       <section className="panel" style={{ marginBottom: 18 }}>
@@ -78,25 +83,33 @@ export default async function BillingPage({ searchParams }: Props) {
       </section>
 
       <section className="panel">
-        <div className="panelHeader"><div><span className="eyebrow">ТАРИФЫ</span><h2>Выбрать план</h2><p className="muted">Цены и период оплаты берутся непосредственно из настроенных вариантов Lemon Squeezy.</p></div></div>
-        <div className="metricGrid" style={{ padding: 16, marginBottom: 0 }}>
-          <article className="metricCard">
-            <span>FREE</span><strong>Free</strong><small>{planDescription.free}</small>
-          </article>
-          {PAID_PLANS.map((plan) => {
-            const configured = checkoutConfigured(plan);
-            return <article className="metricCard" key={plan}>
-              <span>{plan.toUpperCase()}</span>
-              <strong>{PLAN_LABELS[plan]}</strong>
-              <small>{planDescription[plan]}</small>
-              <div className="formActions" style={{ marginTop: 14 }}>
-                {canManage && configured ? <form action={startCheckout}><input type="hidden" name="plan" value={plan}/><button className="primary" type="submit">Выбрать {PLAN_LABELS[plan]}</button></form> : null}
-                {!configured ? <span className="muted">Вариант Lemon Squeezy ещё не настроен</span> : null}
-                {!canManage && configured ? <span className="muted">Изменить тариф может владелец или администратор</span> : null}
-              </div>
-            </article>;
-          })}
-        </div>
+        <div className="panelHeader"><div><span className="eyebrow">ТАРИФЫ</span><h2>{hasManagedSubscription ? 'Смена плана' : 'Выбрать план'}</h2><p className="muted">Цены и период оплаты берутся непосредственно из настроенных вариантов Lemon Squeezy.</p></div></div>
+        {hasManagedSubscription ? (
+          <div className="emptyState">
+            <h3>Подписка уже активна</h3>
+            <p>Смена плана, отмена и платёжные данные выполняются через Customer Portal Lemon Squeezy. Так мы не создаём дубликаты подписок.</p>
+            {canManage ? <form action={openCustomerPortal}><button className="primary" type="submit">Открыть управление подпиской</button></form> : null}
+          </div>
+        ) : (
+          <div className="metricGrid" style={{ padding: 16, marginBottom: 0 }}>
+            <article className="metricCard">
+              <span>FREE</span><strong>Free</strong><small>{planDescription.free}</small>
+            </article>
+            {PAID_PLANS.map((plan) => {
+              const configured = checkoutConfigured(plan);
+              return <article className="metricCard" key={plan}>
+                <span>{plan.toUpperCase()}</span>
+                <strong>{PLAN_LABELS[plan]}</strong>
+                <small>{planDescription[plan]}</small>
+                <div className="formActions" style={{ marginTop: 14 }}>
+                  {canManage && configured ? <form action={startCheckout}><input type="hidden" name="plan" value={plan}/><button className="primary" type="submit">Выбрать {PLAN_LABELS[plan]}</button></form> : null}
+                  {!configured ? <span className="muted">Вариант Lemon Squeezy ещё не настроен</span> : null}
+                  {!canManage && configured ? <span className="muted">Изменить тариф может владелец или администратор</span> : null}
+                </div>
+              </article>;
+            })}
+          </div>
+        )}
       </section>
     </div>
   </AppShell>;
