@@ -6,7 +6,7 @@ import { requireUser, findActiveMembership } from '@/lib/workspace';
 export async function createWorkspace(formData: FormData) {
   const { supabase, userId } = await requireUser();
   const existing = await findActiveMembership(supabase, userId);
-  if (existing) redirect('/');
+  if (existing) redirect('/dashboard');
 
   const name = String(formData.get('name') ?? '').trim();
   const countryCode = String(formData.get('countryCode') ?? 'CZ').trim().toUpperCase();
