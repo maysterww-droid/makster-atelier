@@ -2,10 +2,10 @@ import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
 import { OPERATION_LABELS, type OperationKey } from '@/lib/engineering';
 import { requireWorkspace } from '@/lib/workspace';
-import { addPriceBookItem, deactivatePriceBookItem } from './actions';
+import { addPriceBookItem, deactivatePriceBookItem, importPriceBookCsv } from './actions';
 
 export const dynamic = 'force-dynamic';
-type Props = { searchParams: Promise<{ setup?: string; error?: string }> };
+type Props = { searchParams: Promise<{ setup?: string; error?: string; imported?: string; row?: string }> };
 
 const categoryName: Record<string, string> = { board: 'Плита', front: 'Фасад', edge: 'Кромка', hardware: 'Фурнитура', operation: 'Операция', labour: 'Работа', delivery: 'Доставка', installation: 'Монтаж', overhead: 'Накладные', other: 'Другое' };
 const unitName: Record<string, string> = { sheet: 'лист', m2: 'м²', m: 'м', pcs: 'шт', set: 'компл.', hour: 'час', job: 'заказ' };
@@ -24,6 +24,20 @@ function priceMeta(item: { manufacturer: string | null; sku: string | null; para
   return details.join(' · ') || 'ручная цена';
 }
 
+const importErrors: Record<string, string> = {
+  permission: 'Недостаточно прав для изменения прайс-листа.',
+  'import-file': 'Выберите CSV-файл.',
+  'import-size': 'CSV слишком большой. Максимальный размер — 1,5 МБ.',
+  'import-empty': 'В CSV нет строк для импорта.',
+  'import-limit': 'За один импорт можно загрузить не более 500 позиций.',
+  'import-header': 'В CSV отсутствует обязательная колонка.',
+  'import-row': 'В одной из строк неверная категория, единица, название или цена.',
+  'import-price': 'В одной из строк неверный формат цены.',
+  'import-sheet': 'Для позиции с единицей sheet нужны размеры листа.',
+  'import-operation': 'Для категории operation нужен корректный operation_key.',
+  'import-write': 'Не удалось записать импортированные позиции.',
+};
+
 export default async function PriceBookPage({ searchParams }: Props) {
   const query = await searchParams;
   const { supabase, organization, role } = await requireWorkspace();
@@ -33,13 +47,25 @@ export default async function PriceBookPage({ searchParams }: Props) {
   ]);
   if (error) throw new Error(`Не удалось загрузить прайс-лист: ${error.message}`);
   const canManage = ['owner', 'admin'].includes(role);
+  const errorMessage = query.error ? (importErrors[query.error] ?? 'Не удалось выполнить действие с позицией прайс-листа. Проверьте данные и права доступа.') : '';
 
   return (
     <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan ?? 'free').toUpperCase()}>
       <header className="topbar"><div><span className="eyebrow">PRICE BOOK · MAKSTER QUOTE</span><h1>Прайс-лист мастерской</h1></div><Link href="/" className="textLink">← Главная</Link></header>
       <div className="pageContent">
         {query.setup === '1' ? <div className="notice success"><strong>Мастерская создана.</strong> Теперь внесите реальные закупочные цены. Makster не будет подставлять демонстрационные стоимости в рабочие проекты.</div> : null}
-        {query.error ? <div className="notice error">Не удалось выполнить действие с позицией прайс-листа. Проверьте данные и права доступа.</div> : null}
+        {query.imported ? <div className="notice success"><strong>CSV импортирован.</strong> Добавлено позиций: {query.imported}.</div> : null}
+        {query.error ? <div className="notice error">{errorMessage}{query.row ? ` Строка CSV: ${query.row}.` : ''}</div> : null}
+
+        {canManage ? <section className="panel formPanel">
+          <div className="panelHeader"><div><span className="eyebrow">БЫСТРЫЙ ИМПОРТ</span><h2>Загрузить CSV</h2><p className="muted">Подходит экспорт из Excel / Google Sheets. Разделитель может быть ; , или табуляция.</p></div></div>
+          <form action={importPriceBookCsv} className="stackForm padded">
+            <label>CSV-файл<input name="file" type="file" accept=".csv,text/csv,text/plain" required /></label>
+            <div className="engineNote"><strong>Обязательные колонки</strong><span>category, name, unit, price</span><span>Дополнительно: manufacturer, sku, thickness_mm, sheet_width_mm, sheet_height_mm, waste_pct, operation_key.</span></div>
+            <div className="formActions"><button type="submit" className="secondary">Импортировать CSV</button></div>
+          </form>
+        </section> : null}
+
         <div className="twoColumnPage">
           <section className="panel formPanel">
             <div className="panelHeader"><div><h2>Добавить цену</h2><p className="muted">Операции типизируются один раз здесь, а потом Makster автоматически применяет их к деталировке.</p></div></div>
