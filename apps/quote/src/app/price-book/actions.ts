@@ -12,7 +12,7 @@ const operationKeys = new Set([
   'drawer-drilling',
   'back-groove',
 ]);
-const allowedCategories = new Set(['board', 'front', 'edge', 'hardware', 'operation', 'labour', 'delivery', 'installation', 'overhead', 'other']);
+const allowedCategories = new Set(['board', 'front', 'edge', 'hardware', 'operation', 'labour', 'delivery', 'installation', 'overhead', 'other', 'worktop', 'plinth', 'filler', 'decor']);
 const allowedUnits = new Set(['sheet', 'm2', 'm', 'pcs', 'set', 'hour', 'job']);
 
 function moneyToMinor(raw: string) {
