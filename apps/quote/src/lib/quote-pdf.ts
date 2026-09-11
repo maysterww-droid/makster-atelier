@@ -135,7 +135,7 @@ export async function buildQuotePdf(snapshot: QuoteSnapshot): Promise<Buffer> {
       { text:t.supplier, style:'section' },
       { text:supplier.length ? supplier.join('\n') : snapshot.supplier.tradeName },
       ...(snapshot.supplier.footerText ? [{ text:snapshot.supplier.footerText, style:'small', margin:[0,18,0,0] }] : []),
-      { text:'Makster Quote · MQ 0.1.4', style:'small', margin:[0,22,0,0] },
+      { text:'Makster Quote · MQ 0.1.5', style:'small', margin:[0,22,0,0] },
     ],
   };
 
