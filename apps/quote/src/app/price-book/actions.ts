@@ -76,3 +76,22 @@ export async function addPriceBookItem(formData: FormData) {
   revalidatePath('/price-book');
   revalidatePath('/');
 }
+
+export async function deactivatePriceBookItem(formData: FormData) {
+  const { supabase, organization, role } = await requireWorkspace();
+  if (!['owner', 'admin'].includes(role)) redirect('/price-book?error=permission');
+
+  const itemId = String(formData.get('itemId') ?? '').trim();
+  if (!/^[0-9a-fA-F-]{36}$/.test(itemId)) redirect('/price-book?error=item');
+
+  const { error } = await supabase
+    .from('quote_price_book_items')
+    .update({ active: false, updated_at: new Date().toISOString() })
+    .eq('id', itemId)
+    .eq('organization_id', organization.id)
+    .eq('active', true);
+
+  if (error) redirect('/price-book?error=deactivate');
+  revalidatePath('/price-book');
+  revalidatePath('/');
+}
