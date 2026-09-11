@@ -32,9 +32,13 @@ const statusName: Record<string, string> = {
   superseded: 'Заменено',
 };
 
-function asMinor(value: number | string) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.round(parsed) : 0;
+function asMinor(value: number | string): bigint {
+  const raw = typeof value === 'number' ? Math.trunc(value).toString() : value;
+  try {
+    return BigInt(raw);
+  } catch {
+    return 0n;
+  }
 }
 
 export default async function QuotesPage() {
