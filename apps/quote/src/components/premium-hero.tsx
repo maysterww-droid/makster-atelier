@@ -51,33 +51,22 @@ function QuoteCockpit() {
 
 export function PremiumHero() {
   return (
-    <>
-      <section className={styles.hero}>
-        <div className={styles.grain}/>
-        <div className={styles.heroCopy}>
-          <span className={styles.eyebrow}>СОФТ ДЛЯ МЕБЕЛЬЩИКОВ И МАСТЕРСКИХ</span>
-          <h1>Смета, себестоимость и маржа — <em>из мебельного проекта.</em></h1>
-          <p><strong>Makster Quote</strong> — облачная программа для расчёта корпусной мебели. Соберите конструкцию, используйте свои закупочные цены, получите True Cost и отправьте клиенту готовое предложение.</p>
-          <div className={styles.actions}>
-            <Link href="/login" className={styles.primary}>Открыть Makster Quote <span>→</span></Link>
-            <a href="#workflow" className={styles.secondary}>Как это работает</a>
-          </div>
-          <div className="mq-hero-flow" aria-label="Основной процесс Makster Quote">
-            <span>Конструкция</span><i>→</i><span>Price Book</span><i>→</i><span>True Cost</span><i>→</i><span>PDF клиенту</span>
-          </div>
+    <section className={styles.hero}>
+      <div className={styles.grain}/>
+      <div className={styles.heroCopy}>
+        <span className={styles.eyebrow}>СОФТ ДЛЯ МЕБЕЛЬЩИКОВ И МАСТЕРСКИХ</span>
+        <h1>Смета и маржа — <em>прямо из мебельного проекта.</em></h1>
+        <p><strong>Makster Quote</strong> считает конструкцию, себестоимость и цену клиенту по вашим реальным закупочным ценам.</p>
+        <div className={styles.actions}>
+          <Link href="/login" className={styles.primary}>Открыть Makster Quote <span>→</span></Link>
+          <a href="#workflow" className={styles.secondary}>Показать процесс</a>
         </div>
-        <div className={styles.visualStage}>
-          <div className="mq-hero-context"><small>REAL PROJECT</small><b>Kitchen · Praha</b><span>Walnut / stone / brass</span></div>
-          <div className="mq-software-tag">FURNITURE PRICING SOFTWARE</div>
-          <QuoteCockpit />
-        </div>
-      </section>
-
-      <section className="mq-product-summary" aria-label="Что делает Makster Quote">
-        <article><span>01</span><small>ЧТО ЭТО</small><b>Рабочий инструмент мебельщика</b><p>Не мебельный магазин и не универсальный CRM — Quote считает конкретный мебельный проект.</p></article>
-        <article><span>02</span><small>ЧТО СЧИТАЕТ</small><b>Материалы, фурнитуру и работу</b><p>Собственные закупочные цены, операции, накладные расходы, себестоимость и маржа.</p></article>
-        <article><span>03</span><small>ЧТО ВЫДАЁТ</small><b>Цену и предложение клиенту</b><p>True Cost, цена продажи и аккуратный PDF без ручной сборки сметы.</p></article>
-      </section>
-    </>
+      </div>
+      <div className={styles.visualStage}>
+        <div className="mq-software-tag">FURNITURE PRICING SOFTWARE</div>
+        <div className="mq-live-project"><span>LIVE PROJECT</span><b>MQ-0082</b><em>8 модулей · 34.8% маржа</em></div>
+        <QuoteCockpit />
+      </div>
+    </section>
   );
 }
