@@ -12,6 +12,18 @@ import {
 import { requireWorkspace } from '@/lib/workspace';
 
 const cabinetRoles = new Set(['owner', 'admin', 'sales', 'designer', 'technologist']);
+const moduleKeys = new Set<ModuleKey>([
+  'b-door',
+  'b-drawer',
+  'b-oven',
+  'w-door',
+  't-door',
+  't-oven',
+  't-fridge',
+  'dishwasher',
+  'open',
+  'generic',
+]);
 
 function numberField(formData: FormData, name: string, fallback: number) {
   const value = Number(formData.get(name));
@@ -23,6 +35,31 @@ function idField(formData: FormData, name: string) {
   return /^[0-9a-fA-F-]{36}$/.test(value) ? value : '';
 }
 
+function defaultShelfCount(moduleKey: ModuleKey) {
+  if (moduleKey === 'b-door') return 1;
+  if (moduleKey === 'w-door' || moduleKey === 'open') return 2;
+  if (moduleKey === 't-door') return 4;
+  if (moduleKey === 't-oven') return 2;
+  if (moduleKey === 't-fridge') return 1;
+  return 0;
+}
+
+function defaultModuleName(moduleKey: ModuleKey) {
+  const names: Record<ModuleKey, string> = {
+    'b-door': 'Нижний шкаф с дверью',
+    'b-drawer': 'Нижний шкаф с ящиками',
+    'b-oven': 'Нижний модуль под духовку',
+    'w-door': 'Верхний шкаф с дверью',
+    't-door': 'Высокий пенал',
+    't-oven': 'Пенал под духовку',
+    't-fridge': 'Пенал под холодильник',
+    dishwasher: 'ПММ · мебельный фасад',
+    open: 'Открытый модуль',
+    generic: 'Универсальный корпус',
+  };
+  return names[moduleKey];
+}
+
 export async function saveCabinet(formData: FormData) {
   const { supabase, organization, userId, role } = await requireWorkspace();
   const projectId = idField(formData, 'projectId');
@@ -30,8 +67,8 @@ export async function saveCabinet(formData: FormData) {
   if (!projectId) redirect('/projects?error=project');
   if (!cabinetRoles.has(role)) redirect(`/projects/${projectId}?error=permission`);
 
-  const moduleKeyRaw = String(formData.get('moduleKey') ?? 'b-door');
-  const moduleKey = (['b-door', 'b-drawer', 'generic'].includes(moduleKeyRaw) ? moduleKeyRaw : 'generic') as ModuleKey;
+  const moduleKeyRaw = String(formData.get('moduleKey') ?? 'b-door') as ModuleKey;
+  const moduleKey = moduleKeys.has(moduleKeyRaw) ? moduleKeyRaw : 'generic';
   const backModeRaw = String(formData.get('backMode') ?? 'groove');
   const backMode = (['none', 'overlay', 'groove'].includes(backModeRaw) ? backModeRaw : 'groove') as BackMode;
   const quantity = Math.max(1, Math.min(999, Math.round(numberField(formData, 'quantity', 1))));
@@ -59,10 +96,11 @@ export async function saveCabinet(formData: FormData) {
     thicknessMm: numberField(formData, 'thicknessMm', 18),
     gapMm: numberField(formData, 'gapMm', 2),
     drawers: numberField(formData, 'drawers', 2),
-    doors: numberField(formData, 'doors', 1),
-    shelfCount: numberField(formData, 'shelfCount', moduleKey === 'b-door' ? 1 : 0),
+    doors: numberField(formData, 'doors', moduleKey === 't-fridge' || moduleKey === 't-oven' ? 2 : 1),
+    shelfCount: numberField(formData, 'shelfCount', defaultShelfCount(moduleKey)),
     stretcherDepthMm: numberField(formData, 'stretcherDepthMm', 100),
     shelfSetbackMm: numberField(formData, 'shelfSetbackMm', 20),
+    applianceOpeningHeightMm: numberField(formData, 'applianceOpeningHeightMm', 600),
     backMode,
     backThicknessMm: numberField(formData, 'backThicknessMm', 4),
     backInsetMm: numberField(formData, 'backInsetMm', 10),
@@ -92,8 +130,7 @@ export async function saveCabinet(formData: FormData) {
     taxBps,
   });
 
-  const name = String(formData.get('name') ?? '').trim()
-    || (moduleKey === 'b-drawer' ? 'Шкаф с ящиками' : moduleKey === 'b-door' ? 'Шкаф с дверью' : 'Корпус');
+  const name = String(formData.get('name') ?? '').trim() || defaultModuleName(moduleKey);
 
   let nextSortOrder = 0;
   if (!cabinetId) {
@@ -129,6 +166,7 @@ export async function saveCabinet(formData: FormData) {
       shelfCount: input.shelfCount,
       stretcherDepthMm: input.stretcherDepthMm,
       shelfSetbackMm: input.shelfSetbackMm,
+      applianceOpeningHeightMm: input.applianceOpeningHeightMm,
       backMode: input.backMode,
       backThicknessMm: input.backThicknessMm,
       backInsetMm: input.backInsetMm,
@@ -155,7 +193,7 @@ export async function saveCabinet(formData: FormData) {
       notes: preview.notes,
     },
     computed_cost_json: costPreviewToJson(preview),
-    engine_version: 'mq-0.1.2-engineering',
+    engine_version: 'mq-0.1.10-engineering',
     created_by: userId,
     updated_at: new Date().toISOString(),
   };
