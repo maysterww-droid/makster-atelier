@@ -29,9 +29,9 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
   const pathname = request.nextUrl.pathname;
-  const isPublicAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/auth');
+  const isPublicRoute = pathname.startsWith('/login') || pathname.startsWith('/auth') || pathname.startsWith('/q/');
 
-  if (!claims && !isPublicAuthRoute) {
+  if (!claims && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.search = '';
