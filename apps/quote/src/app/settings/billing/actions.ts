@@ -28,6 +28,22 @@ export async function startCheckout(formData: FormData) {
   if (!plan) redirect('/settings/billing?error=plan');
   if (!checkoutConfigured(plan)) redirect('/settings/billing?error=config');
 
+  const { data: currentSubscription, error: subscriptionError } = await supabase
+    .from('quote_subscriptions')
+    .select('provider, provider_subscription_id, status')
+    .eq('organization_id', organization.id)
+    .maybeSingle();
+
+  if (subscriptionError) redirect('/settings/billing?error=subscription-read');
+  if (
+    currentSubscription?.provider === 'lemonsqueezy'
+    && currentSubscription.provider_subscription_id
+    && currentSubscription.status !== 'expired'
+    && currentSubscription.status !== 'inactive'
+  ) {
+    redirect('/settings/billing?error=existing-subscription');
+  }
+
   const apiKey = lemonApiKey();
   const storeId = lemonStoreId();
   const variantId = variantIdForPlan(plan);
