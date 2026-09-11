@@ -51,27 +51,33 @@ function QuoteCockpit() {
 
 export function PremiumHero() {
   return (
-    <section className={styles.hero}>
-      <div className={styles.grain}/>
-      <div className={styles.heroCopy}>
-        <span className={styles.eyebrow}>MAKSTER QUOTE · FURNITURE PRICING OS</span>
-        <h1>Считайте мебель так, как вы её <em>реально производите.</em></h1>
-        <p>Конструкция, Price Book, себестоимость и предложение клиенту — в одной цепочке.</p>
-        <div className={styles.actions}>
-          <Link href="/login" className={styles.primary}>Начать закрытый пилот <span>→</span></Link>
-          <a href="#product" className={styles.secondary}>Посмотреть продукт</a>
+    <>
+      <section className={styles.hero}>
+        <div className={styles.grain}/>
+        <div className={styles.heroCopy}>
+          <span className={styles.eyebrow}>СОФТ ДЛЯ МЕБЕЛЬЩИКОВ И МАСТЕРСКИХ</span>
+          <h1>Смета, себестоимость и маржа — <em>из мебельного проекта.</em></h1>
+          <p><strong>Makster Quote</strong> — облачная программа для расчёта корпусной мебели. Соберите конструкцию, используйте свои закупочные цены, получите True Cost и отправьте клиенту готовое предложение.</p>
+          <div className={styles.actions}>
+            <Link href="/login" className={styles.primary}>Открыть Makster Quote <span>→</span></Link>
+            <a href="#workflow" className={styles.secondary}>Как это работает</a>
+          </div>
+          <div className="mq-hero-flow" aria-label="Основной процесс Makster Quote">
+            <span>Конструкция</span><i>→</i><span>Price Book</span><i>→</i><span>True Cost</span><i>→</i><span>PDF клиенту</span>
+          </div>
         </div>
-        <div className={styles.proofRow}>
-          <span><b>01</b> Свои закупочные цены</span>
-          <span><b>02</b> True Cost</span>
-          <span><b>03</b> Client-ready PDF</span>
+        <div className={styles.visualStage}>
+          <div className="mq-hero-context"><small>REAL PROJECT</small><b>Kitchen · Praha</b><span>Walnut / stone / brass</span></div>
+          <div className="mq-software-tag">FURNITURE PRICING SOFTWARE</div>
+          <QuoteCockpit />
         </div>
-      </div>
-      <div className={styles.visualStage}>
-        <div className={styles.projectLabel}><small>REAL PROJECT CONTEXT</small><b>Kitchen / Praha</b></div>
-        <div className={styles.stageCaption}><span>Walnut · stone · brass</span><b>196 900 Kč</b></div>
-        <QuoteCockpit />
-      </div>
-    </section>
+      </section>
+
+      <section className="mq-product-summary" aria-label="Что делает Makster Quote">
+        <article><span>01</span><small>ЧТО ЭТО</small><b>Рабочий инструмент мебельщика</b><p>Не мебельный магазин и не универсальный CRM — Quote считает конкретный мебельный проект.</p></article>
+        <article><span>02</span><small>ЧТО СЧИТАЕТ</small><b>Материалы, фурнитуру и работу</b><p>Собственные закупочные цены, операции, накладные расходы, себестоимость и маржа.</p></article>
+        <article><span>03</span><small>ЧТО ВЫДАЁТ</small><b>Цену и предложение клиенту</b><p>True Cost, цена продажи и аккуратный PDF без ручной сборки сметы.</p></article>
+      </section>
+    </>
   );
 }
