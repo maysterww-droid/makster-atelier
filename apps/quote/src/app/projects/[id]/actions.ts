@@ -95,6 +95,21 @@ export async function saveCabinet(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim()
     || (moduleKey === 'b-drawer' ? 'Шкаф с ящиками' : moduleKey === 'b-door' ? 'Шкаф с дверью' : 'Корпус');
 
+  let nextSortOrder = 0;
+  if (!cabinetId) {
+    const { data: lastRow, error: orderError } = await supabase
+      .from('quote_cabinets')
+      .select('sort_order')
+      .eq('project_id', projectId)
+      .eq('organization_id', organization.id)
+      .order('sort_order', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (orderError) redirect(`/projects/${projectId}?error=module-order`);
+    nextSortOrder = Number(lastRow?.sort_order ?? -10) + 10;
+  }
+
   const payload = {
     organization_id: organization.id,
     project_id: projectId,
@@ -105,6 +120,7 @@ export async function saveCabinet(formData: FormData) {
     height_mm: input.heightMm,
     depth_mm: input.depthMm,
     quantity,
+    ...(!cabinetId ? { sort_order: nextSortOrder } : {}),
     construction_json: {
       thicknessMm: input.thicknessMm,
       gapMm: input.gapMm,
@@ -194,6 +210,45 @@ export async function duplicateCabinet(formData: FormData) {
   revalidatePath(`/projects/${projectId}`);
   revalidatePath('/');
   redirect(`/projects/${projectId}?saved=module-duplicated`);
+}
+
+export async function moveCabinet(formData: FormData) {
+  const { supabase, organization, role } = await requireWorkspace();
+  const projectId = idField(formData, 'projectId');
+  const cabinetId = idField(formData, 'cabinetId');
+  const direction = String(formData.get('direction') ?? '');
+  if (!projectId || !cabinetId) redirect('/projects?error=module');
+  if (!cabinetRoles.has(role)) redirect(`/projects/${projectId}?error=permission`);
+  if (direction !== 'up' && direction !== 'down') redirect(`/projects/${projectId}?error=module-order`);
+
+  const { data: rows, error } = await supabase
+    .from('quote_cabinets')
+    .select('id')
+    .eq('project_id', projectId)
+    .eq('organization_id', organization.id)
+    .order('sort_order')
+    .order('created_at');
+  if (error || !rows) redirect(`/projects/${projectId}?error=module-order`);
+
+  const currentIndex = rows.findIndex((row) => row.id === cabinetId);
+  if (currentIndex < 0) redirect(`/projects/${projectId}?error=module-order`);
+  const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+  if (targetIndex < 0 || targetIndex >= rows.length) redirect(`/projects/${projectId}?saved=module-order-unchanged`);
+
+  const ordered = [...rows];
+  [ordered[currentIndex], ordered[targetIndex]] = [ordered[targetIndex], ordered[currentIndex]];
+  const now = new Date().toISOString();
+  const results = await Promise.all(ordered.map((row, index) => supabase
+    .from('quote_cabinets')
+    .update({ sort_order: index * 10, updated_at: now })
+    .eq('id', row.id)
+    .eq('project_id', projectId)
+    .eq('organization_id', organization.id)));
+  if (results.some((result) => result.error)) redirect(`/projects/${projectId}?error=module-order`);
+
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath('/');
+  redirect(`/projects/${projectId}?saved=module-moved`);
 }
 
 export async function deleteCabinet(formData: FormData) {
