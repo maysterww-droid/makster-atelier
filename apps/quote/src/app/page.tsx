@@ -1,9 +1,8 @@
 import {
   FAQSection,
   FinalCTA,
-  MarketingFooter,
-  MarketingHeader,
 } from '@/components/marketing-sections';
+import { SiteFooter, SiteHeader } from '@/components/site-chrome';
 import { PremiumHero } from '@/components/premium-hero';
 import { LuxuryVisual } from '@/components/luxury-visual';
 import { EmbeddedQuote } from '@/components/embedded-quote';
@@ -23,7 +22,7 @@ import './sales-visibility-fix.css';
 export default function MarketingPage() {
   return (
     <main className={`${styles.site} mq-premium`}>
-      <MarketingHeader />
+      <SiteHeader />
       <PremiumHero />
       <EmbeddedQuote />
       <LuxuryVisual />
@@ -31,7 +30,7 @@ export default function MarketingPage() {
       <SalesPricing />
       <FAQSection />
       <FinalCTA />
-      <MarketingFooter />
+      <SiteFooter />
     </main>
   );
 }
