@@ -1,0 +1,121 @@
+.mq-premium{overflow-x:hidden!important}
+
+/* Sales sections own their backgrounds. Legacy marketing selectors must not repaint them. */
+.mq-premium #features,
+.mq-premium #for-whom,
+.mq-premium #pricing{
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+
+.mq-premium #features{
+  background:
+    radial-gradient(circle at 82% 12%,rgba(184,111,65,.18),transparent 28%),
+    linear-gradient(160deg,#2b1d17 0%,#211611 62%,#2d1c14 100%)!important;
+  color:#fff!important;
+  padding-left:max(20px,calc((100vw - 1184px)/2))!important;
+  padding-right:max(20px,calc((100vw - 1184px)/2))!important;
+}
+.mq-premium #features [class*="capHead"]>span{color:#e0a172!important;font-size:12px!important}
+.mq-premium #features [class*="capHead"] h2{color:#fff!important}
+.mq-premium #features [class*="capHead"] h2 em{color:#e2a16f!important}
+.mq-premium #features [class*="capBands"]{border-color:rgba(255,255,255,.32)!important}
+.mq-premium #features [class*="capBands"] article{border-color:rgba(255,255,255,.30)!important}
+.mq-premium #features [class*="capBands"] article>span{color:#e2a16f!important}
+.mq-premium #features [class*="capBands"] small{color:#e0a172!important}
+.mq-premium #features [class*="capBands"] h3{color:#fff!important}
+.mq-premium #features [class*="capBands"] article>b{color:#ddcfc5!important}
+
+.mq-premium #for-whom{
+  background:
+    radial-gradient(circle at 12% 12%,rgba(172,103,62,.16),transparent 30%),
+    linear-gradient(180deg,#241813,#1d1410)!important;
+  color:#fff!important;
+}
+.mq-premium #for-whom [class*="audienceHead"] h2{color:#fff!important}
+.mq-premium #for-whom [class*="audienceHead"] h2 em{color:#e0a172!important}
+.mq-premium #for-whom [class*="scaleRail"] h3{color:#fff!important}
+.mq-premium #for-whom [class*="scaleRail"] strong{color:#f5d8c1!important}
+.mq-premium #for-whom [class*="scaleRail"] p{color:#cbb9ad!important}
+
+.mq-premium #pricing{
+  background:
+    radial-gradient(circle at 88% 10%,rgba(181,111,67,.12),transparent 28%),
+    linear-gradient(180deg,#f5ece3,#eee0d4)!important;
+  color:#261b15!important;
+  padding-left:max(20px,calc((100vw - 1184px)/2))!important;
+  padding-right:max(20px,calc((100vw - 1184px)/2))!important;
+}
+.mq-premium #pricing [class*="pricingHead"]>span{color:#9e6442!important}
+.mq-premium #pricing [class*="pricingHead"] h2{color:#261b15!important}
+.mq-premium #pricing [class*="pricingHead"] h2 em{color:#a7623c!important}
+.mq-premium #pricing [class*="futurePlans"]{border-color:#bfa994!important}
+.mq-premium #pricing [class*="futurePlans"] article{border-color:#bfa994!important}
+.mq-premium #pricing [class*="futurePlans"] h3{color:#2a1e18!important}
+.mq-premium #pricing [class*="futurePlans"] p{color:#69584d!important}
+
+@media(max-width:780px){
+  .mq-premium #features{padding-top:64px!important;padding-bottom:68px!important}
+  .mq-premium #features [class*="capHead"] h2,
+  .mq-premium #for-whom [class*="audienceHead"] h2,
+  .mq-premium #pricing [class*="pricingHead"] h2{
+    font-size:clamp(48px,13.5vw,62px)!important;
+    line-height:.93!important;
+    letter-spacing:-.055em!important;
+  }
+  .mq-premium #features [class*="capBands"] article{
+    grid-template-columns:56px 1fr!important;
+    gap:14px!important;
+    padding:28px 0!important;
+  }
+  .mq-premium #features [class*="capBands"] article>span{
+    font-size:38px!important;
+    line-height:1!important;
+  }
+  .mq-premium #features [class*="capBands"] small{
+    font-size:11px!important;
+    letter-spacing:.15em!important;
+  }
+  .mq-premium #features [class*="capBands"] h3{
+    font-size:32px!important;
+    line-height:1.02!important;
+    margin-top:8px!important;
+  }
+  .mq-premium #features [class*="capBands"] article>b{
+    grid-column:2!important;
+    font-size:15px!important;
+    line-height:1.45!important;
+  }
+
+  .mq-premium #for-whom{padding-top:68px!important;padding-bottom:72px!important}
+  .mq-premium #for-whom [class*="scaleRail"] article{padding:29px 0!important;gap:9px!important}
+  .mq-premium #for-whom [class*="scaleRail"] article>span{font-size:11px!important}
+  .mq-premium #for-whom [class*="scaleRail"] h3{font-size:27px!important}
+  .mq-premium #for-whom [class*="scaleRail"] strong{font-size:39px!important;line-height:1!important}
+  .mq-premium #for-whom [class*="scaleRail"] p{font-size:15px!important;line-height:1.4!important}
+  .mq-premium #for-whom [class*="pilotCopy"]>span{font-size:11px!important}
+  .mq-premium #for-whom [class*="pilotCopy"] h3{font-size:50px!important;line-height:.95!important}
+  .mq-premium #for-whom [class*="pilotCopy"] p{font-size:16px!important;line-height:1.45!important}
+  .mq-premium #for-whom [class*="pilotPrice"] strong{font-size:76px!important}
+  .mq-premium #for-whom [class*="pilotPrice"] span{font-size:13px!important}
+  .mq-premium #for-whom [class*="pilotButton"]{font-size:16px!important;min-height:62px!important}
+  .mq-premium #for-whom [class*="pilotTrack"]{display:grid!important;grid-template-columns:1fr 1fr!important;overflow:visible!important;gap:10px!important}
+  .mq-premium #for-whom [class*="pilotTrack"] i{display:none!important}
+  .mq-premium #for-whom [class*="pilotTrack"] span{font-size:13px!important;white-space:normal!important;padding:10px 0!important}
+
+  .mq-premium #pricing{padding-top:68px!important;padding-bottom:76px!important}
+  .mq-premium #pricing [class*="pricingMain"]{margin-top:30px!important}
+  .mq-premium #pricing [class*="pilotOffer"]{padding:26px!important;min-height:390px!important;border-radius:24px!important}
+  .mq-premium #pricing [class*="pilotOffer"]>span{font-size:12px!important}
+  .mq-premium #pricing [class*="pilotOffer"]>strong{font-size:104px!important;line-height:.82!important;margin:30px 0 28px!important}
+  .mq-premium #pricing [class*="pilotOffer"] h3{font-size:38px!important;line-height:1.02!important}
+  .mq-premium #pricing [class*="pilotOffer"] p{font-size:16px!important;line-height:1.45!important;color:#d7c7bc!important}
+  .mq-premium #pricing [class*="pilotOffer"] a{font-size:16px!important;min-height:60px!important;padding:0 20px!important}
+  .mq-premium #pricing [class*="futurePlans"] article{padding:30px 2px!important}
+  .mq-premium #pricing [class*="futurePlans"] article>span{font-size:11px!important}
+  .mq-premium #pricing [class*="futurePlans"] h3{font-size:31px!important}
+  .mq-premium #pricing [class*="futurePlans"] strong{font-size:40px!important}
+  .mq-premium #pricing [class*="futurePlans"] p{font-size:15px!important;line-height:1.45!important}
+}
