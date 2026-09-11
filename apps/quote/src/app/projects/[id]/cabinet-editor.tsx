@@ -36,6 +36,18 @@ type Props = {
 
 const byCategory = (items: PriceBookItem[], category: string) => items.filter((item) => item.category === category);
 const roleLabel: Record<string, string> = { board: 'Корпус', front: 'Фасад', back: 'Задняя стенка' };
+const moduleLabel: Record<ModuleKey, string> = {
+  'b-door': 'Нижний с дверью',
+  'b-drawer': 'Нижний с ящиками',
+  'b-oven': 'Нижний под духовку',
+  'w-door': 'Верхний с дверью',
+  't-door': 'Высокий пенал',
+  't-oven': 'Пенал под духовку',
+  't-fridge': 'Пенал под холодильник',
+  dishwasher: 'ПММ · фасад',
+  open: 'Открытый модуль',
+  generic: 'Универсальный корпус',
+};
 
 function asBackMode(value: unknown): BackMode {
   return value === 'none' || value === 'overlay' || value === 'groove' ? value : 'groove';
@@ -54,15 +66,41 @@ function rowQuantity(value: unknown) {
   return Number.isFinite(quantity) ? Math.max(1, Math.min(999, Math.round(quantity))) : 1;
 }
 
+function defaultShelfCount(moduleKey: ModuleKey) {
+  if (moduleKey === 'b-door') return 1;
+  if (moduleKey === 'w-door' || moduleKey === 'open') return 2;
+  if (moduleKey === 't-door') return 4;
+  if (moduleKey === 't-oven') return 2;
+  if (moduleKey === 't-fridge') return 1;
+  return 0;
+}
+
+function hasFront(moduleKey: ModuleKey) {
+  return ['b-door', 'b-drawer', 'w-door', 't-door', 't-oven', 't-fridge', 'dishwasher'].includes(moduleKey);
+}
+
+function hasCarcass(moduleKey: ModuleKey) {
+  return moduleKey !== 'dishwasher';
+}
+
+function isHinged(moduleKey: ModuleKey) {
+  return ['b-door', 'w-door', 't-door', 't-oven'].includes(moduleKey);
+}
+
+function usesStretchers(moduleKey: ModuleKey) {
+  return ['b-door', 'b-drawer', 'b-oven'].includes(moduleKey);
+}
+
 export default function CabinetEditor({ projectId, currency, cabinets, priceBook, targetMarginBps, overheadBps, taxBps }: Props) {
   const first = cabinets[0];
   const firstConstruction = first?.construction_json ?? {};
   const firstMaterials = first?.material_refs_json ?? {};
   const firstHardware = first?.hardware_refs_json ?? {};
   const firstLegacyHardware = String(firstHardware.hardwareItemId ?? '');
+  const initialKey = ((first?.module_key as ModuleKey) ?? 'b-drawer');
 
   const [cabinetId, setCabinetId] = useState(first?.id ?? '');
-  const [moduleKey, setModuleKey] = useState<ModuleKey>((first?.module_key as ModuleKey) ?? 'b-drawer');
+  const [moduleKey, setModuleKey] = useState<ModuleKey>(initialKey);
   const [name, setName] = useState(first?.name ?? 'Шкаф с ящиками');
   const [quantity, setQuantity] = useState(rowQuantity(first?.quantity));
   const [width, setWidth] = useState(Number(first?.width_mm ?? 800));
@@ -71,10 +109,11 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
   const [thickness, setThickness] = useState(Number(firstConstruction.thicknessMm ?? 18));
   const [gap, setGap] = useState(Number(firstConstruction.gapMm ?? 2));
   const [drawers, setDrawers] = useState(Number(firstConstruction.drawers ?? 2));
-  const [doors, setDoors] = useState(Number(firstConstruction.doors ?? 1));
-  const [shelfCount, setShelfCount] = useState(Number(firstConstruction.shelfCount ?? (first?.module_key === 'b-door' ? 1 : 0)));
+  const [doors, setDoors] = useState(Number(firstConstruction.doors ?? (initialKey === 't-fridge' || initialKey === 't-oven' ? 2 : 1)));
+  const [shelfCount, setShelfCount] = useState(Number(firstConstruction.shelfCount ?? defaultShelfCount(initialKey)));
   const [stretcherDepth, setStretcherDepth] = useState(Number(firstConstruction.stretcherDepthMm ?? 100));
   const [shelfSetback, setShelfSetback] = useState(Number(firstConstruction.shelfSetbackMm ?? 20));
+  const [applianceOpeningHeight, setApplianceOpeningHeight] = useState(Number(firstConstruction.applianceOpeningHeightMm ?? 600));
   const [backMode, setBackMode] = useState<BackMode>(asBackMode(firstConstruction.backMode));
   const [backThickness, setBackThickness] = useState(Number(firstConstruction.backThicknessMm ?? 4));
   const [backInset, setBackInset] = useState(Number(firstConstruction.backInsetMm ?? 10));
@@ -85,8 +124,8 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
   const [frontItemId, setFrontItemId] = useState(String(firstMaterials.frontItemId ?? ''));
   const [backItemId, setBackItemId] = useState(String(firstMaterials.backItemId ?? ''));
   const [edgeItemId, setEdgeItemId] = useState(String(firstMaterials.edgeItemId ?? ''));
-  const [hingeItemId, setHingeItemId] = useState(String(firstHardware.hingeItemId ?? (first?.module_key === 'b-door' ? firstLegacyHardware : '')));
-  const [drawerItemId, setDrawerItemId] = useState(String(firstHardware.drawerItemId ?? (first?.module_key === 'b-drawer' ? firstLegacyHardware : '')));
+  const [hingeItemId, setHingeItemId] = useState(String(firstHardware.hingeItemId ?? (isHinged(initialKey) ? firstLegacyHardware : '')));
+  const [drawerItemId, setDrawerItemId] = useState(String(firstHardware.drawerItemId ?? (initialKey === 'b-drawer' ? firstLegacyHardware : '')));
   const [labourItemId, setLabourItemId] = useState(String(firstMaterials.labourItemId ?? ''));
 
   const preview = useMemo(() => calculateCabinetPreview({
@@ -101,7 +140,8 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     shelfCount,
     stretcherDepthMm: stretcherDepth,
     shelfSetbackMm: shelfSetback,
-    backMode,
+    applianceOpeningHeightMm: applianceOpeningHeight,
+    backMode: moduleKey === 'dishwasher' ? 'none' : backMode,
     backThicknessMm: backThickness,
     backInsetMm: backInset,
     backGrooveDepthMm: backGrooveDepth,
@@ -116,7 +156,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     labourHours,
   }, priceBook, { targetMarginBps, overheadBps, taxBps }), [
     moduleKey, width, height, depth, thickness, gap, drawers, doors, shelfCount,
-    stretcherDepth, shelfSetback, backMode, backThickness, backInset, backGrooveDepth,
+    stretcherDepth, shelfSetback, applianceOpeningHeight, backMode, backThickness, backInset, backGrooveDepth,
     frontEdgeIncluded, boardItemId, frontItemId, backItemId, edgeItemId, hingeItemId,
     drawerItemId, labourItemId, labourHours, priceBook, targetMarginBps, overheadBps, taxBps,
   ]);
@@ -147,10 +187,11 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     setThickness(Number(construction.thicknessMm ?? 18));
     setGap(Number(construction.gapMm ?? 2));
     setDrawers(Number(construction.drawers ?? 2));
-    setDoors(Number(construction.doors ?? 1));
-    setShelfCount(Number(construction.shelfCount ?? (key === 'b-door' ? 1 : 0)));
+    setDoors(Number(construction.doors ?? (key === 't-fridge' || key === 't-oven' ? 2 : 1)));
+    setShelfCount(Number(construction.shelfCount ?? defaultShelfCount(key)));
     setStretcherDepth(Number(construction.stretcherDepthMm ?? 100));
     setShelfSetback(Number(construction.shelfSetbackMm ?? 20));
+    setApplianceOpeningHeight(Number(construction.applianceOpeningHeightMm ?? 600));
     setBackMode(asBackMode(construction.backMode));
     setBackThickness(Number(construction.backThicknessMm ?? 4));
     setBackInset(Number(construction.backInsetMm ?? 10));
@@ -161,7 +202,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     setFrontItemId(String(materials.frontItemId ?? ''));
     setBackItemId(String(materials.backItemId ?? ''));
     setEdgeItemId(String(materials.edgeItemId ?? ''));
-    setHingeItemId(String(hardware.hingeItemId ?? (key === 'b-door' ? legacyHardware : '')));
+    setHingeItemId(String(hardware.hingeItemId ?? (isHinged(key) ? legacyHardware : '')));
     setDrawerItemId(String(hardware.drawerItemId ?? (key === 'b-drawer' ? legacyHardware : '')));
     setLabourItemId(String(materials.labourItemId ?? ''));
   }
@@ -181,6 +222,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     setShelfCount(0);
     setStretcherDepth(100);
     setShelfSetback(20);
+    setApplianceOpeningHeight(600);
     setBackMode('groove');
     setBackThickness(4);
     setBackInset(10);
@@ -201,6 +243,11 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
   const edges = byCategory(priceBook, 'edge');
   const hardware = byCategory(priceBook, 'hardware');
   const labour = byCategory(priceBook, 'labour');
+  const showCarcass = hasCarcass(moduleKey);
+  const showFront = hasFront(moduleKey);
+  const showDoors = ['b-door', 'w-door', 't-door', 't-fridge'].includes(moduleKey);
+  const showShelves = showCarcass && !['b-drawer', 'b-oven'].includes(moduleKey);
+  const showBack = showCarcass;
 
   return <div className="contentGrid">
     <section className="panel treePanel">
@@ -213,10 +260,11 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     <form action={saveCabinet} className="panel editorPanel">
       <input type="hidden" name="projectId" value={projectId}/>
       <input type="hidden" name="cabinetId" value={cabinetId}/>
-      <div className="panelHeader"><div><span className="eyebrow">{cabinetId ? 'РЕДАКТИРОВАНИЕ' : 'НОВЫЙ МОДУЛЬ'} · ENGINEERING 0.1.2</span><h2>{name}</h2></div><div className="topActions">{cabinetId ? <><button className="secondary" type="submit" formAction={duplicateCabinet}>Дублировать</button><button className="secondary" type="submit" formAction={deleteCabinet} onClick={(event) => { if (!window.confirm('Удалить этот модуль из текущего проекта? Выпущенные ранее предложения не изменятся.')) event.preventDefault(); }}>Удалить</button></> : null}<button className="primary" type="submit">Сохранить</button></div></div>
+      {moduleKey === 'dishwasher' ? <input type="hidden" name="backMode" value="none"/> : null}
+      <div className="panelHeader"><div><span className="eyebrow">{cabinetId ? 'РЕДАКТИРОВАНИЕ' : 'НОВЫЙ МОДУЛЬ'} · ENGINEERING 0.1.10</span><h2>{name}</h2></div><div className="topActions">{cabinetId ? <><button className="secondary" type="submit" formAction={duplicateCabinet}>Дублировать</button><button className="secondary" type="submit" formAction={deleteCabinet} onClick={(event) => { if (!window.confirm('Удалить этот модуль из текущего проекта? Выпущенные ранее предложения не изменятся.')) event.preventDefault(); }}>Удалить</button></> : null}<button className="primary" type="submit">Сохранить</button></div></div>
 
       <div className="formSection"><h3>Тип и размеры</h3><div className="fieldGrid">
-        <label>Тип<select name="moduleKey" value={moduleKey} onChange={(event) => setModuleKey(event.target.value as ModuleKey)}><option value="b-drawer">Нижний с ящиками</option><option value="b-door">Нижний с дверью</option><option value="generic">Универсальный корпус</option></select></label>
+        <label>Тип<select name="moduleKey" value={moduleKey} onChange={(event) => setModuleKey(event.target.value as ModuleKey)}>{Object.entries(moduleLabel).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
         <label>Название<input name="name" value={name} onChange={(event) => setName(event.target.value)}/></label>
         <label>Количество<input name="quantity" type="number" min="1" max="999" step="1" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))}/></label>
         <label>Толщина корпуса, мм<input name="thicknessMm" type="number" min="1" step="0.1" value={thickness} onChange={(event) => setThickness(Number(event.target.value))}/></label>
@@ -228,34 +276,35 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
       <div className="formSection"><h3>Конструкция</h3><div className="fieldGrid">
         <label>Зазор фасада, мм<input name="gapMm" type="number" min="0" step="0.5" value={gap} onChange={(event) => setGap(Number(event.target.value))}/></label>
         {moduleKey === 'b-drawer' ? <label>Ящиков<input name="drawers" type="number" min="1" max="8" value={drawers} onChange={(event) => setDrawers(Number(event.target.value))}/></label> : null}
-        {moduleKey === 'b-door' ? <label>Дверей<input name="doors" type="number" min="1" max="4" value={doors} onChange={(event) => setDoors(Number(event.target.value))}/></label> : null}
-        {moduleKey !== 'b-drawer' ? <label>Полок<input name="shelfCount" type="number" min="0" max="10" value={shelfCount} onChange={(event) => setShelfCount(Number(event.target.value))}/></label> : null}
-        {moduleKey !== 'generic' ? <label>Глубина царги, мм<input name="stretcherDepthMm" type="number" min="20" value={stretcherDepth} onChange={(event) => setStretcherDepth(Number(event.target.value))}/></label> : null}
-        {shelfCount > 0 ? <label>Отступ полки сзади, мм<input name="shelfSetbackMm" type="number" min="0" value={shelfSetback} onChange={(event) => setShelfSetback(Number(event.target.value))}/></label> : null}
-        {moduleKey !== 'generic' ? <label>Кромка фасада<select name="frontEdgeMode" value={frontEdgeIncluded ? 'included' : 'same-edge'} onChange={(event) => setFrontEdgeIncluded(event.target.value === 'included')}><option value="included">Входит в цену фасада</option><option value="same-edge">Считать той же кромкой</option></select></label> : null}
+        {showDoors ? <label>{moduleKey === 't-fridge' ? 'Фасадов по высоте' : 'Дверей'}<input name="doors" type="number" min="1" max="4" value={doors} onChange={(event) => setDoors(Number(event.target.value))}/></label> : null}
+        {showShelves ? <label>Полок / перегородок<input name="shelfCount" type="number" min="0" max="12" value={shelfCount} onChange={(event) => setShelfCount(Number(event.target.value))}/></label> : null}
+        {usesStretchers(moduleKey) ? <label>Глубина царги, мм<input name="stretcherDepthMm" type="number" min="20" value={stretcherDepth} onChange={(event) => setStretcherDepth(Number(event.target.value))}/></label> : null}
+        {showShelves && shelfCount > 0 ? <label>Отступ полки сзади, мм<input name="shelfSetbackMm" type="number" min="0" value={shelfSetback} onChange={(event) => setShelfSetback(Number(event.target.value))}/></label> : null}
+        {moduleKey === 't-oven' ? <label>Высота проёма духовки, мм<input name="applianceOpeningHeightMm" type="number" min="400" max={Math.max(400, height - 200)} value={applianceOpeningHeight} onChange={(event) => setApplianceOpeningHeight(Number(event.target.value))}/></label> : null}
+        {showFront ? <label>Кромка фасада<select name="frontEdgeMode" value={frontEdgeIncluded ? 'included' : 'same-edge'} onChange={(event) => setFrontEdgeIncluded(event.target.value === 'included')}><option value="included">Входит в цену фасада</option><option value="same-edge">Считать той же кромкой</option></select></label> : <input type="hidden" name="frontEdgeMode" value="included"/>}
         <label>Прямой труд, часов<input name="labourHours" type="number" step="0.1" min="0" value={labourHours} onChange={(event) => setLabourHours(Number(event.target.value))}/></label>
       </div></div>
 
-      <div className="formSection"><h3>Задняя стенка</h3><div className="fieldGrid">
+      {showBack ? <div className="formSection"><h3>Задняя стенка</h3><div className="fieldGrid">
         <label>Монтаж<select name="backMode" value={backMode} onChange={(event) => setBackMode(event.target.value as BackMode)}><option value="groove">В паз</option><option value="overlay">Накладная</option><option value="none">Без задней стенки</option></select></label>
         {backMode !== 'none' ? <label>Толщина, мм<input name="backThicknessMm" type="number" min="1" step="0.1" value={backThickness} onChange={(event) => setBackThickness(Number(event.target.value))}/></label> : null}
         {backMode === 'groove' ? <label>Отступ паза, мм<input name="backInsetMm" type="number" min="0" step="0.5" value={backInset} onChange={(event) => setBackInset(Number(event.target.value))}/></label> : null}
         {backMode === 'groove' ? <label>Глубина паза, мм<input name="backGrooveDepthMm" type="number" min="0" step="0.5" value={backGrooveDepth} onChange={(event) => setBackGrooveDepth(Number(event.target.value))}/></label> : null}
-      </div></div>
+      </div></div> : null}
 
       <div className="formSection"><h3>Материалы и фурнитура</h3><div className="fieldGrid two">
-        <PriceSelect name="boardItemId" label="Плита корпуса" value={boardItemId} setValue={setBoardItemId} items={boards}/>
-        {moduleKey !== 'generic' ? <PriceSelect name="frontItemId" label="Фасад" value={frontItemId} setValue={setFrontItemId} items={fronts}/> : null}
-        {backMode !== 'none' ? <PriceSelect name="backItemId" label="Задняя стенка" value={backItemId} setValue={setBackItemId} items={boards}/> : null}
+        {showCarcass ? <PriceSelect name="boardItemId" label="Плита корпуса" value={boardItemId} setValue={setBoardItemId} items={boards}/> : null}
+        {showFront ? <PriceSelect name="frontItemId" label="Фасад" value={frontItemId} setValue={setFrontItemId} items={fronts}/> : null}
+        {showBack && backMode !== 'none' ? <PriceSelect name="backItemId" label="Задняя стенка" value={backItemId} setValue={setBackItemId} items={boards}/> : null}
         <PriceSelect name="edgeItemId" label="Кромка" value={edgeItemId} setValue={setEdgeItemId} items={edges}/>
-        {moduleKey === 'b-door' ? <PriceSelect name="hingeItemId" label="Петля" value={hingeItemId} setValue={setHingeItemId} items={hardware}/> : null}
+        {isHinged(moduleKey) ? <PriceSelect name="hingeItemId" label="Петля" value={hingeItemId} setValue={setHingeItemId} items={hardware}/> : null}
         {moduleKey === 'b-drawer' ? <PriceSelect name="drawerItemId" label="Комплект ящика" value={drawerItemId} setValue={setDrawerItemId} items={hardware}/> : null}
         <PriceSelect name="labourItemId" label="Ставка труда" value={labourItemId} setValue={setLabourItemId} items={labour}/>
       </div></div>
 
       <div className="formSection"><h3>Деталировка на 1 шт.</h3><div className="tableWrap"><table><thead><tr><th>Деталь</th><th>Материал</th><th>Кол.</th><th>Размер, мм</th><th>Кромка</th></tr></thead><tbody>{preview.parts.map((part) => <tr key={part.key}><td><strong>{part.label}</strong></td><td>{roleLabel[part.materialRole] ?? part.materialRole}</td><td>{part.quantity}</td><td>{part.lengthMm.toFixed(1)} × {part.widthMm.toFixed(1)} × {part.thicknessMm.toFixed(1)}</td><td>{part.edgeLengthMm > 0 ? `${(part.edgeLengthMm / 1000).toFixed(2)} м/шт` : '—'}</td></tr>)}</tbody></table></div></div>
 
-      <div className="engineNote"><strong>Makster Engineering Core 0.1.2</strong><span>{preview.usage.partCount} деталей/шт · корпус {preview.usage.boardM2.toFixed(3)} м² · фасад {preview.usage.frontM2.toFixed(3)} м² · задняя стенка {preview.usage.backM2.toFixed(3)} м² · кромка {preview.usage.edgeM.toFixed(2)} м.</span>{normalizedQuantity > 1 ? <span>В проекте: {normalizedQuantity} одинаковых модулей. Итоговая стоимость умножается автоматически.</span> : null}</div>
+      <div className="engineNote"><strong>Makster Engineering Core 0.1.10</strong><span>{preview.usage.partCount} деталей/шт · корпус {preview.usage.boardM2.toFixed(3)} м² · фасад {preview.usage.frontM2.toFixed(3)} м² · задняя стенка {preview.usage.backM2.toFixed(3)} м² · кромка {preview.usage.edgeM.toFixed(2)} м.</span>{normalizedQuantity > 1 ? <span>В проекте: {normalizedQuantity} одинаковых модулей. Итоговая стоимость умножается автоматически.</span> : null}</div>
     </form>
 
     <aside className="panel costPanel">
@@ -279,7 +328,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
       {preview.hardware.length ? <div className="costRows"><div className="soft"><span>Фурнитура</span><strong>{preview.usage.hardwareQty} шт/компл.</strong></div>{preview.hardware.map((line) => <div key={line.key}><span>{line.label}<br/><small>{line.itemName ?? 'цена не выбрана'} · {line.quantity}</small></span><strong>{formatMinor(line.costMinor, currency)}</strong></div>)}</div> : null}
 
       {preview.warnings.length ? <div className="warningList"><strong>До полного расчёта нужно заполнить</strong>{preview.warnings.map((warning, index) => <span key={index}>• {warning}</span>)}</div> : <div className="notice success"><strong>Модуль рассчитан полностью.</strong></div>}
-      <div className="warningList"><strong>Допущения 0.1.2</strong>{preview.notes.map((note, index) => <span key={index}>• {note}</span>)}</div>
+      <div className="warningList"><strong>Допущения 0.1.10</strong>{preview.notes.map((note, index) => <span key={index}>• {note}</span>)}</div>
     </aside>
   </div>;
 }
