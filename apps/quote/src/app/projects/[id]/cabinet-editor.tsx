@@ -17,6 +17,7 @@ type CabinetRow = {
   width_mm: number | string;
   height_mm: number | string;
   depth_mm: number | string;
+  quantity: number | string;
   construction_json: Record<string, unknown>;
   material_refs_json: Record<string, unknown>;
   hardware_refs_json: Record<string, unknown>;
@@ -48,6 +49,11 @@ function safeBigInt(value: unknown) {
   }
 }
 
+function rowQuantity(value: unknown) {
+  const quantity = Number(value);
+  return Number.isFinite(quantity) ? Math.max(1, Math.min(999, Math.round(quantity))) : 1;
+}
+
 export default function CabinetEditor({ projectId, currency, cabinets, priceBook, targetMarginBps, overheadBps, taxBps }: Props) {
   const first = cabinets[0];
   const firstConstruction = first?.construction_json ?? {};
@@ -58,6 +64,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
   const [cabinetId, setCabinetId] = useState(first?.id ?? '');
   const [moduleKey, setModuleKey] = useState<ModuleKey>((first?.module_key as ModuleKey) ?? 'b-drawer');
   const [name, setName] = useState(first?.name ?? 'Шкаф с ящиками');
+  const [quantity, setQuantity] = useState(rowQuantity(first?.quantity));
   const [width, setWidth] = useState(Number(first?.width_mm ?? 800));
   const [height, setHeight] = useState(Number(first?.height_mm ?? 720));
   const [depth, setDepth] = useState(Number(first?.depth_mm ?? 560));
@@ -114,10 +121,14 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     drawerItemId, labourItemId, labourHours, priceBook, targetMarginBps, overheadBps, taxBps,
   ]);
 
-  const savedProject = useMemo(() => cabinets.reduce((totals, row) => ({
-    trueCost: totals.trueCost + safeBigInt(row.computed_cost_json?.trueCostMinor),
-    netSales: totals.netSales + safeBigInt(row.computed_cost_json?.netSalesMinor),
-  }), { trueCost: 0n, netSales: 0n }), [cabinets]);
+  const normalizedQuantity = rowQuantity(quantity);
+  const savedProject = useMemo(() => cabinets.reduce((totals, row) => {
+    const rowQty = BigInt(rowQuantity(row.quantity));
+    return {
+      trueCost: totals.trueCost + safeBigInt(row.computed_cost_json?.trueCostMinor) * rowQty,
+      netSales: totals.netSales + safeBigInt(row.computed_cost_json?.netSalesMinor) * rowQty,
+    };
+  }, { trueCost: 0n, netSales: 0n }), [cabinets]);
 
   function loadCabinet(row: CabinetRow) {
     const construction = row.construction_json ?? {};
@@ -129,6 +140,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     setCabinetId(row.id);
     setModuleKey(key);
     setName(row.name);
+    setQuantity(rowQuantity(row.quantity));
     setWidth(Number(row.width_mm));
     setHeight(Number(row.height_mm));
     setDepth(Number(row.depth_mm));
@@ -158,6 +170,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
     setCabinetId('');
     setModuleKey('b-drawer');
     setName('Шкаф с ящиками');
+    setQuantity(1);
     setWidth(800);
     setHeight(720);
     setDepth(560);
@@ -192,7 +205,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
   return <div className="contentGrid">
     <section className="panel treePanel">
       <div className="panelHeader"><span>Модули</span><button className="iconButton" type="button" onClick={newCabinet}>+</button></div>
-      {cabinets.map((row) => <button key={row.id} type="button" onClick={() => loadCabinet(row)} className={`cabinetRow ${row.id === cabinetId ? 'selected' : ''}`}><span>{row.module_key}</span><div><strong>{row.name}</strong><small>{Number(row.width_mm)} × {Number(row.height_mm)} × {Number(row.depth_mm)} мм</small></div></button>)}
+      {cabinets.map((row) => <button key={row.id} type="button" onClick={() => loadCabinet(row)} className={`cabinetRow ${row.id === cabinetId ? 'selected' : ''}`}><span>{row.module_key}</span><div><strong>{row.name}{rowQuantity(row.quantity) > 1 ? ` × ${rowQuantity(row.quantity)}` : ''}</strong><small>{Number(row.width_mm)} × {Number(row.height_mm)} × {Number(row.depth_mm)} мм</small></div></button>)}
       {!cabinets.length ? <div className="miniEmpty">Добавьте первый модуль.</div> : null}
       <div className="engineNote"><strong>Сохранено по проекту</strong><span>Себестоимость: {formatMinor(savedProject.trueCost, currency)}</span><span>Цена: {formatMinor(savedProject.netSales, currency)}</span></div>
     </section>
@@ -205,6 +218,7 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
       <div className="formSection"><h3>Тип и размеры</h3><div className="fieldGrid">
         <label>Тип<select name="moduleKey" value={moduleKey} onChange={(event) => setModuleKey(event.target.value as ModuleKey)}><option value="b-drawer">Нижний с ящиками</option><option value="b-door">Нижний с дверью</option><option value="generic">Универсальный корпус</option></select></label>
         <label>Название<input name="name" value={name} onChange={(event) => setName(event.target.value)}/></label>
+        <label>Количество<input name="quantity" type="number" min="1" max="999" step="1" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))}/></label>
         <label>Толщина корпуса, мм<input name="thicknessMm" type="number" min="1" step="0.1" value={thickness} onChange={(event) => setThickness(Number(event.target.value))}/></label>
         <label>Ширина, мм<input name="widthMm" type="number" min="1" value={width} onChange={(event) => setWidth(Number(event.target.value))}/></label>
         <label>Высота, мм<input name="heightMm" type="number" min="1" value={height} onChange={(event) => setHeight(Number(event.target.value))}/></label>
@@ -239,13 +253,13 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
         <PriceSelect name="labourItemId" label="Ставка труда" value={labourItemId} setValue={setLabourItemId} items={labour}/>
       </div></div>
 
-      <div className="formSection"><h3>Деталировка</h3><div className="tableWrap"><table><thead><tr><th>Деталь</th><th>Материал</th><th>Кол.</th><th>Размер, мм</th><th>Кромка</th></tr></thead><tbody>{preview.parts.map((part) => <tr key={part.key}><td><strong>{part.label}</strong></td><td>{roleLabel[part.materialRole] ?? part.materialRole}</td><td>{part.quantity}</td><td>{part.lengthMm.toFixed(1)} × {part.widthMm.toFixed(1)} × {part.thicknessMm.toFixed(1)}</td><td>{part.edgeLengthMm > 0 ? `${(part.edgeLengthMm / 1000).toFixed(2)} м/шт` : '—'}</td></tr>)}</tbody></table></div></div>
+      <div className="formSection"><h3>Деталировка на 1 шт.</h3><div className="tableWrap"><table><thead><tr><th>Деталь</th><th>Материал</th><th>Кол.</th><th>Размер, мм</th><th>Кромка</th></tr></thead><tbody>{preview.parts.map((part) => <tr key={part.key}><td><strong>{part.label}</strong></td><td>{roleLabel[part.materialRole] ?? part.materialRole}</td><td>{part.quantity}</td><td>{part.lengthMm.toFixed(1)} × {part.widthMm.toFixed(1)} × {part.thicknessMm.toFixed(1)}</td><td>{part.edgeLengthMm > 0 ? `${(part.edgeLengthMm / 1000).toFixed(2)} м/шт` : '—'}</td></tr>)}</tbody></table></div></div>
 
-      <div className="engineNote"><strong>Makster Engineering Core 0.1.2</strong><span>{preview.usage.partCount} деталей · корпус {preview.usage.boardM2.toFixed(3)} м² · фасад {preview.usage.frontM2.toFixed(3)} м² · задняя стенка {preview.usage.backM2.toFixed(3)} м² · кромка {preview.usage.edgeM.toFixed(2)} м.</span></div>
+      <div className="engineNote"><strong>Makster Engineering Core 0.1.2</strong><span>{preview.usage.partCount} деталей/шт · корпус {preview.usage.boardM2.toFixed(3)} м² · фасад {preview.usage.frontM2.toFixed(3)} м² · задняя стенка {preview.usage.backM2.toFixed(3)} м² · кромка {preview.usage.edgeM.toFixed(2)} м.</span>{normalizedQuantity > 1 ? <span>В проекте: {normalizedQuantity} одинаковых модулей. Итоговая стоимость умножается автоматически.</span> : null}</div>
     </form>
 
     <aside className="panel costPanel">
-      <div className="panelHeader"><span>Себестоимость модуля</span><span className="liveDot">LIVE</span></div>
+      <div className="panelHeader"><span>Себестоимость 1 шт.</span><span className="liveDot">LIVE</span></div>
       <div className="costRows">
         <div><span>Корпус</span><strong>{formatMinor(preview.detailCosts.carcass, currency)}</strong></div>
         <div><span>Задняя стенка</span><strong>{formatMinor(preview.detailCosts.back, currency)}</strong></div>
@@ -256,8 +270,9 @@ export default function CabinetEditor({ projectId, currency, cabinets, priceBook
         <div><span>Прямой труд</span><strong>{formatMinor(preview.detailCosts.labour, currency)}</strong></div>
         <div className="soft"><span>Накладные</span><strong>{formatMinor(preview.pricing.overheadMinor, currency)}</strong></div>
       </div>
-      <div className="trueCost"><span>Полная себестоимость</span><strong>{formatMinor(preview.pricing.trueCostMinor, currency)}</strong></div>
-      <div className="priceHero"><span>Рекомендуемая цена</span><strong>{formatMinor(preview.pricing.netSalesMinor, currency)}</strong><small>маржа {(preview.pricing.marginBps / 100).toFixed(2)}%</small></div>
+      <div className="trueCost"><span>Полная себестоимость 1 шт.</span><strong>{formatMinor(preview.pricing.trueCostMinor, currency)}</strong></div>
+      <div className="priceHero"><span>Рекомендуемая цена 1 шт.</span><strong>{formatMinor(preview.pricing.netSalesMinor, currency)}</strong><small>маржа {(preview.pricing.marginBps / 100).toFixed(2)}%</small></div>
+      {normalizedQuantity > 1 ? <div className="engineNote"><strong>Итого × {normalizedQuantity}</strong><span>Полная себестоимость: {formatMinor(preview.pricing.trueCostMinor * BigInt(normalizedQuantity), currency)}</span><span>Рекомендуемая цена: {formatMinor(preview.pricing.netSalesMinor * BigInt(normalizedQuantity), currency)}</span></div> : null}
 
       <div className="costRows"><div className="soft"><span>Операции</span><strong>{preview.operations.length}</strong></div>{preview.operations.map((operation) => <div key={operation.key}><span>{operation.label}<br/><small>{operation.quantity.toFixed(operation.unit === 'm' ? 2 : 0)} {operation.unit === 'm' ? 'м' : 'шт'}</small></span><strong>{formatMinor(operation.costMinor, currency)}</strong></div>)}</div>
 
