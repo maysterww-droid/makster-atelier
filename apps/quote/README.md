@@ -1,16 +1,16 @@
-# Makster Quote 0.1 — Client Delivery & Acceptance 0.1.5
+# Makster Quote 0.1 — Billing Foundation 0.1.6
 
 Makster Quote is the quotation-first product in the Makster ecosystem.
 
 ## Current milestone
 
-0.1.5 extends the immutable commercial document workflow with secure client delivery and a client-side acceptance flow.
+0.1.6 keeps the immutable commercial document workflow from 0.1.5 and adds the first production billing foundation for Lemon Squeezy.
 
 Implemented now:
 
 - Email/password auth and protected workshop onboarding
 - shared Makster projects, clients and revisions
-- workshop Price Book
+- workshop Price Book with manual entry, edit/deactivation and CSV import
 - deterministic Engineering Core for `B-Door`, `B-Drawer` and generic cabinets
 - part, edge, hardware, operation and labour costing
 - project-level delivery, installation and other fixed per-order costs
@@ -35,6 +35,14 @@ Implemented now:
 - quote status changes to `sent` only after a successful email-provider response
 - failed email delivery revokes the newly created email link
 - serialized terminal status transitions so concurrent client/staff actions cannot silently create opposing final states
+- client, project and quote pipeline workspaces with search/filter/follow-up cues
+- project duplication without copying old published quote versions
+- client/project archiving safeguards
+- Lemon Squeezy checkout creation for Founder / Pro / Workshop variants
+- verified Lemon Squeezy webhook endpoint using HMAC SHA-256 `X-Signature`
+- idempotent billing event journal and stale-event protection
+- subscription sync into `quote_subscriptions`
+- Customer Portal hand-off for existing subscriptions, preventing duplicate paid subscriptions
 - CI PDF smoke test that creates a real multilingual PDF buffer before the production build
 - explicit blocking of quote publication while cabinet pricing is incomplete
 
@@ -68,13 +76,23 @@ The server-side email adapter uses Resend. A successful send includes both a sec
 
 The UI intentionally disables live email sending when the server-only provider configuration is absent. Manual secure-link generation remains available independently of email.
 
+## Billing
+
+Billing uses Lemon Squeezy server-side only. Paid checkout URLs are created on demand for the configured Founder / Pro / Workshop variant IDs. The checkout carries `organization_id` and `user_id` as custom data so subscription webhooks can securely map the purchase back to the Makster workspace.
+
+`/api/webhooks/lemonsqueezy` is the only public billing endpoint. Every request must pass the Lemon Squeezy HMAC SHA-256 signature check before any database write. Billing writes use a server-only Supabase service-role client; authenticated browser users keep read-only access to their workspace subscription state.
+
+Webhook processing is idempotent through `quote_billing_events`. Provider update timestamps are compared so an older delayed event cannot overwrite newer subscription state. Existing subscribers are sent to the Lemon Squeezy Customer Portal instead of being allowed to create a second parallel subscription.
+
+The code is ready for Lemon Squeezy configuration, but commercial prices and actual variant IDs remain external configuration rather than being hardcoded into Makster Quote.
+
 ## Product boundary
 
 Makster Quote answers: **What will this furniture order really cost, how do we present it to the client, and did the client accept it?**
 
 CRM, warehouse, CNC release, production scheduling, accounting and AI Office remain in the wider Makster platform. Quote reuses shared business records instead of creating parallel clients/projects.
 
-The 0.1.5 client response is a recorded acceptance/rejection event, not a qualified electronic signature service. Legal e-signature/identity verification can be added later if required by the sales process or jurisdiction.
+The client response is a recorded acceptance/rejection event, not a qualified electronic signature service. Legal e-signature/identity verification can be added later if required by the sales process or jurisdiction.
 
 Exact CNC coordinates, connector drilling patterns, manufacturer-specific manufacturing profiles, nesting and machine-specific output remain later Makster Pro engineering layers.
 
@@ -84,15 +102,32 @@ Owner-testing UI is Russian-first. Client document/public acceptance language is
 
 ## Environment variables
 
-Use only the publishable Supabase key in browser-visible environment variables. Resend credentials remain server-only and must never use the `NEXT_PUBLIC_` prefix.
+Use only the publishable Supabase key in browser-visible environment variables. Supabase service-role, Resend and Lemon Squeezy credentials are server-only and must never use the `NEXT_PUBLIC_` prefix.
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_APP_URL=
 
 RESEND_API_KEY=
 QUOTE_EMAIL_FROM=
+
+LEMONSQUEEZY_API_KEY=
+LEMONSQUEEZY_WEBHOOK_SECRET=
+LEMONSQUEEZY_STORE_ID=
+LEMONSQUEEZY_TEST_MODE=true
+LEMONSQUEEZY_VARIANT_FOUNDER=
+LEMONSQUEEZY_VARIANT_PRO=
+LEMONSQUEEZY_VARIANT_WORKSHOP=
 ```
 
-`NEXT_PUBLIC_APP_URL` should be the canonical public application origin used in client quote links. If it is absent, the action can derive the origin from the incoming request/Vercel host, but an explicit production value is preferred.
+`NEXT_PUBLIC_APP_URL` should be the canonical public application origin used in client quote links and Lemon Squeezy post-checkout redirects.
+
+The Lemon Squeezy webhook callback is:
+
+```text
+<NEXT_PUBLIC_APP_URL>/api/webhooks/lemonsqueezy
+```
+
+Apply `20260911124000_makster_quote_billing_0_1_6.sql` before enabling live webhook delivery.
