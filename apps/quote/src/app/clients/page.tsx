@@ -5,7 +5,7 @@ import { createClient } from './actions';
 
 export const dynamic = 'force-dynamic';
 
-type Props = { searchParams: Promise<{ error?: string; created?: string }> };
+type Props = { searchParams: Promise<{ error?: string; created?: string; archived?: string }> };
 
 type ClientRow = {
   id: string;
@@ -64,6 +64,7 @@ export default async function ClientsPage({ searchParams }: Props) {
 
       <div className="pageContent">
         {query.created ? <div className="notice success">Клиент добавлен.</div> : null}
+        {query.archived ? <div className="notice success">Клиент перемещён в архив.</div> : null}
         {query.error ? <div className="notice error">Не удалось сохранить клиента ({query.error}).</div> : null}
 
         {canCreate ? (
@@ -92,14 +93,13 @@ export default async function ClientsPage({ searchParams }: Props) {
                 <tbody>
                   {rows.map((client) => {
                     const clientProjects = projectsByClient.get(client.id) ?? [];
-                    const latestProject = clientProjects[0];
                     return (
                       <tr key={client.id}>
                         <td><strong>{client.display_name}</strong></td>
                         <td>{client.email ?? '—'}{client.phone ? <><br />{client.phone}</> : null}</td>
                         <td>{addressLabel(client.address) || '—'}</td>
                         <td>{clientProjects.length}</td>
-                        <td>{latestProject ? <Link className="textLink" href={`/projects/${latestProject.id}`}>Открыть проект →</Link> : <span className="muted">нет проектов</span>}</td>
+                        <td><Link className="textLink" href={`/clients/${client.id}`}>Карточка →</Link></td>
                       </tr>
                     );
                   })}
