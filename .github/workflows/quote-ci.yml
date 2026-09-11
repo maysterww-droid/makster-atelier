@@ -30,3 +30,10 @@ jobs:
         run: npm run typecheck
       - name: Build
         run: npm run build
+      - name: Export generated lockfile
+        uses: actions/upload-artifact@v6
+        with:
+          name: quote-package-lock
+          path: apps/quote/package-lock.json
+          if-no-files-found: error
+          retention-days: 1
