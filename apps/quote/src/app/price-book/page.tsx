@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
 import { OPERATION_LABELS, type OperationKey } from '@/lib/engineering';
 import { requireWorkspace } from '@/lib/workspace';
-import { addPriceBookItem } from './actions';
+import { addPriceBookItem, deactivatePriceBookItem } from './actions';
 
 export const dynamic = 'force-dynamic';
 type Props = { searchParams: Promise<{ setup?: string; error?: string }> };
@@ -32,13 +32,14 @@ export default async function PriceBookPage({ searchParams }: Props) {
     supabase.from('quote_price_book_items').select('id, category, name, manufacturer, sku, unit, currency, purchase_price_minor, parameters_json, active').eq('organization_id', organization.id).eq('active', true).order('category').order('name'),
   ]);
   if (error) throw new Error(`Не удалось загрузить прайс-лист: ${error.message}`);
+  const canManage = ['owner', 'admin'].includes(role);
 
   return (
     <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan ?? 'free').toUpperCase()}>
-      <header className="topbar"><div><span className="eyebrow">PRICE BOOK · ENGINEERING 0.1.3</span><h1>Прайс-лист мастерской</h1></div><Link href="/" className="textLink">← Главная</Link></header>
+      <header className="topbar"><div><span className="eyebrow">PRICE BOOK · MAKSTER QUOTE</span><h1>Прайс-лист мастерской</h1></div><Link href="/" className="textLink">← Главная</Link></header>
       <div className="pageContent">
         {query.setup === '1' ? <div className="notice success"><strong>Мастерская создана.</strong> Теперь внесите реальные закупочные цены. Makster не будет подставлять демонстрационные стоимости в рабочие проекты.</div> : null}
-        {query.error ? <div className="notice error">Не удалось сохранить позицию. Для операции обязательно выберите её тип; для листа укажите размеры.</div> : null}
+        {query.error ? <div className="notice error">Не удалось выполнить действие с позицией прайс-листа. Проверьте данные и права доступа.</div> : null}
         <div className="twoColumnPage">
           <section className="panel formPanel">
             <div className="panelHeader"><div><h2>Добавить цену</h2><p className="muted">Операции типизируются один раз здесь, а потом Makster автоматически применяет их к деталировке.</p></div></div>
@@ -55,7 +56,7 @@ export default async function PriceBookPage({ searchParams }: Props) {
           </section>
           <section className="panel">
             <div className="panelHeader"><div><span className="eyebrow">АКТИВНЫЕ ЦЕНЫ</span><h2>{items?.length ?? 0} позиций</h2></div></div>
-            {!items?.length ? <div className="emptyState"><h3>Прайс-лист пока пуст</h3><p>Для полного расчёта добавьте корпус, фасад, заднюю стенку, кромку, фурнитуру, производственные операции, а при необходимости доставку и монтаж.</p></div> : <div className="priceList">{items.map((item) => <article className="priceRow" key={item.id}><div><span className="pill">{categoryName[item.category] ?? item.category}</span><strong>{item.name}</strong><small>{priceMeta(item)}</small></div><div className="priceValue"><strong>{formatMoney(item.purchase_price_minor, item.currency)}</strong><small>/ {unitName[item.unit] ?? item.unit}</small></div></article>)}</div>}
+            {!items?.length ? <div className="emptyState"><h3>Прайс-лист пока пуст</h3><p>Для полного расчёта добавьте корпус, фасад, заднюю стенку, кромку, фурнитуру, производственные операции, а при необходимости доставку и монтаж.</p></div> : <div className="priceList">{items.map((item) => <article className="priceRow" key={item.id}><div><span className="pill">{categoryName[item.category] ?? item.category}</span><strong>{item.name}</strong><small>{priceMeta(item)}</small></div><div className="priceValue"><strong>{formatMoney(item.purchase_price_minor, item.currency)}</strong><small>/ {unitName[item.unit] ?? item.unit}</small>{canManage ? <form action={deactivatePriceBookItem}><input type="hidden" name="itemId" value={item.id}/><button type="submit" className="textLink">Убрать</button></form> : null}</div></article>)}</div>}
           </section>
         </div>
       </div>
