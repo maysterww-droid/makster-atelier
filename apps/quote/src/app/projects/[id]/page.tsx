@@ -4,6 +4,7 @@ import { AppShell } from '@/components/app-shell';
 import { requireWorkspace } from '@/lib/workspace';
 import type { PriceBookItem } from '@/lib/engineering';
 import CabinetEditor from './cabinet-editor';
+import { ModuleOrderPanel } from './module-order-panel';
 import { ProjectCommercial } from './project-commercial';
 
 export const dynamic = 'force-dynamic';
@@ -53,8 +54,10 @@ export default async function ProjectPage({ params, searchParams }: Props) {
     {query.saved === 'module-added' ? <div className="pageContent compact"><div className="notice success"><strong>Модуль добавлен из библиотеки.</strong> Теперь выберите для него реальные материалы, кромку и фурнитуру из Price Book и сохраните расчёт.</div></div> : null}
     {query.saved === 'module-duplicated' ? <div className="pageContent compact"><div className="notice success">Модуль продублирован вместе с размерами, материалами, фурнитурой и рассчитанной стоимостью.</div></div> : null}
     {query.saved === 'module-deleted' ? <div className="pageContent compact"><div className="notice success">Модуль удалён из рабочего проекта. Ранее выпущенные предложения не изменены.</div></div> : null}
+    {query.saved === 'module-moved' ? <div className="pageContent compact"><div className="notice success">Порядок модулей обновлён. Следующая выпущенная версия предложения будет использовать новый порядок.</div></div> : null}
     {!priceBook?.length ? <div className="pageContent compact"><div className="notice warning">Прайс-лист пуст. <Link href="/price-book">Добавьте реальные цены</Link>, иначе стоимость останется нулевой.</div></div> : null}
     <ProjectCommercial projectId={project.id} clientId={project.client_id} settings={project.settings as Record<string, unknown>} clients={clientsResult.data ?? []} priceBook={(priceBook ?? []) as never[]} cabinets={(cabinets ?? []) as never[]} currency={project.currency} targetMarginBps={targetMarginBps} overheadBps={overheadBps} role={role} quoteHistory={quoteHistory} statusEvents={statusEvents}/>
+    <ModuleOrderPanel projectId={project.id} cabinets={(cabinets ?? []) as never[]}/>
     <CabinetEditor projectId={project.id} currency={project.currency} cabinets={(cabinets ?? []) as never[]} priceBook={(priceBook ?? []) as PriceBookItem[]} targetMarginBps={targetMarginBps} overheadBps={overheadBps} taxBps={taxBps}/>
   </AppShell>;
 }
