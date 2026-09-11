@@ -19,6 +19,13 @@
       "@/*": ["apps/quote/src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "apps/quote/src/app/page.tsx",
+    "apps/quote/src/components/marketing-sections.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "apps/quote/src/app/dashboard/**", "apps/quote/src/app/projects/**", "apps/quote/src/app/price-book/**", "apps/quote/src/lib/**"]
 }
