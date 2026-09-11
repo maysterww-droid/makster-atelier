@@ -37,6 +37,7 @@ export async function saveProjectCommercial(formData: FormData) {
   const newClientName = cleanText(formData, 'newClientName', 200);
   const newClientEmail = cleanText(formData, 'newClientEmail', 320) || null;
   const newClientPhone = cleanText(formData, 'newClientPhone', 80) || null;
+  const newClientAddress = cleanText(formData, 'newClientAddress', 500);
 
   let clientId: string | null = selectedClientId || project.client_id || null;
 
@@ -48,7 +49,7 @@ export async function saveProjectCommercial(formData: FormData) {
         display_name: newClientName,
         email: newClientEmail,
         phone: newClientPhone,
-        address: {},
+        address: newClientAddress ? { formatted: newClientAddress, street: newClientAddress } : {},
         created_by: userId,
       })
       .select('id')
@@ -72,23 +73,26 @@ export async function saveProjectCommercial(formData: FormData) {
     { field: 'otherItemId', category: 'other' },
   ] as const;
   const extraIds = requestedExtras.map(({ field }) => cleanText(formData, field, 80)).filter(Boolean);
-  const validIds = new Map<string, string>();
+  const validIds = new Map<string, { category: string; unit: string }>();
 
   if (extraIds.length) {
     const { data: extraRows, error: extrasError } = await supabase
       .from('quote_price_book_items')
-      .select('id, category')
+      .select('id, category, unit')
       .eq('organization_id', organization.id)
       .eq('active', true)
       .in('id', extraIds);
     if (extrasError) redirect(`/projects/${projectId}?error=extras`);
-    for (const row of extraRows ?? []) validIds.set(row.id, row.category);
+    for (const row of extraRows ?? []) validIds.set(row.id, { category: row.category, unit: row.unit });
   }
 
   const extraValues: Record<string, string> = {};
   for (const { field, category } of requestedExtras) {
     const id = cleanText(formData, field, 80);
-    if (id && validIds.get(id) !== category) redirect(`/projects/${projectId}?error=extras`);
+    const row = id ? validIds.get(id) : undefined;
+    if (id && (!row || row.category !== category || row.unit !== 'job')) {
+      redirect(`/projects/${projectId}?error=extras-unit`);
+    }
     extraValues[field] = id;
   }
 
