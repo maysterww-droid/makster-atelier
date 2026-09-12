@@ -1,92 +1,39 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
+import { getInterfaceLocale } from '@/lib/interface-locale';
+import { INTL_LOCALES, type Locale } from '@/lib/i18n';
 import { requireWorkspace } from '@/lib/workspace';
 import { archiveClient, updateClient } from '../actions';
 
-export const dynamic = 'force-dynamic';
-
-type Props = {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string }>;
+export const dynamic='force-dynamic';
+type Props={params:Promise<{id:string}>;searchParams:Promise<{error?:string;saved?:string}>};
+type Text={client:string;back:string;saved:string;genericError:string;errors:Record<string,string>;contacts:string;card:string;nameCompany:string;phone:string;address:string;save:string;projects:string;active:string;noActive:string;newQuote:string;open:string;noProjects:string;archive:string;archiveTitle:string;archiveHelp:string;archiveButton:string};
+const text:Record<Locale,Text>={
+  ru:{client:'КЛИЕНТ',back:'← Клиенты',saved:'Данные клиента сохранены.',genericError:'Не удалось выполнить действие',errors:{permission:'Недостаточно прав для изменения клиента.',name:'Укажите имя клиента или название компании.',update:'Не удалось сохранить изменения.',projects:'Не удалось проверить связанные проекты.','active-projects':'Нельзя архивировать клиента, пока у него есть активные проекты. Сначала архивируйте проекты.',archive:'Не удалось архивировать клиента.'},contacts:'КОНТАКТЫ',card:'Карточка клиента',nameCompany:'Имя / компания',phone:'Телефон',address:'Адрес',save:'Сохранить',projects:'ПРОЕКТЫ',active:'активных',noActive:'Нет активных проектов',newQuote:'Новый расчёт',open:'Открыть →',noProjects:'Этот клиент пока не привязан ни к одному активному проекту.',archive:'АРХИВ',archiveTitle:'Архивировать клиента',archiveHelp:'Опубликованные предложения останутся неизменяемыми. Архивация доступна только когда нет активных проектов.',archiveButton:'Архивировать клиента'},
+  en:{client:'CUSTOMER',back:'← Customers',saved:'Customer details saved.',genericError:'Could not complete the action',errors:{permission:'You do not have permission to edit this customer.',name:'Enter the customer name or company.',update:'Could not save changes.',projects:'Could not check related projects.','active-projects':'The customer cannot be archived while active projects exist. Archive the projects first.',archive:'Could not archive the customer.'},contacts:'CONTACTS',card:'Customer details',nameCompany:'Name / company',phone:'Phone',address:'Address',save:'Save',projects:'PROJECTS',active:'active',noActive:'No active projects',newQuote:'New quote',open:'Open →',noProjects:'This customer is not linked to any active project yet.',archive:'ARCHIVE',archiveTitle:'Archive customer',archiveHelp:'Published quotes remain immutable. Archiving is available only when there are no active projects.',archiveButton:'Archive customer'},
+  cs:{client:'KLIENT',back:'← Zákazníci',saved:'Údaje zákazníka byly uloženy.',genericError:'Akci se nepodařilo dokončit',errors:{permission:'Nemáte oprávnění upravovat zákazníka.',name:'Zadejte jméno zákazníka nebo název firmy.',update:'Změny se nepodařilo uložit.',projects:'Související projekty se nepodařilo ověřit.','active-projects':'Zákazníka nelze archivovat, dokud má aktivní projekty. Nejprve archivujte projekty.',archive:'Zákazníka se nepodařilo archivovat.'},contacts:'KONTAKTY',card:'Karta zákazníka',nameCompany:'Jméno / firma',phone:'Telefon',address:'Adresa',save:'Uložit',projects:'PROJEKTY',active:'aktivních',noActive:'Žádné aktivní projekty',newQuote:'Nová kalkulace',open:'Otevřít →',noProjects:'Tento zákazník zatím není připojen k žádnému aktivnímu projektu.',archive:'ARCHIV',archiveTitle:'Archivovat zákazníka',archiveHelp:'Vydané nabídky zůstanou neměnné. Archivovat lze jen bez aktivních projektů.',archiveButton:'Archivovat zákazníka'},
+  de:{client:'KUNDE',back:'← Kunden',saved:'Kundendaten gespeichert.',genericError:'Aktion konnte nicht ausgeführt werden',errors:{permission:'Keine Berechtigung zur Bearbeitung dieses Kunden.',name:'Kundenname oder Firma eingeben.',update:'Änderungen konnten nicht gespeichert werden.',projects:'Verknüpfte Projekte konnten nicht geprüft werden.','active-projects':'Der Kunde kann nicht archiviert werden, solange aktive Projekte existieren. Zuerst Projekte archivieren.',archive:'Kunde konnte nicht archiviert werden.'},contacts:'KONTAKTE',card:'Kundenkarte',nameCompany:'Name / Firma',phone:'Telefon',address:'Adresse',save:'Speichern',projects:'PROJEKTE',active:'aktiv',noActive:'Keine aktiven Projekte',newQuote:'Neue Kalkulation',open:'Öffnen →',noProjects:'Dieser Kunde ist noch keinem aktiven Projekt zugeordnet.',archive:'ARCHIV',archiveTitle:'Kunden archivieren',archiveHelp:'Veröffentlichte Angebote bleiben unverändert. Archivieren ist nur ohne aktive Projekte möglich.',archiveButton:'Kunden archivieren'},
+  pl:{client:'KLIENT',back:'← Klienci',saved:'Dane klienta zapisane.',genericError:'Nie udało się wykonać operacji',errors:{permission:'Brak uprawnień do edycji klienta.',name:'Podaj imię klienta lub nazwę firmy.',update:'Nie udało się zapisać zmian.',projects:'Nie udało się sprawdzić powiązanych projektów.','active-projects':'Nie można zarchiwizować klienta, gdy ma aktywne projekty. Najpierw zarchiwizuj projekty.',archive:'Nie udało się zarchiwizować klienta.'},contacts:'KONTAKTY',card:'Karta klienta',nameCompany:'Imię / firma',phone:'Telefon',address:'Adres',save:'Zapisz',projects:'PROJEKTY',active:'aktywnych',noActive:'Brak aktywnych projektów',newQuote:'Nowa wycena',open:'Otwórz →',noProjects:'Ten klient nie jest jeszcze powiązany z aktywnym projektem.',archive:'ARCHIWUM',archiveTitle:'Archiwizuj klienta',archiveHelp:'Opublikowane oferty pozostaną niezmienne. Archiwizacja jest dostępna tylko bez aktywnych projektów.',archiveButton:'Archiwizuj klienta'}
 };
+function addressLabel(value:unknown){if(!value||typeof value!=='object'||Array.isArray(value))return '';const address=value as Record<string,unknown>;return String(address.formatted??address.street??'').trim();}
 
-function addressLabel(value: unknown) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return '';
-  const address = value as Record<string, unknown>;
-  return String(address.formatted ?? address.street ?? '').trim();
-}
-
-const errorText: Record<string, string> = {
-  permission: 'Недостаточно прав для изменения клиента.',
-  name: 'Укажите имя клиента или название компании.',
-  update: 'Не удалось сохранить изменения.',
-  projects: 'Не удалось проверить связанные проекты.',
-  'active-projects': 'Нельзя архивировать клиента, пока у него есть активные проекты. Сначала архивируйте проекты.',
-  archive: 'Не удалось архивировать клиента.',
-};
-
-export default async function ClientPage({ params, searchParams }: Props) {
-  const { id } = await params;
-  const query = await searchParams;
-  const { supabase, organization, role } = await requireWorkspace();
-
-  const [clientResult, projectsResult, subscriptionResult] = await Promise.all([
-    supabase
-      .from('clients')
-      .select('id, display_name, email, phone, address, created_at, updated_at, archived_at')
-      .eq('id', id)
-      .eq('organization_id', organization.id)
-      .maybeSingle(),
-    supabase
-      .from('projects')
-      .select('id, name, status, updated_at')
-      .eq('organization_id', organization.id)
-      .eq('client_id', id)
-      .is('archived_at', null)
-      .order('updated_at', { ascending: false }),
-    supabase.from('quote_subscriptions').select('plan').eq('organization_id', organization.id).maybeSingle(),
+export default async function ClientPage({params,searchParams}:Props){
+  const {id}=await params; const query=await searchParams; const {supabase,organization,role}=await requireWorkspace(); const locale=await getInterfaceLocale(); const t=text[locale];
+  const [clientResult,projectsResult,subscriptionResult]=await Promise.all([
+    supabase.from('clients').select('id, display_name, email, phone, address, created_at, updated_at, archived_at').eq('id',id).eq('organization_id',organization.id).maybeSingle(),
+    supabase.from('projects').select('id, name, status, updated_at').eq('organization_id',organization.id).eq('client_id',id).is('archived_at',null).order('updated_at',{ascending:false}),
+    supabase.from('quote_subscriptions').select('plan').eq('organization_id',organization.id).maybeSingle(),
   ]);
-
-  if (clientResult.error || !clientResult.data || clientResult.data.archived_at) notFound();
-  if (projectsResult.error) throw new Error(`Не удалось загрузить проекты клиента: ${projectsResult.error.message}`);
-
-  const client = clientResult.data;
-  const projects = projectsResult.data ?? [];
-  const canEdit = ['owner', 'admin', 'sales', 'designer', 'technologist'].includes(role);
-
-  return (
-    <AppShell organizationName={organization.name} role={role} plan={(subscriptionResult.data?.plan ?? 'free').toUpperCase()}>
-      <header className="topbar">
-        <div><span className="eyebrow">КЛИЕНТ</span><h1>{client.display_name}</h1></div>
-        <Link href="/clients" className="textLink">← Клиенты</Link>
-      </header>
-
-      <div className="pageContent narrow">
-        {query.saved ? <div className="notice success">Данные клиента сохранены.</div> : null}
-        {query.error ? <div className="notice error">{errorText[query.error] ?? `Не удалось выполнить действие (${query.error}).`}</div> : null}
-
-        <section className="panel formPanel">
-          <div className="panelHeader"><div><span className="eyebrow">КОНТАКТЫ</span><h2>Карточка клиента</h2></div></div>
-          <form action={updateClient} className="stackForm padded">
-            <input type="hidden" name="clientId" value={client.id} />
-            <label>Имя / компания<input name="displayName" maxLength={200} required defaultValue={client.display_name} disabled={!canEdit} /></label>
-            <div className="formGrid2">
-              <label>Email<input name="email" type="email" maxLength={320} defaultValue={client.email ?? ''} disabled={!canEdit} /></label>
-              <label>Телефон<input name="phone" maxLength={80} defaultValue={client.phone ?? ''} disabled={!canEdit} /></label>
-            </div>
-            <label>Адрес<input name="address" maxLength={500} defaultValue={addressLabel(client.address)} disabled={!canEdit} /></label>
-            {canEdit ? <div className="formActions"><button type="submit" className="primary">Сохранить</button></div> : null}
-          </form>
-        </section>
-
-        <section className="panel">
-          <div className="panelHeader"><div><span className="eyebrow">ПРОЕКТЫ</span><h2>{projects.length ? `${projects.length} активных` : 'Нет активных проектов'}</h2></div><Link href="/projects/new" className="secondary linkButton">+ Новый расчёт</Link></div>
-          {projects.length ? <div className="priceList">{projects.map((project) => <article className="priceRow" key={project.id}><div><strong>{project.name}</strong><small>{project.status} · {new Intl.DateTimeFormat('ru-RU').format(new Date(project.updated_at))}</small></div><div className="priceValue"><Link href={`/projects/${project.id}`} className="textLink">Открыть →</Link></div></article>)}</div> : <div className="emptyState"><p>Этот клиент пока не привязан ни к одному активному проекту.</p></div>}
-        </section>
-
-        {canEdit ? <section className="panel formPanel"><div className="panelHeader"><div><span className="eyebrow">АРХИВ</span><h2>Архивировать клиента</h2><p className="muted">Опубликованные предложения останутся неизменяемыми. Архивация доступна только когда нет активных проектов.</p></div></div><form action={archiveClient} className="padded"><input type="hidden" name="clientId" value={client.id}/><button type="submit" className="secondary" disabled={projects.length > 0}>Архивировать клиента</button></form></section> : null}
-      </div>
-    </AppShell>
-  );
+  if(clientResult.error||!clientResult.data||clientResult.data.archived_at)notFound(); if(projectsResult.error)throw new Error(`Failed to load customer projects: ${projectsResult.error.message}`);
+  const client=clientResult.data; const projects=projectsResult.data??[]; const canEdit=['owner','admin','sales','designer','technologist'].includes(role);
+  return <AppShell organizationName={organization.name} role={role} plan={(subscriptionResult.data?.plan??'free').toUpperCase()}>
+    <header className="topbar"><div><span className="eyebrow">{t.client}</span><h1>{client.display_name}</h1></div><Link href="/clients" className="textLink">{t.back}</Link></header>
+    <div className="pageContent narrow">
+      {query.saved?<div className="notice success">{t.saved}</div>:null}{query.error?<div className="notice error">{t.errors[query.error]??`${t.genericError} (${query.error}).`}</div>:null}
+      <section className="panel formPanel"><div className="panelHeader"><div><span className="eyebrow">{t.contacts}</span><h2>{t.card}</h2></div></div><form action={updateClient} className="stackForm padded"><input type="hidden" name="clientId" value={client.id}/><label>{t.nameCompany}<input name="displayName" maxLength={200} required defaultValue={client.display_name} disabled={!canEdit}/></label><div className="formGrid2"><label>Email<input name="email" type="email" maxLength={320} defaultValue={client.email??''} disabled={!canEdit}/></label><label>{t.phone}<input name="phone" maxLength={80} defaultValue={client.phone??''} disabled={!canEdit}/></label></div><label>{t.address}<input name="address" maxLength={500} defaultValue={addressLabel(client.address)} disabled={!canEdit}/></label>{canEdit?<div className="formActions"><button type="submit" className="primary">{t.save}</button></div>:null}</form></section>
+      <section className="panel"><div className="panelHeader"><div><span className="eyebrow">{t.projects}</span><h2>{projects.length?`${projects.length} ${t.active}`:t.noActive}</h2></div><Link href="/projects/new" className="secondary linkButton">+ {t.newQuote}</Link></div>{projects.length?<div className="priceList">{projects.map((project)=><article className="priceRow" key={project.id}><div><strong>{project.name}</strong><small>{project.status} · {new Intl.DateTimeFormat(INTL_LOCALES[locale]).format(new Date(project.updated_at))}</small></div><div className="priceValue"><Link href={`/projects/${project.id}`} className="textLink">{t.open}</Link></div></article>)}</div>:<div className="emptyState"><p>{t.noProjects}</p></div>}</section>
+      {canEdit?<section className="panel formPanel"><div className="panelHeader"><div><span className="eyebrow">{t.archive}</span><h2>{t.archiveTitle}</h2><p className="muted">{t.archiveHelp}</p></div></div><form action={archiveClient} className="padded"><input type="hidden" name="clientId" value={client.id}/><button type="submit" className="secondary" disabled={projects.length>0}>{t.archiveButton}</button></form></section>:null}
+    </div>
+  </AppShell>;
 }
