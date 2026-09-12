@@ -29,10 +29,11 @@ export default async function QuotePage({params}:Props){
   const [{data:project,error:projectError},{data:cabinets,error:cabinetsError},{data:priceBook,error:priceError}]=await Promise.all([
     supabase.from('projects').select('id, name, currency, client_id, settings, created_at').eq('id',id).eq('organization_id',organization.id).maybeSingle(),
     supabase.from('quote_cabinets').select('id, name, width_mm, height_mm, depth_mm, quantity, computed_cost_json').eq('project_id',id).eq('organization_id',organization.id).order('sort_order').order('created_at'),
-    supabase.from('quote_price_book_items').select('id, category, name, unit, purchase_price_minor').eq('organization_id',organization.id).eq('active',true),
+    supabase.from('quote_price_book_items').select('id, category, name, unit, currency, purchase_price_minor').eq('organization_id',organization.id).eq('active',true),
   ]);
   if(projectError||!project)notFound(); if(cabinetsError||priceError)throw new Error('Не удалось сформировать предложение.');
-  const commercial=readProjectCommercialSettings(project.settings); const measured=calculateMeasuredExtras(readMeasuredExtraSettings(project.settings),priceBook??[]); const locale=commercial.documentLocale; const t=labels[locale]??labels.ru; const rows=priceBook??[];
+  const rows=(priceBook??[]).filter((item)=>item.currency===project.currency);
+  const commercial=readProjectCommercialSettings(project.settings); const measured=calculateMeasuredExtras(readMeasuredExtraSettings(project.settings),rows); const locale=commercial.documentLocale; const t=labels[locale]??labels.ru;
   const selected=(itemId:string,category:string)=>rows.find((item)=>item.id===itemId&&item.category===category&&item.unit==='job');
   const delivery=selected(commercial.deliveryItemId,'delivery'); const installation=selected(commercial.installationItemId,'installation'); const other=selected(commercial.otherItemId,'other');
   const missingFixedExtra=[{id:commercial.deliveryItemId,item:delivery},{id:commercial.installationItemId,item:installation},{id:commercial.otherItemId,item:other}].some(({id:itemId,item})=>Boolean(itemId)&&!item);
