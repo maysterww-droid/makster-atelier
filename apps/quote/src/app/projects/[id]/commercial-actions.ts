@@ -43,7 +43,7 @@ export async function saveProjectCommercial(formData: FormData) {
     .eq('id', projectId)
     .eq('organization_id', organization.id)
     .maybeSingle();
-  if (projectError || !project) redirect('/?error=project');
+  if (projectError || !project) redirect('/dashboard?error=project');
 
   const rootSettings = record(project.settings);
   const currentQuoteCommercial = record(rootSettings.quoteCommercial);

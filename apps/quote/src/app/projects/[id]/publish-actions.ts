@@ -95,7 +95,7 @@ export async function publishCommercialQuote(formData: FormData) {
     .eq('id', projectId)
     .eq('organization_id', organization.id)
     .maybeSingle();
-  if (projectError || !project) redirect('/?error=project');
+  if (projectError || !project) redirect('/dashboard?error=project');
   if (!project.client_id) redirect(`/projects/${projectId}?error=publish-client`);
 
   const [clientResult, cabinetsResult, priceResult] = await Promise.all([

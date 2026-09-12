@@ -46,7 +46,7 @@ export default async function AnalyticsPage(){
   for(const quote of activeOpen.filter((item)=>item.currency===organization.currency)){const age=daysBetween(contactAnchor(quote),now);const bucket=age<3?ageBuckets[0]:age<8?ageBuckets[1]:age<15?ageBuckets[2]:ageBuckets[3];bucket.count+=1;bucket.amount+=minorFromUnknown(quote.total_amount_minor);}
 
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan??'free').toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">SALES ANALYTICS · MQ 0.1.15</span><h1>{m.title}</h1></div><div className="topActions"><Link href="/quotes" className="secondary linkButton">{m.quotes}</Link><Link href="/" className="textLink">{m.back}</Link></div></header>
+    <header className="topbar"><div><span className="eyebrow">SALES ANALYTICS · MQ 0.1.15</span><h1>{m.title}</h1></div><div className="topActions"><Link href="/quotes" className="secondary linkButton">{m.quotes}</Link><Link href="/dashboard" className="textLink">{m.back}</Link></div></header>
     <div className="pageContent">
       <section className="metricGrid">
         <article className="metricCard"><span>{m.conversion}</span><strong>{conversion}%</strong><small>{accepted.length} {m.accepted} · {rejected.length} {m.rejected}</small></article>

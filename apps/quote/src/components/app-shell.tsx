@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { LocaleSwitcher } from './locale-switcher';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import { getMessages } from '@/lib/i18n';
+import { MaksterQuoteLogo } from './brand-logo';
 
 type Props = {
   organizationName: string;
@@ -19,13 +20,12 @@ export async function AppShell({ organizationName, role, plan = 'FREE', children
   return (
     <main className="shell">
       <aside className="sidebar">
-        <Link href="/" className="brand linkReset">
-          <span className="brandMark">M</span>
-          <span><strong>Makster</strong><small>Quote</small></span>
+        <Link href="/dashboard" className="brand linkReset">
+          <MaksterQuoteLogo variant="light" />
         </Link>
         <div className="workspaceName"><span>{m.workspace}</span><strong>{organizationName}</strong></div>
         <nav>
-          <Link className="navItem" href="/">{m.dashboard}</Link>
+          <Link className="navItem" href="/dashboard">{m.dashboard}</Link>
           <Link className="navItem" href="/projects">{m.projects}</Link>
           <Link className="navItem" href="/projects/new">{m.newQuote}</Link>
           <Link className="navItem" href="/quotes">{m.quotes}</Link>

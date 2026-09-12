@@ -161,7 +161,7 @@ export async function addPriceBookItem(formData: FormData) {
 
   if (error) redirect('/price-book?error=create');
   revalidatePath('/price-book');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
 }
 
 export async function importPriceBookCsv(formData: FormData) {
@@ -247,7 +247,7 @@ export async function importPriceBookCsv(formData: FormData) {
   if (error) redirect('/price-book?error=import-write');
 
   revalidatePath('/price-book');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
   redirect(`/price-book?imported=${insertRows.length}`);
 }
 
@@ -287,7 +287,7 @@ export async function updatePriceBookItem(formData: FormData) {
   if (error || !updated) redirect(`/price-book/${itemId}?error=update`);
   revalidatePath('/price-book');
   revalidatePath(`/price-book/${itemId}`);
-  revalidatePath('/');
+  revalidatePath('/dashboard');
   redirect('/price-book');
 }
 
@@ -307,5 +307,5 @@ export async function deactivatePriceBookItem(formData: FormData) {
 
   if (error) redirect('/price-book?error=deactivate');
   revalidatePath('/price-book');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
 }

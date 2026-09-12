@@ -75,6 +75,6 @@ export async function addPresetToProject(formData: FormData) {
     computed_cost_json:costPreviewToJson(preview), engine_version:'mq-0.1.11-engineering', created_by:userId, created_at:now, updated_at:now,
   });
   if (error) redirect(`/library?project=${projectId}&error=add`);
-  revalidatePath(`/projects/${projectId}`); revalidatePath('/');
+  revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard');
   redirect(`/projects/${projectId}?saved=module-added`);
 }

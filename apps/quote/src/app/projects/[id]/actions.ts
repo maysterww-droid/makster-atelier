@@ -29,7 +29,7 @@ export async function saveCabinet(formData:FormData){
     supabase.from('quote_price_book_items').select('id, category, name, unit, currency, purchase_price_minor, parameters_json').eq('organization_id',organization.id).eq('active',true),
     cabinetId ? supabase.from('quote_cabinets').select('construction_json').eq('id',cabinetId).eq('project_id',projectId).eq('organization_id',organization.id).maybeSingle() : Promise.resolve({data:null,error:null}),
   ]);
-  if(projectError||!project)redirect('/?error=project'); if(priceError)redirect(`/projects/${projectId}?error=pricebook`); if(existingError)redirect(`/projects/${projectId}?error=module-source`);
+  if(projectError||!project)redirect('/dashboard?error=project'); if(priceError)redirect(`/projects/${projectId}?error=pricebook`); if(existingError)redirect(`/projects/${projectId}?error=module-source`);
   const projectPriceBook=(priceBook??[]).filter((item)=>item.currency===project.currency) as PriceBookItem[];
   const existingConstruction=record(existing?.construction_json);
   const explicitFrontWidth=formData.has('frontWidthMm')?numberField(formData,'frontWidthMm',0):Number(existingConstruction.frontWidthMm??0);
@@ -53,7 +53,7 @@ export async function saveCabinet(formData:FormData){
     material_refs_json:{boardItemId:input.boardItemId??null,frontItemId:input.frontItemId??null,backItemId:input.backItemId??null,edgeItemId:input.edgeItemId??null,labourItemId:input.labourItemId??null},hardware_refs_json:{hingeItemId:input.hingeItemId??null,drawerItemId:input.drawerItemId??null},
     computed_parts_json:{usage:preview.usage,parts:preview.parts,hardware:preview.hardware.map((line)=>({...line,costMinor:line.costMinor.toString()})),operations:preview.operations.map((line)=>({...line,costMinor:line.costMinor.toString()})),notes:preview.notes},computed_cost_json:costPreviewToJson(preview),engine_version:'mq-0.1.11-engineering',created_by:userId,updated_at:new Date().toISOString()};
   const result=cabinetId?await supabase.from('quote_cabinets').update(payload).eq('id',cabinetId).eq('project_id',projectId).eq('organization_id',organization.id):await supabase.from('quote_cabinets').insert(payload);
-  if(result.error)redirect(`/projects/${projectId}?error=save`); revalidatePath(`/projects/${projectId}`); revalidatePath('/');
+  if(result.error)redirect(`/projects/${projectId}?error=save`); revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard');
 }
 
 export async function duplicateCabinet(formData:FormData){
@@ -62,7 +62,7 @@ export async function duplicateCabinet(formData:FormData){
   const {data:source,error}=await supabase.from('quote_cabinets').select('project_revision_id, module_key, name, sort_order, width_mm, height_mm, depth_mm, quantity, construction_json, material_refs_json, hardware_refs_json, computed_parts_json, computed_cost_json, engine_version').eq('id',cabinetId).eq('project_id',projectId).eq('organization_id',organization.id).maybeSingle();
   if(error||!source)redirect(`/projects/${projectId}?error=module-source`);
   const {error:insertError}=await supabase.from('quote_cabinets').insert({organization_id:organization.id,project_id:projectId,project_revision_id:source.project_revision_id,module_key:source.module_key,name:`${source.name} — копия`.slice(0,200),sort_order:Number(source.sort_order??0)+1,width_mm:source.width_mm,height_mm:source.height_mm,depth_mm:source.depth_mm,quantity:source.quantity,construction_json:source.construction_json,material_refs_json:source.material_refs_json,hardware_refs_json:source.hardware_refs_json,computed_parts_json:source.computed_parts_json,computed_cost_json:source.computed_cost_json,engine_version:source.engine_version,created_by:userId,updated_at:new Date().toISOString()});
-  if(insertError)redirect(`/projects/${projectId}?error=module-duplicate`); revalidatePath(`/projects/${projectId}`); revalidatePath('/'); redirect(`/projects/${projectId}?saved=module-duplicated`);
+  if(insertError)redirect(`/projects/${projectId}?error=module-duplicate`); revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard'); redirect(`/projects/${projectId}?saved=module-duplicated`);
 }
 
 export async function moveCabinet(formData:FormData){
@@ -72,10 +72,10 @@ export async function moveCabinet(formData:FormData){
   const currentIndex=rows.findIndex((row)=>row.id===cabinetId); if(currentIndex<0)redirect(`/projects/${projectId}?error=module-order`); const targetIndex=direction==='up'?currentIndex-1:currentIndex+1; if(targetIndex<0||targetIndex>=rows.length)redirect(`/projects/${projectId}?saved=module-order-unchanged`);
   const ordered=[...rows]; [ordered[currentIndex],ordered[targetIndex]]=[ordered[targetIndex],ordered[currentIndex]]; const now=new Date().toISOString();
   const results=await Promise.all(ordered.map((row,index)=>supabase.from('quote_cabinets').update({sort_order:index*10,updated_at:now}).eq('id',row.id).eq('project_id',projectId).eq('organization_id',organization.id))); if(results.some((result)=>result.error))redirect(`/projects/${projectId}?error=module-order`);
-  revalidatePath(`/projects/${projectId}`); revalidatePath('/'); redirect(`/projects/${projectId}?saved=module-moved`);
+  revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard'); redirect(`/projects/${projectId}?saved=module-moved`);
 }
 
 export async function deleteCabinet(formData:FormData){
   const {supabase,organization,role}=await requireWorkspace(); const projectId=idField(formData,'projectId'); const cabinetId=idField(formData,'cabinetId'); if(!projectId||!cabinetId)redirect('/projects?error=module'); if(!cabinetRoles.has(role))redirect(`/projects/${projectId}?error=permission`);
-  const {error}=await supabase.from('quote_cabinets').delete().eq('id',cabinetId).eq('project_id',projectId).eq('organization_id',organization.id); if(error)redirect(`/projects/${projectId}?error=module-delete`); revalidatePath(`/projects/${projectId}`); revalidatePath('/'); redirect(`/projects/${projectId}?saved=module-deleted`);
+  const {error}=await supabase.from('quote_cabinets').delete().eq('id',cabinetId).eq('project_id',projectId).eq('organization_id',organization.id); if(error)redirect(`/projects/${projectId}?error=module-delete`); revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard'); redirect(`/projects/${projectId}?saved=module-deleted`);
 }

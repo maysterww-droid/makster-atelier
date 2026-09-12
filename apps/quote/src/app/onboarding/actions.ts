@@ -10,7 +10,7 @@ const allowedTimezones = new Set(['Europe/Prague', 'Europe/Berlin', 'Europe/Wars
 export async function createWorkspace(formData: FormData) {
   const { supabase, userId } = await requireUser();
   const existing = await findActiveMembership(supabase, userId);
-  if (existing) redirect('/');
+  if (existing) redirect('/dashboard');
 
   const name = String(formData.get('name') ?? '').trim().slice(0, 160);
   const countryCode = String(formData.get('countryCode') ?? 'CZ').trim().toUpperCase();

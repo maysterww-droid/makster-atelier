@@ -22,7 +22,7 @@ export default async function PricingSettingsPage({ searchParams }: Props) {
   const errorText:Record<string,string>={permission:m.ownerAdminOnly,margin:m.targetMargin,'minimum-margin':m.minimumMargin,'minimum-above-target':`${m.minimumMargin} > ${m.targetMargin}`,overhead:m.overhead,save:m.billingError};
 
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan??'free').toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">PRICING ENGINE · MAKSTER QUOTE</span><h1>{m.pricingTitle}</h1></div><Link href="/" className="textLink">{m.back}</Link></header>
+    <header className="topbar"><div><span className="eyebrow">PRICING ENGINE · MAKSTER QUOTE</span><h1>{m.pricingTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       {query.saved==='1'?<div className="notice success"><strong>{m.pricingSaved}</strong> {m.pricingUpdated}</div>:null}
       {query.error?<div className="notice error">{errorText[query.error]??query.error}</div>:null}

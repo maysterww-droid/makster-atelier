@@ -37,6 +37,6 @@ export async function saveQuoteBrand(formData: FormData) {
 
   if (error) redirect('/settings/quote?error=save');
   revalidatePath('/settings/quote');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
   redirect('/settings/quote?saved=1');
 }
