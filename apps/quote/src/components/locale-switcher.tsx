@@ -1,9 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { INTERFACE_LOCALE_COOKIE } from '@/lib/interface-locale';
 import type { Locale } from '@/lib/i18n';
 
+const COOKIE_NAME = 'mq_locale';
 const options: Array<{ value: Locale; label: string }> = [
   { value: 'ru', label: 'Русский' },
   { value: 'en', label: 'English' },
@@ -19,7 +19,7 @@ export function LocaleSwitcher({ locale, label }: { locale: Locale; label: strin
     <select
       value={locale}
       onChange={(event) => {
-        document.cookie = `${INTERFACE_LOCALE_COOKIE}=${event.target.value}; path=/; max-age=31536000; samesite=lax`;
+        document.cookie = `${COOKIE_NAME}=${event.target.value}; path=/; max-age=31536000; samesite=lax`;
         router.refresh();
       }}
     >
