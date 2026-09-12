@@ -52,7 +52,7 @@ export async function duplicateProject(formData: FormData) {
   const snapshot = {
     source: 'makster-quote-duplicate',
     duplicatedFromProjectId: sourceProjectId,
-    quoteVersion: '0.1.7',
+    quoteVersion: '0.1.15',
     cabinets: [],
     commercial: { currency: source.currency },
     createdAt: now,
