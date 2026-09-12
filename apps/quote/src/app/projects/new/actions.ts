@@ -5,6 +5,7 @@ import { requireWorkspace } from '@/lib/workspace';
 
 const allowedTypes = new Set(['kitchen', 'wardrobe', 'cabinet', 'sideboard', 'built_in', 'mixed']);
 const projectRoles = new Set(['owner', 'admin', 'sales', 'designer', 'technologist']);
+const allowedCurrencies = new Set(['CZK', 'EUR', 'PLN', 'USD']);
 
 export async function createProject(formData: FormData) {
   const { supabase, organization, role } = await requireWorkspace();
@@ -13,15 +14,16 @@ export async function createProject(formData: FormData) {
   const name = String(formData.get('name') ?? '').trim();
   const requestedType = String(formData.get('projectType') ?? 'kitchen');
   const projectType = allowedTypes.has(requestedType) ? requestedType : 'mixed';
-  const currency = String(formData.get('currency') ?? organization.currency).trim().toUpperCase();
+  const requestedCurrency = String(formData.get('currency') ?? organization.currency).trim().toUpperCase();
+  const currency = allowedCurrencies.has(requestedCurrency) ? requestedCurrency : '';
 
   if (!name) redirect('/projects/new?error=name');
-  if (!/^[A-Z]{3}$/.test(currency)) redirect('/projects/new?error=currency');
+  if (!currency) redirect('/projects/new?error=currency');
 
   const projectId = crypto.randomUUID();
   const snapshot = {
     source: 'makster-quote',
-    quoteVersion: '0.1.7',
+    quoteVersion: '0.1.15',
     cabinets: [],
     commercial: { currency },
     createdAt: new Date().toISOString(),
