@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { LocaleSwitcher } from './locale-switcher';
+import { getInterfaceLocale } from '@/lib/interface-locale';
+import { getMessages } from '@/lib/i18n';
 
 type Props = {
   organizationName: string;
@@ -8,8 +11,10 @@ type Props = {
   children: ReactNode;
 };
 
-export function AppShell({ organizationName, role, plan = 'FREE', children }: Props) {
+export async function AppShell({ organizationName, role, plan = 'FREE', children }: Props) {
   const canManageSystem = role === 'owner' || role === 'admin';
+  const locale = await getInterfaceLocale();
+  const m = getMessages(locale);
 
   return (
     <main className="shell">
@@ -18,24 +23,25 @@ export function AppShell({ organizationName, role, plan = 'FREE', children }: Pr
           <span className="brandMark">M</span>
           <span><strong>Makster</strong><small>Quote</small></span>
         </Link>
-        <div className="workspaceName"><span>Мастерская</span><strong>{organizationName}</strong></div>
+        <div className="workspaceName"><span>{m.workspace}</span><strong>{organizationName}</strong></div>
         <nav>
-          <Link className="navItem" href="/">Главная</Link>
-          <Link className="navItem" href="/projects">Проекты</Link>
-          <Link className="navItem" href="/projects/new">Новый расчёт</Link>
-          <Link className="navItem" href="/quotes">Предложения</Link>
-          <Link className="navItem" href="/analytics">Аналитика</Link>
-          <Link className="navItem" href="/clients">Клиенты</Link>
-          <Link className="navItem" href="/price-book">Прайс-лист</Link>
-          <Link className="navItem" href="/library">Библиотека модулей</Link>
-          <span className="navItem disabled">Фурнитура</span>
-          <Link className="navItem" href="/settings/pricing">Маржа и накладные</Link>
-          <Link className="navItem" href="/settings/quote">Документы / реквизиты</Link>
-          <Link className="navItem" href="/settings/billing">Тариф и оплата</Link>
-          {canManageSystem ? <Link className="navItem" href="/settings/readiness">Готовность системы</Link> : null}
+          <Link className="navItem" href="/">{m.dashboard}</Link>
+          <Link className="navItem" href="/projects">{m.projects}</Link>
+          <Link className="navItem" href="/projects/new">{m.newQuote}</Link>
+          <Link className="navItem" href="/quotes">{m.quotes}</Link>
+          <Link className="navItem" href="/analytics">{m.analytics}</Link>
+          <Link className="navItem" href="/clients">{m.customers}</Link>
+          <Link className="navItem" href="/price-book">{m.priceBook}</Link>
+          <Link className="navItem" href="/library">{m.cabinetLibrary}</Link>
+          <span className="navItem disabled">{m.hardware}</span>
+          <Link className="navItem" href="/settings/pricing">{m.pricingSettings}</Link>
+          <Link className="navItem" href="/settings/quote">{m.documentSettings}</Link>
+          <Link className="navItem" href="/settings/billing">{m.billing}</Link>
+          {canManageSystem ? <Link className="navItem" href="/settings/readiness">{m.readiness}</Link> : null}
         </nav>
-        <div className="planCard"><span>Тариф</span><strong>{plan}</strong><small>{role}</small></div>
-        <form action="/auth/signout" method="post"><button className="navItem signOut" type="submit">Выйти</button></form>
+        <LocaleSwitcher locale={locale} label={m.interfaceLanguage}/>
+        <div className="planCard"><span>{m.plan}</span><strong>{plan}</strong><small>{role}</small></div>
+        <form action="/auth/signout" method="post"><button className="navItem signOut" type="submit">{m.signOut}</button></form>
       </aside>
       <section className="workspace">{children}</section>
     </main>
