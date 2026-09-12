@@ -12,6 +12,7 @@ const categories: Array<[string,string]> = [
   ['worktop','Столешница'],['plinth','Цоколь'],['filler','Добор / фальшпанель'],['decor','Декоративная боковина'],['delivery','Доставка'],['installation','Монтаж'],['overhead','Накладные'],['other','Прочее'],
 ];
 const units: Array<[string,string]> = [['sheet','Лист'],['m2','м²'],['m','метр'],['pcs','штука'],['set','комплект'],['hour','час'],['job','заказ']];
+const currencies = ['CZK','EUR','PLN','USD'];
 
 function priceInput(value: number | string) {
   const minor = Number(value);
@@ -35,13 +36,13 @@ export default async function EditPriceBookItemPage({ params, searchParams }: Pr
     <div className="pageContent narrow">
       {query.error ? <div className="notice error">Не удалось сохранить изменения ({query.error}). Проверьте данные.</div> : null}
       {!canManage ? <div className="notice warning">Редактировать прайс-лист могут только владелец и администратор.</div> : null}
-      <section className="panel formPanel"><div className="panelHeader"><div><h2>{item.name}</h2><p className="muted">Изменение цены влияет только на будущие расчёты и текущие черновики.</p></div></div>
+      <section className="panel formPanel"><div className="panelHeader"><div><h2>{item.name}</h2><p className="muted">Изменение цены или валюты влияет только на будущие расчёты и текущие черновики. Выпущенные предложения остаются неизменными.</p></div></div>
         {canManage ? <form action={updatePriceBookItem} className="stackForm padded">
           <input type="hidden" name="itemId" value={item.id}/>
-          <div className="formGrid2"><label>Категория<select name="category" defaultValue={item.category}>{categories.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Единица<select name="unit" defaultValue={item.unit}>{units.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label></div>
+          <div className="formGrid3"><label>Категория<select name="category" defaultValue={item.category}>{categories.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Единица<select name="unit" defaultValue={item.unit}>{units.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Валюта<select name="currency" defaultValue={item.currency}>{currencies.map((currency) => <option key={currency} value={currency}>{currency}</option>)}</select></label></div>
           <label>Название<input name="name" defaultValue={item.name} required /></label>
           <div className="formGrid2"><label>Производитель<input name="manufacturer" defaultValue={item.manufacturer ?? ''} /></label><label>Артикул<input name="sku" defaultValue={item.sku ?? ''} /></label></div>
-          <div className="formGrid2"><label>Закупочная цена, {organization.currency}<input name="price" inputMode="decimal" defaultValue={priceInput(item.purchase_price_minor)} required /></label><label>Толщина, мм<input name="thicknessMm" type="number" min="0" step="0.1" defaultValue={Number(parameters.thicknessMm ?? 0) || ''} /></label></div>
+          <div className="formGrid2"><label>Закупочная цена<input name="price" inputMode="decimal" defaultValue={priceInput(item.purchase_price_minor)} required /></label><label>Толщина, мм<input name="thicknessMm" type="number" min="0" step="0.1" defaultValue={Number(parameters.thicknessMm ?? 0) || ''} /></label></div>
           <label>Тип операции<select name="operationKey" defaultValue={typeof parameters.operationKey === 'string' ? parameters.operationKey : ''}><option value="">— не операция —</option>{Object.entries(OPERATION_LABELS).map(([key,label]) => <option key={key} value={key}>{label}</option>)}</select></label>
           <div className="formGrid3"><label>Ширина листа, мм<input name="sheetWidthMm" type="number" min="1" defaultValue={Number(parameters.sheetWidthMm ?? 0) || ''} /></label><label>Высота листа, мм<input name="sheetHeightMm" type="number" min="1" defaultValue={Number(parameters.sheetHeightMm ?? 0) || ''} /></label><label>Запас / отход, %<input name="wastePct" type="number" min="0" step="0.1" defaultValue={Number(parameters.wastePct ?? 0)} /></label></div>
           <div className="formActions"><Link href="/price-book" className="secondary linkButton">Отмена</Link><button type="submit" className="primary">Сохранить изменения</button></div>
