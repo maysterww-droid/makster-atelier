@@ -18,6 +18,7 @@ import './visual-hook.css';
 import './product-demo-first.css';
 import './product-demo-mobile.css';
 import './sales-visibility-fix.css';
+import './mobile-experience-v2.css';
 
 export default function MarketingPage() {
   return (
