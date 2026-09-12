@@ -47,7 +47,11 @@ export async function signup(formData: FormData) {
     options: origin ? { emailRedirectTo: `${origin}/auth/confirm` } : undefined,
   });
 
-  if (error) redirect('/login?error=signup');
+  if (error) {
+    if (error.code === 'email_address_not_authorized') redirect('/login?error=signup-email');
+    if (error.status === 429) redirect('/login?error=signup-rate');
+    redirect('/login?error=signup');
+  }
   if (data.session) redirect('/onboarding');
   redirect('/login?message=check-email');
 }
