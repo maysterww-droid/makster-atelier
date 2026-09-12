@@ -16,6 +16,25 @@ const quickPresets=[
   {key:'corner-base-blind-900',label:'Угол 900 · глухой'},{key:'tall-oven-600',label:'Пенал духовки'},{key:'tall-fridge-600',label:'Пенал холодильника'},
 ];
 
+function safeBps(value: unknown, fallback: number, max = 9_500) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(max, Math.round(parsed)));
+}
+
+function projectErrorMessage(code: string) {
+  const messages: Record<string,string> = {
+    'publish-client': 'Перед выпуском предложения выберите и сохраните клиента.',
+    'publish-empty': 'Нельзя выпустить пустое предложение. Добавьте хотя бы один модуль.',
+    'publish-incomplete': 'Есть модули с неполным расчётом. Заполните материалы, фурнитуру и операции.',
+    'publish-extras': 'Одна из выбранных услуг или отделочных позиций больше недоступна в Price Book. Выберите актуальную позицию и сохраните расчёт.',
+    'publish-margin-guard': 'Profit Guardrail не разрешил выпуск: фактическая маржа ниже минимальной.',
+    'pricing-options': 'Проверьте значения маржи и коммерческой корректировки.',
+    'extras-unit': 'Выбранная услуга не соответствует нужной категории или единице измерения.',
+  };
+  return messages[code] ?? `Не удалось выполнить действие (${code}). Проверьте данные и попробуйте снова.`;
+}
+
 export default async function ProjectPage({params,searchParams}:Props){
   const {id}=await params; const query=await searchParams; const {supabase,organization,role}=await requireWorkspace();
   const [projectResult,cabinetsResult,priceResult,subscriptionResult,clientsResult,quotesResult]=await Promise.all([
@@ -30,11 +49,11 @@ export default async function ProjectPage({params,searchParams}:Props){
   if(projectResult.error||!project)notFound(); if(cabinetsResult.error)throw new Error(`Не удалось загрузить шкафы: ${cabinetsResult.error.message}`); if(priceResult.error)throw new Error(`Не удалось загрузить прайс-лист: ${priceResult.error.message}`); if(clientsResult.error)throw new Error(`Не удалось загрузить клиентов: ${clientsResult.error.message}`); if(quotesResult.error)throw new Error(`Не удалось загрузить историю предложений: ${quotesResult.error.message}`);
   const quoteHistory=quotesResult.data??[]; let statusEvents:{quote_id:string;status:string;created_at:string;note:string|null}[]=[];
   if(quoteHistory.length){const {data,error}=await supabase.from('client_quote_status_events').select('quote_id, status, created_at, note').eq('organization_id',organization.id).in('quote_id',quoteHistory.map((quote)=>quote.id)).order('created_at',{ascending:false});if(error)throw new Error(`Не удалось загрузить статусы предложений: ${error.message}`);statusEvents=data??[];}
-  const quoteSettings=(organization.settings?.quote??{}) as Record<string,unknown>; const targetMarginBps=Number(quoteSettings.targetMarginBps??3500); const minimumMarginBps=Math.min(targetMarginBps,Number(quoteSettings.minimumMarginBps??1500)); const overheadBps=Number(quoteSettings.overheadBps??0); const taxBps=Number((project.settings as Record<string,unknown>|null)?.taxBps??0);
+  const quoteSettings=(organization.settings?.quote??{}) as Record<string,unknown>; const targetMarginBps=safeBps(quoteSettings.targetMarginBps,3500); const minimumMarginBps=Math.min(targetMarginBps,safeBps(quoteSettings.minimumMarginBps,1500)); const overheadBps=safeBps(quoteSettings.overheadBps,0); const taxBps=safeBps((project.settings as Record<string,unknown>|null)?.taxBps,0,100_000);
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan??'free').toUpperCase()}>
     <header className="topbar"><div><span className="eyebrow">{project.project_type.toUpperCase()} · {project.status.toUpperCase()}</span><h1>{project.name}</h1></div><div className="topActions"><Link href="/projects" className="textLink">← Проекты</Link><Link href={`/library?project=${project.id}`} className="secondary linkButton">Библиотека модулей</Link><Link href="/price-book" className="secondary linkButton">Прайс-лист</Link><Link href={`/projects/${project.id}/quote`} className="secondary linkButton" target="_blank">Живой просмотр</Link></div></header>
     {query.duplicated?<div className="pageContent compact"><div className="notice success">Создана независимая копия проекта. Выпущенные предложения исходного проекта не копировались.</div></div>:null}
-    {query.error?<div className="pageContent compact"><div className="notice error">Не удалось выполнить действие ({query.error}). Проверьте данные и попробуйте снова.</div></div>:null}
+    {query.error?<div className="pageContent compact"><div className="notice error">{projectErrorMessage(query.error)}</div></div>:null}
     {query.saved==='commercial'?<div className="pageContent compact"><div className="notice success">Итог проекта и параметры предложения сохранены.</div></div>:null}
     {query.saved==='manual-cost-added'?<div className="pageContent compact"><div className="notice success">Нестандартная позиция добавлена в себестоимость проекта.</div></div>:null}
     {query.saved==='manual-cost-removed'?<div className="pageContent compact"><div className="notice success">Нестандартная позиция удалена из рабочего расчёта.</div></div>:null}
@@ -43,7 +62,7 @@ export default async function ProjectPage({params,searchParams}:Props){
     {query.saved==='module-deleted'?<div className="pageContent compact"><div className="notice success">Модуль удалён из рабочего проекта. Выпущенные предложения не изменены.</div></div>:null}
     {query.saved==='module-moved'?<div className="pageContent compact"><div className="notice success">Порядок модулей обновлён.</div></div>:null}
     {!priceBook?.length?<div className="pageContent compact"><div className="notice warning">Прайс-лист пуст. <Link href="/price-book">Добавьте реальные цены</Link>.</div></div>:null}
-    <section className="pageContent compact"><div className="panel"><div className="panelHeader"><div><span className="eyebrow">QUICK ADD · MQ 0.1.14</span><h2>Быстро добавить модуль</h2><p className="muted">Основные элементы кухни, включая глухой угол, можно добавить прямо из проекта.</p></div><Link href={`/library?project=${project.id}`} className="textLink">Все пресеты →</Link></div><div className="formActions padded" style={{flexWrap:'wrap'}}>{quickPresets.map((preset)=><form action={addPresetToProject} key={preset.key}><input type="hidden" name="projectId" value={project.id}/><input type="hidden" name="presetKey" value={preset.key}/><input type="hidden" name="quantity" value="1"/><button className="secondary" type="submit">+ {preset.label}</button></form>)}</div></div></section>
+    <section className="pageContent compact"><div className="panel"><div className="panelHeader"><div><span className="eyebrow">QUICK ADD · MQ 0.1.15</span><h2>Быстро добавить модуль</h2><p className="muted">Основные элементы кухни, включая глухой угол, можно добавить прямо из проекта.</p></div><Link href={`/library?project=${project.id}`} className="textLink">Все пресеты →</Link></div><div className="formActions padded" style={{flexWrap:'wrap'}}>{quickPresets.map((preset)=><form action={addPresetToProject} key={preset.key}><input type="hidden" name="projectId" value={project.id}/><input type="hidden" name="presetKey" value={preset.key}/><input type="hidden" name="quantity" value="1"/><button className="secondary" type="submit">+ {preset.label}</button></form>)}</div></div></section>
     <ProjectCommercial projectId={project.id} clientId={project.client_id} settings={project.settings as Record<string,unknown>} clients={clientsResult.data??[]} priceBook={(priceBook??[]) as never[]} cabinets={(cabinets??[]) as never[]} currency={project.currency} targetMarginBps={targetMarginBps} minimumMarginBps={minimumMarginBps} overheadBps={overheadBps} role={role} quoteHistory={quoteHistory} statusEvents={statusEvents}/>
     <ModuleOrderPanel projectId={project.id} cabinets={(cabinets??[]) as never[]}/>
     <CabinetEditor projectId={project.id} currency={project.currency} cabinets={(cabinets??[]) as never[]} priceBook={(priceBook??[]) as PriceBookItem[]} targetMarginBps={targetMarginBps} overheadBps={overheadBps} taxBps={taxBps}/>
