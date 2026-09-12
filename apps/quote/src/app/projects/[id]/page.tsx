@@ -27,10 +27,11 @@ function projectErrorMessage(code: string) {
     'publish-client': 'Перед выпуском предложения выберите и сохраните клиента.',
     'publish-empty': 'Нельзя выпустить пустое предложение. Добавьте хотя бы один модуль.',
     'publish-incomplete': 'Есть модули с неполным расчётом. Заполните материалы, фурнитуру и операции.',
-    'publish-extras': 'Одна из выбранных услуг или отделочных позиций больше недоступна в Price Book. Выберите актуальную позицию и сохраните расчёт.',
+    'publish-extras': 'Одна из выбранных услуг или отделочных позиций больше недоступна в Price Book для валюты проекта. Выберите актуальную позицию и сохраните расчёт.',
     'publish-margin-guard': 'Profit Guardrail не разрешил выпуск: фактическая маржа ниже минимальной.',
     'pricing-options': 'Проверьте значения маржи и коммерческой корректировки.',
-    'extras-unit': 'Выбранная услуга не соответствует нужной категории или единице измерения.',
+    'extras-unit': 'Выбранная услуга не соответствует нужной категории, единице измерения или валюте проекта.',
+    'pricebook-currency': 'Для проекта выбрана позиция Price Book в другой валюте. Выберите цены в валюте проекта.',
   };
   return messages[code] ?? `Не удалось выполнить действие (${code}). Проверьте данные и попробуйте снова.`;
 }
@@ -47,6 +48,7 @@ export default async function ProjectPage({params,searchParams}:Props){
   ]);
   const project=projectResult.data; const cabinets=cabinetsResult.data; const priceBook=priceResult.data; const subscription=subscriptionResult.data;
   if(projectResult.error||!project)notFound(); if(cabinetsResult.error)throw new Error(`Не удалось загрузить шкафы: ${cabinetsResult.error.message}`); if(priceResult.error)throw new Error(`Не удалось загрузить прайс-лист: ${priceResult.error.message}`); if(clientsResult.error)throw new Error(`Не удалось загрузить клиентов: ${clientsResult.error.message}`); if(quotesResult.error)throw new Error(`Не удалось загрузить историю предложений: ${quotesResult.error.message}`);
+  const projectPriceBook=(priceBook??[]).filter((item)=>item.currency===project.currency);
   const quoteHistory=quotesResult.data??[]; let statusEvents:{quote_id:string;status:string;created_at:string;note:string|null}[]=[];
   if(quoteHistory.length){const {data,error}=await supabase.from('client_quote_status_events').select('quote_id, status, created_at, note').eq('organization_id',organization.id).in('quote_id',quoteHistory.map((quote)=>quote.id)).order('created_at',{ascending:false});if(error)throw new Error(`Не удалось загрузить статусы предложений: ${error.message}`);statusEvents=data??[];}
   const quoteSettings=(organization.settings?.quote??{}) as Record<string,unknown>; const targetMarginBps=safeBps(quoteSettings.targetMarginBps,3500); const minimumMarginBps=Math.min(targetMarginBps,safeBps(quoteSettings.minimumMarginBps,1500)); const overheadBps=safeBps(quoteSettings.overheadBps,0); const taxBps=safeBps((project.settings as Record<string,unknown>|null)?.taxBps,0,100_000);
@@ -62,9 +64,10 @@ export default async function ProjectPage({params,searchParams}:Props){
     {query.saved==='module-deleted'?<div className="pageContent compact"><div className="notice success">Модуль удалён из рабочего проекта. Выпущенные предложения не изменены.</div></div>:null}
     {query.saved==='module-moved'?<div className="pageContent compact"><div className="notice success">Порядок модулей обновлён.</div></div>:null}
     {!priceBook?.length?<div className="pageContent compact"><div className="notice warning">Прайс-лист пуст. <Link href="/price-book">Добавьте реальные цены</Link>.</div></div>:null}
+    {priceBook?.length&&!projectPriceBook.length?<div className="pageContent compact"><div className="notice warning"><strong>Нет цен в {project.currency}.</strong> Этот проект не будет использовать позиции из другой валюты. <Link href="/price-book">Добавьте Price Book для {project.currency}</Link>.</div></div>:null}
     <section className="pageContent compact"><div className="panel"><div className="panelHeader"><div><span className="eyebrow">QUICK ADD · MQ 0.1.15</span><h2>Быстро добавить модуль</h2><p className="muted">Основные элементы кухни, включая глухой угол, можно добавить прямо из проекта.</p></div><Link href={`/library?project=${project.id}`} className="textLink">Все пресеты →</Link></div><div className="formActions padded" style={{flexWrap:'wrap'}}>{quickPresets.map((preset)=><form action={addPresetToProject} key={preset.key}><input type="hidden" name="projectId" value={project.id}/><input type="hidden" name="presetKey" value={preset.key}/><input type="hidden" name="quantity" value="1"/><button className="secondary" type="submit">+ {preset.label}</button></form>)}</div></div></section>
-    <ProjectCommercial projectId={project.id} clientId={project.client_id} settings={project.settings as Record<string,unknown>} clients={clientsResult.data??[]} priceBook={(priceBook??[]) as never[]} cabinets={(cabinets??[]) as never[]} currency={project.currency} targetMarginBps={targetMarginBps} minimumMarginBps={minimumMarginBps} overheadBps={overheadBps} role={role} quoteHistory={quoteHistory} statusEvents={statusEvents}/>
+    <ProjectCommercial projectId={project.id} clientId={project.client_id} settings={project.settings as Record<string,unknown>} clients={clientsResult.data??[]} priceBook={projectPriceBook as never[]} cabinets={(cabinets??[]) as never[]} currency={project.currency} targetMarginBps={targetMarginBps} minimumMarginBps={minimumMarginBps} overheadBps={overheadBps} role={role} quoteHistory={quoteHistory} statusEvents={statusEvents}/>
     <ModuleOrderPanel projectId={project.id} cabinets={(cabinets??[]) as never[]}/>
-    <CabinetEditor projectId={project.id} currency={project.currency} cabinets={(cabinets??[]) as never[]} priceBook={(priceBook??[]) as PriceBookItem[]} targetMarginBps={targetMarginBps} overheadBps={overheadBps} taxBps={taxBps}/>
+    <CabinetEditor projectId={project.id} currency={project.currency} cabinets={(cabinets??[]) as never[]} priceBook={projectPriceBook as PriceBookItem[]} targetMarginBps={targetMarginBps} overheadBps={overheadBps} taxBps={taxBps}/>
   </AppShell>;
 }
