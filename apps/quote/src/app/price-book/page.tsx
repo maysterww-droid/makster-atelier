@@ -51,7 +51,7 @@ export default async function PriceBookPage({ searchParams }: Props) {
   const errorMessage = query.error ? (importErrors[query.error] ?? m.genericError) : '';
 
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan ?? 'free').toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">PRICE BOOK · MAKSTER QUOTE</span><h1>{m.title}</h1></div><Link href="/" className="textLink">{m.back}</Link></header>
+    <header className="topbar"><div><span className="eyebrow">PRICE BOOK · MAKSTER QUOTE</span><h1>{m.title}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       {query.setup === '1' ? <div className="notice success"><strong>{m.setupSuccess}</strong></div> : null}
       {query.imported ? <div className="notice success"><strong>{m.importedSuccess}</strong> {m.importedCount}: {query.imported}.</div> : null}

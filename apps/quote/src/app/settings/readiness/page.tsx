@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 function record(value:unknown):Record<string,unknown>{return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:{};}
 
 export default async function ReadinessPage(){
-  const {supabase,organization,role}=await requireWorkspace(); if(!['owner','admin'].includes(role))redirect('/?error=permission');
+  const {supabase,organization,role}=await requireWorkspace(); if(!['owner','admin'].includes(role))redirect('/dashboard?error=permission');
   const locale=await getInterfaceLocale(); const m=getSettingsMessages(locale);
   const stateLabel:Record<ReadinessState,string>={ready:m.ready,warning:m.warning,blocked:m.blocked};
   const [subscriptionResult,priceBookResult,projectResult,quoteResult,clientResult]=await Promise.all([
@@ -32,7 +32,7 @@ export default async function ReadinessPage(){
   );
   const overall=overallReadiness(checks); const subscription=subscriptionResult.data; const readyCount=checks.filter((check)=>check.state==='ready').length;
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan??'free').toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">PRODUCTION READINESS · MAKSTER QUOTE</span><h1>{m.readinessTitle}</h1></div><Link href="/" className="textLink">{m.back}</Link></header>
+    <header className="topbar"><div><span className="eyebrow">PRODUCTION READINESS · MAKSTER QUOTE</span><h1>{m.readinessTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       <section className="metricGrid"><article className="metricCard"><span>{m.overallStatus}</span><strong>{stateLabel[overall]}</strong><small>{readyCount} / {checks.length} {m.checksReady}</small></article><article className="metricCard"><span>{m.workData}</span><strong>{projectResult.count??0}</strong><small>{m.projects} · {clientResult.count??0} {m.clients}</small></article><article className="metricCard"><span>{m.issued}</span><strong>{quoteResult.count??0}</strong><small>{m.quoteVersions}</small></article></section>
       <section className="panel" style={{marginBottom:18}}><div className="panelHeader"><div><span className="eyebrow">{m.checks}</span><h2>{m.beforeProduction}</h2><p className="muted">{m.secretsHidden}</p></div></div><div className="priceList">{checks.map((check)=><article className="priceRow" key={check.key}><div><span className="pill">{stateLabel[check.state]}</span><strong>{check.label}</strong><small>{check.detail}</small></div></article>)}</div></section>

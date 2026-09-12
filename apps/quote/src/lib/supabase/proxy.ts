@@ -15,7 +15,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  const isPublicRoute = pathname.startsWith('/login')
+  const isPublicRoute = pathname === '/'
+    || pathname.startsWith('/login')
     || pathname.startsWith('/auth')
     || pathname.startsWith('/q/');
 

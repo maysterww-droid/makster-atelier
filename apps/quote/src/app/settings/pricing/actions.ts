@@ -50,6 +50,6 @@ export async function savePricingSettings(formData: FormData) {
 
   revalidatePath('/settings/pricing');
   revalidatePath('/projects');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
   redirect('/settings/pricing?saved=1');
 }

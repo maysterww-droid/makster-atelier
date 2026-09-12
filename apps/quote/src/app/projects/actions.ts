@@ -27,7 +27,7 @@ export async function archiveProject(formData: FormData) {
   if (error) redirect('/projects?error=archive');
 
   revalidatePath('/projects');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
   redirect('/projects?archived=1');
 }
 
@@ -112,6 +112,6 @@ export async function duplicateProject(formData: FormData) {
   }
 
   revalidatePath('/projects');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
   redirect(`/projects/${newProjectId}?duplicated=1`);
 }

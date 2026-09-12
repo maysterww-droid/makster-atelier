@@ -10,7 +10,7 @@ type Props={searchParams:Promise<{error?:string}>};
 const countries=['CZ','DE','PL','AT','UA'];
 
 export default async function OnboardingPage({searchParams}:Props){
-  const query=await searchParams;const {supabase,userId}=await requireUser();const existing=await findActiveMembership(supabase,userId);if(existing)redirect('/');
+  const query=await searchParams;const {supabase,userId}=await requireUser();const existing=await findActiveMembership(supabase,userId);if(existing)redirect('/dashboard');
   const locale=await getInterfaceLocale();const m=getAuthMessages(locale);
   return <main className="authPage"><section className="authCard wideCard">
     <div className="eyebrow">MAKSTER QUOTE · {m.firstRun}</div><h1>{m.createWorkspace}</h1><p className="muted">{m.workspaceHelp}</p><LocaleSwitcher locale={locale} label={m.interfaceLanguage}/>

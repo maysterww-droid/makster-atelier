@@ -22,7 +22,7 @@ export default async function BillingPage({ searchParams }: Props) {
   const description=(plan:QuotePlan)=>billingPlanDescription(locale,plan); const status=billingStatusLabel(locale,currentStatus);
 
   return <AppShell organizationName={organization.name} role={role} plan={PLAN_LABELS[currentPlan].toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">BILLING · MAKSTER QUOTE</span><h1>{m.billingTitle}</h1></div><Link href="/" className="textLink">{m.back}</Link></header>
+    <header className="topbar"><div><span className="eyebrow">BILLING · MAKSTER QUOTE</span><h1>{m.billingTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       {query.checkout==='success'?<div className="notice success"><strong>{m.checkoutSuccess}</strong> {m.checkoutWebhook}</div>:null}
       {query.error==='existing-subscription'?<div className="notice warning">{m.existingSubscription}</div>:null}

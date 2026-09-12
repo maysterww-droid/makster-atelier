@@ -1,0 +1,104 @@
+@media (max-width:780px){
+  html,body{overflow-x:hidden}
+  .mq-premium{overflow-x:hidden}
+
+  /* Header: make the brand visible and keep chrome compact. */
+  .mq-premium>header:first-child{
+    height:68px!important;
+    padding:0 16px!important;
+    background:rgba(250,244,238,.94)!important;
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid rgba(83,55,38,.10);
+    position:sticky!important;
+    top:0;
+    z-index:50!important;
+  }
+  .mq-premium>header:first-child [aria-label="Makster Quote"]{gap:9px!important}
+  .mq-premium>header:first-child [aria-label="Makster Quote"] svg{width:48px!important;height:42px!important}
+  .mq-premium>header:first-child [aria-label="Makster Quote"] strong{font-size:14px!important;letter-spacing:.025em!important}
+  .mq-premium>header:first-child [aria-label="Makster Quote"] small{font-size:7px!important;letter-spacing:.20em!important}
+  .mq-premium>header:first-child details summary{padding:8px 11px!important;font-size:11px!important}
+
+  /* Hero: not a squeezed desktop page. */
+  .mq-mobile-hero{
+    min-height:auto!important;
+    display:block!important;
+    padding:34px 18px 46px!important;
+  }
+  .mq-mobile-hero .mq-hero-brand{display:none!important}
+  .mq-mobile-hero .mq-software-tag,
+  .mq-mobile-hero .mq-live-project{display:none!important}
+  .mq-mobile-hero [class*="heroCopy"]{max-width:none!important}
+  .mq-mobile-hero [class*="eyebrow"]{font-size:9px!important;line-height:1.35!important;letter-spacing:.14em!important}
+  .mq-mobile-hero h1{
+    font-size:clamp(42px,11.8vw,52px)!important;
+    line-height:.98!important;
+    letter-spacing:-.052em!important;
+    margin:12px 0 18px!important;
+  }
+  .mq-mobile-hero [class*="heroCopy"]>p{
+    font-size:15px!important;
+    line-height:1.55!important;
+    max-width:33ch!important;
+  }
+  .mq-mobile-hero [class*="actions"]{margin-top:22px!important;display:block!important}
+  .mq-mobile-hero [class*="actions"] a{width:100%!important;min-height:54px!important}
+  .mq-mobile-hero [class*="actions"] a:nth-child(2){display:none!important}
+  .mq-mobile-hero [class*="visualStage"]{margin-top:28px!important;width:100%!important}
+  .mq-mobile-hero [class*="cockpit"]{border-radius:18px!important;overflow:hidden!important;box-shadow:0 18px 45px rgba(68,41,25,.12)!important}
+  .mq-mobile-hero [class*="cockpitChrome"]{height:38px!important;padding:0 11px!important}
+  .mq-mobile-hero [class*="cockpitBody"]{min-height:0!important}
+  .mq-mobile-hero [class*="workspace"]{padding:12px!important}
+  .mq-mobile-hero [class*="workspaceHead"] strong{font-size:16px!important}
+  .mq-mobile-hero [class*="metrics"]{margin-top:12px!important;gap:7px!important}
+  .mq-mobile-hero [class*="metrics"] article{padding:12px!important}
+  .mq-mobile-hero [class*="metrics"] span{font-size:9px!important}
+  .mq-mobile-hero [class*="metrics"] b{font-size:16px!important}
+  .mq-mobile-hero [class*="projectGrid"]{display:none!important}
+
+  /* The real product demo: one clear mobile workspace, not three desktop columns stacked. */
+  #workflow{
+    padding:56px 14px 64px!important;
+  }
+  #workflow [class*="heading"]>span{font-size:9px!important;letter-spacing:.15em!important}
+  #workflow [class*="heading"] h2{
+    font-size:clamp(42px,11.5vw,52px)!important;
+    line-height:.96!important;
+    margin:10px 0 22px!important;
+  }
+  #workflow [class*="browser"]{border-radius:18px!important;box-shadow:0 20px 55px rgba(62,36,22,.12)!important}
+  #workflow [class*="chrome"]{height:38px!important;padding:0 10px!important}
+  #workflow [class*="chrome"]>div{display:none!important}
+  #workflow [class*="chrome"]>span{font-size:9px!important}
+  #workflow [class*="topbar"]{min-height:62px!important;padding:10px 11px!important}
+  #workflow [class*="topbar"] h3{font-size:17px!important}
+  #workflow [class*="tabs"]{padding:8px 8px 0!important;gap:5px!important}
+  #workflow [class*="tabs"] button{min-height:52px!important;padding:9px 7px!important}
+  #workflow [class*="tabs"] span{font-size:8px!important}
+  #workflow [class*="tabs"] b{font-size:11px!important}
+  #workflow [class*="view"]{padding:8px!important}
+  #workflow [class*="modules"]{display:none!important}
+  #workflow [class*="editorGrid"]{grid-template-columns:1fr!important;gap:8px!important}
+  #workflow [class*="editor"]{border-radius:12px!important}
+  #workflow [class*="panelHeader"]{height:48px!important;padding:0 11px!important}
+  #workflow [class*="panelHeader"] h3{font-size:16px!important}
+  #workflow [class*="formBlock"]{padding:11px!important}
+  #workflow [class*="fields3"]{gap:6px!important}
+  #workflow [class*="formBlock"] label{padding:8px!important}
+  #workflow [class*="formBlock"] label span{font-size:9px!important}
+  #workflow [class*="formBlock"] label b{font-size:11px!important}
+  #workflow [class*="engine"]{margin:9px 11px 11px!important}
+  #workflow [class*="cost"]{border-radius:12px!important}
+  #workflow [class*="costRows"]{display:grid!important;grid-template-columns:1fr 1fr!important;gap:0 14px!important;padding:7px 12px!important}
+  #workflow [class*="costRows"] p{font-size:11px!important;padding:6px 0!important}
+  #workflow [class*="trueCost"]{margin:0 12px!important}
+  #workflow [class*="trueCost"] strong{font-size:26px!important}
+  #workflow [class*="clientPrice"]{margin:6px 10px 10px!important;padding:12px!important}
+  #workflow [class*="clientPrice"] strong{font-size:28px!important}
+  #workflow [class*="under"]{display:block!important;padding-top:16px!important}
+  #workflow [class*="under"] strong{display:none!important}
+  #workflow [class*="under"] a{width:100%!important;min-height:52px!important}
+
+  /* Keep the rest of the page airy on a narrow screen. */
+  #pricing,#faq{scroll-margin-top:76px}
+}

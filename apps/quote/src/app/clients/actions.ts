@@ -38,7 +38,7 @@ export async function createClient(formData: FormData) {
   if (error) redirect('/clients?error=create');
 
   revalidatePath('/clients');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
   redirect('/clients?created=1');
 }
 
@@ -101,6 +101,6 @@ export async function archiveClient(formData: FormData) {
   if (error) redirect(`/clients/${clientId}?error=archive`);
 
   revalidatePath('/clients');
-  revalidatePath('/');
+  revalidatePath('/dashboard');
   redirect('/clients?archived=1');
 }

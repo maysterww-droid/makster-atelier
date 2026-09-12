@@ -17,7 +17,7 @@ export default async function QuoteSettingsPage({ searchParams }: Props) {
   const brand=readQuoteBrand(organization.settings,organization.name); const editable=['owner','admin'].includes(role);
 
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan??'free').toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">DOCUMENT SETTINGS · MQ 0.1.15</span><h1>{m.documentsTitle}</h1></div><Link href="/" className="textLink">{m.back}</Link></header>
+    <header className="topbar"><div><span className="eyebrow">DOCUMENT SETTINGS · MQ 0.1.15</span><h1>{m.documentsTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent compact">
       {query.saved==='1'?<div className="notice success"><strong>{m.documentSaved}</strong> {m.documentSnapshotHelp}</div>:null}
       {query.error?<div className="notice error">{m.documentSaveError} ({query.error})</div>:null}
