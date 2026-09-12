@@ -52,10 +52,10 @@ function QuoteCockpit() {
 
 export function PremiumHero() {
   return (
-    <section className={styles.hero}>
+    <section className={`${styles.hero} mq-mobile-hero`}>
       <div className={styles.grain}/>
       <div className={styles.heroCopy}>
-        <div style={{ marginBottom: 24 }}><MaksterQuoteLogo /></div>
+        <div className="mq-hero-brand" style={{ marginBottom: 24 }}><MaksterQuoteLogo /></div>
         <span className={styles.eyebrow}>СОФТ ДЛЯ МЕБЕЛЬЩИКОВ И МАСТЕРСКИХ</span>
         <h1>Смета и маржа — <em>прямо из мебельного проекта.</em></h1>
         <p><strong>Makster Quote</strong> считает конструкцию, себестоимость и цену клиенту по вашим реальным закупочным ценам.</p>
