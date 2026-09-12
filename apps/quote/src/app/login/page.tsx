@@ -15,7 +15,7 @@ export default async function LoginPage({searchParams}:Props){
     <LocaleSwitcher locale={locale} label={m.interfaceLanguage}/>
     {query.error?<div className="notice error">{errors[query.error]??m.genericError}</div>:null}
     {query.message==='check-email'?<div className="notice success">{m.checkEmail}</div>:null}
-    <form className="stackForm"><label>Email<input name="email" type="email" autoComplete="email" required/></label><label>{m.password}<input name="password" type="password" minLength={8} autoComplete="current-password" required/></label><button className="primary wide" formAction={login}>{m.login}</button><button className="secondary wide" formAction={signup}>{m.createAccount}</button></form>
+    <form className="stackForm"><label>{m.email}<input name="email" type="email" autoComplete="email" required/></label><label>{m.password}<input name="password" type="password" minLength={8} autoComplete="current-password" required/></label><button className="primary wide" formAction={login}>{m.login}</button><button className="secondary wide" formAction={signup}>{m.createAccount}</button></form>
     <p className="finePrint">{m.languageNote}</p>
   </section></main>;
 }
