@@ -12,6 +12,17 @@ function credentials(formData: FormData) {
   };
 }
 
+async function canonicalOrigin() {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '');
+  if (configured && /^https?:\/\//i.test(configured)) return configured;
+
+  const requestHeaders = await headers();
+  const host = requestHeaders.get('x-forwarded-host') ?? requestHeaders.get('host');
+  if (!host) return null;
+  const proto = requestHeaders.get('x-forwarded-proto') ?? (host.includes('localhost') ? 'http' : 'https');
+  return `${proto}://${host}`;
+}
+
 export async function login(formData: FormData) {
   const { email, password } = credentials(formData);
   if (!email || !password) redirect('/login?error=missing');
@@ -28,10 +39,8 @@ export async function signup(formData: FormData) {
   const { email, password } = credentials(formData);
   if (!email || password.length < 8) redirect('/login?error=password');
 
-  const requestHeaders = await headers();
-  const origin = requestHeaders.get('origin');
+  const origin = await canonicalOrigin();
   const supabase = await createClient();
-
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
