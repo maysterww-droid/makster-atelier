@@ -1,34 +1,20 @@
 import { redirect } from 'next/navigation';
+import { LocaleSwitcher } from '@/components/locale-switcher';
+import { getInterfaceLocale } from '@/lib/interface-locale';
+import { getAuthMessages } from '@/lib/i18n-auth';
+import { findActiveMembership, requireUser } from '@/lib/workspace';
 import { createWorkspace } from './actions';
-import { requireUser, findActiveMembership } from '@/lib/workspace';
 
-export const dynamic = 'force-dynamic';
+export const dynamic='force-dynamic';
+type Props={searchParams:Promise<{error?:string}>};
+const countries=['CZ','DE','PL','AT','UA'];
 
-type Props = { searchParams: Promise<{ error?: string }> };
-
-export default async function OnboardingPage({ searchParams }: Props) {
-  const query = await searchParams;
-  const { supabase, userId } = await requireUser();
-  const existing = await findActiveMembership(supabase, userId);
-  if (existing) redirect('/');
-
-  return (
-    <main className="authPage">
-      <section className="authCard wideCard">
-        <div className="eyebrow">MAKSTER QUOTE · ПЕРВЫЙ ЗАПУСК</div>
-        <h1>Создайте рабочее пространство</h1>
-        <p className="muted">Это отдельная защищённая мастерская. Её проекты, закупочные цены и клиенты не видны другим пользователям.</p>
-        {query.error ? <div className="notice error">Не удалось создать рабочее пространство. Проверьте поля и повторите.</div> : null}
-        <form action={createWorkspace} className="stackForm">
-          <label>Название мастерской<input name="name" placeholder="Например, Makster Atelier" maxLength={160} required /></label>
-          <div className="formGrid3">
-            <label>Страна<select name="countryCode" defaultValue="CZ"><option value="CZ">Чехия</option><option value="DE">Германия</option><option value="PL">Польша</option><option value="AT">Австрия</option><option value="UA">Украина</option></select></label>
-            <label>Валюта<select name="currency" defaultValue="CZK"><option>CZK</option><option>EUR</option><option>PLN</option><option>USD</option></select></label>
-            <label>Часовой пояс<select name="timezone" defaultValue="Europe/Prague"><option>Europe/Prague</option><option>Europe/Berlin</option><option>Europe/Warsaw</option><option>Europe/Kyiv</option></select></label>
-          </div>
-          <button className="primary wide" type="submit">Создать мастерскую</button>
-        </form>
-      </section>
-    </main>
-  );
+export default async function OnboardingPage({searchParams}:Props){
+  const query=await searchParams;const {supabase,userId}=await requireUser();const existing=await findActiveMembership(supabase,userId);if(existing)redirect('/');
+  const locale=await getInterfaceLocale();const m=getAuthMessages(locale);
+  return <main className="authPage"><section className="authCard wideCard">
+    <div className="eyebrow">MAKSTER QUOTE · {m.firstRun}</div><h1>{m.createWorkspace}</h1><p className="muted">{m.workspaceHelp}</p><LocaleSwitcher locale={locale} label={m.interfaceLanguage}/>
+    {query.error?<div className="notice error">{m.workspaceError}</div>:null}
+    <form action={createWorkspace} className="stackForm"><label>{m.workspaceName}<input name="name" placeholder={m.workspacePlaceholder} maxLength={160} required/></label><div className="formGrid3"><label>{m.country}<select name="countryCode" defaultValue="CZ">{countries.map((code)=><option key={code} value={code}>{m.countries[code]}</option>)}</select></label><label>{m.currency}<select name="currency" defaultValue="CZK"><option>CZK</option><option>EUR</option><option>PLN</option><option>USD</option></select></label><label>{m.timezone}<select name="timezone" defaultValue="Europe/Prague"><option>Europe/Prague</option><option>Europe/Berlin</option><option>Europe/Warsaw</option><option>Europe/Kyiv</option></select></label></div><button className="primary wide" type="submit">{m.createWorkshop}</button></form>
+  </section></main>;
 }
