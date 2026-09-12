@@ -12,6 +12,7 @@ const moduleKeys = new Set<ModuleKey>(['b-door','b-drawer','b-oven','w-door','t-
 function numberField(formData:FormData,name:string,fallback:number){const value=Number(formData.get(name));return Number.isFinite(value)?value:fallback;}
 function idField(formData:FormData,name:string){const value=String(formData.get(name)??'').trim();return /^[0-9a-fA-F-]{36}$/.test(value)?value:'';}
 function record(value:unknown):Record<string,unknown>{return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:{};}
+function safeBps(value:unknown,fallback:number,max=9_500){const parsed=Number(value);return Number.isFinite(parsed)?Math.max(0,Math.min(max,Math.round(parsed))):fallback;}
 function defaultShelfCount(moduleKey:ModuleKey){if(moduleKey==='b-door')return 1;if(moduleKey==='w-door'||moduleKey==='open')return 2;if(moduleKey==='t-door')return 4;if(moduleKey==='t-oven')return 2;if(moduleKey==='t-fridge')return 1;return 0;}
 function defaultModuleName(moduleKey:ModuleKey){const names:Record<ModuleKey,string>={'b-door':'Нижний шкаф с дверью','b-drawer':'Нижний шкаф с ящиками','b-oven':'Нижний модуль под духовку','w-door':'Верхний шкаф с дверью','t-door':'Высокий пенал','t-oven':'Пенал под духовку','t-fridge':'Пенал под холодильник',dishwasher:'ПММ · мебельный фасад',open:'Открытый модуль',generic:'Универсальный корпус'};return names[moduleKey];}
 
@@ -29,6 +30,7 @@ export async function saveCabinet(formData:FormData){
     cabinetId ? supabase.from('quote_cabinets').select('construction_json').eq('id',cabinetId).eq('project_id',projectId).eq('organization_id',organization.id).maybeSingle() : Promise.resolve({data:null,error:null}),
   ]);
   if(projectError||!project)redirect('/?error=project'); if(priceError)redirect(`/projects/${projectId}?error=pricebook`); if(existingError)redirect(`/projects/${projectId}?error=module-source`);
+  const projectPriceBook=(priceBook??[]).filter((item)=>item.currency===project.currency) as PriceBookItem[];
   const existingConstruction=record(existing?.construction_json);
   const explicitFrontWidth=formData.has('frontWidthMm')?numberField(formData,'frontWidthMm',0):Number(existingConstruction.frontWidthMm??0);
 
@@ -39,8 +41,8 @@ export async function saveCabinet(formData:FormData){
     boardItemId:String(formData.get('boardItemId')??'')||undefined,frontItemId:String(formData.get('frontItemId')??'')||undefined,backItemId:String(formData.get('backItemId')??'')||undefined,edgeItemId:String(formData.get('edgeItemId')??'')||undefined,hingeItemId:String(formData.get('hingeItemId')??'')||undefined,drawerItemId:String(formData.get('drawerItemId')??'')||undefined,labourItemId:String(formData.get('labourItemId')??'')||undefined,labourHours:numberField(formData,'labourHours',0),
   };
   if(input.widthMm<=0||input.heightMm<=0||input.depthMm<=0||input.thicknessMm<=0)redirect(`/projects/${projectId}?error=dimensions`);
-  const quoteSettings=(organization.settings?.quote??{}) as Record<string,unknown>; const targetMarginBps=Number(quoteSettings.targetMarginBps??3500); const overheadBps=Number(quoteSettings.overheadBps??0); const taxBps=Number((project.settings as Record<string,unknown>|null)?.taxBps??0);
-  const preview=calculateQuoteCabinetPreview(input,(priceBook??[]) as PriceBookItem[],{targetMarginBps,overheadBps,taxBps});
+  const quoteSettings=(organization.settings?.quote??{}) as Record<string,unknown>; const targetMarginBps=safeBps(quoteSettings.targetMarginBps,3500); const overheadBps=safeBps(quoteSettings.overheadBps,0); const taxBps=safeBps((project.settings as Record<string,unknown>|null)?.taxBps,0,100_000);
+  const preview=calculateQuoteCabinetPreview(input,projectPriceBook,{targetMarginBps,overheadBps,taxBps});
   const name=String(formData.get('name')??'').trim()||defaultModuleName(moduleKey);
 
   let nextSortOrder=0;
