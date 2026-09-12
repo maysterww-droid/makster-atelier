@@ -39,7 +39,7 @@ export async function saveProjectCommercial(formData: FormData) {
 
   const { data: project, error: projectError } = await supabase
     .from('projects')
-    .select('id, client_id, settings')
+    .select('id, client_id, currency, settings')
     .eq('id', projectId)
     .eq('organization_id', organization.id)
     .maybeSingle();
@@ -122,24 +122,24 @@ export async function saveProjectCommercial(formData: FormData) {
     { field: 'decorItemId', category: 'decor', unit: 'm2' },
   ] as const;
   const extraIds = requestedExtras.map(({ field }) => cleanText(formData, field, 80)).filter(Boolean);
-  const validIds = new Map<string, { category: string; unit: string }>();
+  const validIds = new Map<string, { category: string; unit: string; currency: string }>();
 
   if (extraIds.length) {
     const { data: extraRows, error: extrasError } = await supabase
       .from('quote_price_book_items')
-      .select('id, category, unit')
+      .select('id, category, unit, currency')
       .eq('organization_id', organization.id)
       .eq('active', true)
       .in('id', extraIds);
     if (extrasError) redirect(`/projects/${projectId}?error=extras`);
-    for (const row of extraRows ?? []) validIds.set(row.id, { category: row.category, unit: row.unit });
+    for (const row of extraRows ?? []) validIds.set(row.id, { category: row.category, unit: row.unit, currency: row.currency });
   }
 
   const extraValues: Record<string, string> = {};
   for (const { field, category, unit } of requestedExtras) {
     const id = cleanText(formData, field, 80);
     const row = id ? validIds.get(id) : undefined;
-    if (id && (!row || row.category !== category || row.unit !== unit)) redirect(`/projects/${projectId}?error=extras-unit`);
+    if (id && (!row || row.category !== category || row.unit !== unit || row.currency !== project.currency)) redirect(`/projects/${projectId}?error=extras-unit`);
     extraValues[field] = id;
   }
 
