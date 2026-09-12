@@ -14,6 +14,12 @@ const operationKeys = new Set([
 ]);
 const allowedCategories = new Set(['board', 'front', 'edge', 'hardware', 'operation', 'labour', 'delivery', 'installation', 'overhead', 'other', 'worktop', 'plinth', 'filler', 'decor']);
 const allowedUnits = new Set(['sheet', 'm2', 'm', 'pcs', 'set', 'hour', 'job']);
+const supportedCurrencies = new Set(['CZK', 'EUR', 'PLN', 'USD']);
+
+function normalizeCurrency(value: unknown, fallback: string) {
+  const currency = String(value ?? fallback).trim().toUpperCase();
+  return supportedCurrencies.has(currency) ? currency : '';
+}
 
 function moneyToMinor(raw: string) {
   const normalized = raw.trim().replace(/\s/g, '').replace(',', '.');
@@ -22,15 +28,16 @@ function moneyToMinor(raw: string) {
   return Number(BigInt(whole) * 100n + BigInt((fraction + '00').slice(0, 2)));
 }
 
-function readPriceFields(formData: FormData) {
+function readPriceFields(formData: FormData, defaultCurrency: string) {
   const category = String(formData.get('category') ?? '').trim();
   const name = String(formData.get('name') ?? '').trim().slice(0, 300);
   const unit = String(formData.get('unit') ?? 'pcs').trim();
+  const currency = normalizeCurrency(formData.get('currency'), defaultCurrency);
   const manufacturer = String(formData.get('manufacturer') ?? '').trim().slice(0, 200) || null;
   const sku = String(formData.get('sku') ?? '').trim().slice(0, 200) || null;
   const priceRaw = String(formData.get('price') ?? '');
 
-  if (!allowedCategories.has(category) || !allowedUnits.has(unit) || !name || !priceRaw) throw new Error('fields');
+  if (!allowedCategories.has(category) || !allowedUnits.has(unit) || !currency || !name || !priceRaw) throw new Error('fields');
 
   const purchasePriceMinor = moneyToMinor(priceRaw);
   const parameters: Record<string, number | string> = {};
@@ -53,7 +60,7 @@ function readPriceFields(formData: FormData) {
     parameters.operationKey = operationKey;
   }
 
-  return { category, name, unit, manufacturer, sku, purchasePriceMinor, parameters };
+  return { category, name, unit, currency, manufacturer, sku, purchasePriceMinor, parameters };
 }
 
 function detectDelimiter(header: string) {
@@ -133,7 +140,7 @@ export async function addPriceBookItem(formData: FormData) {
   if (!['owner', 'admin'].includes(role)) redirect('/price-book?error=permission');
 
   let fields: ReturnType<typeof readPriceFields>;
-  try { fields = readPriceFields(formData); } catch (error) {
+  try { fields = readPriceFields(formData, organization.currency); } catch (error) {
     const code = error instanceof Error ? error.message : 'fields';
     redirect(`/price-book?error=${encodeURIComponent(code)}`);
   }
@@ -145,7 +152,7 @@ export async function addPriceBookItem(formData: FormData) {
     manufacturer: fields.manufacturer,
     sku: fields.sku,
     unit: fields.unit,
-    currency: organization.currency,
+    currency: fields.currency,
     purchase_price_minor: fields.purchasePriceMinor,
     parameters_json: fields.parameters,
     source: 'manual',
@@ -186,11 +193,12 @@ export async function importPriceBookCsv(formData: FormData) {
     const category = rowValue(row, headerIndex, 'category').toLowerCase();
     const name = rowValue(row, headerIndex, 'name').slice(0, 300);
     const unit = rowValue(row, headerIndex, 'unit').toLowerCase();
+    const currency = normalizeCurrency(rowValue(row, headerIndex, 'currency'), organization.currency);
     const price = rowValue(row, headerIndex, 'price', 'purchaseprice');
     const manufacturer = rowValue(row, headerIndex, 'manufacturer').slice(0, 200) || null;
     const sku = rowValue(row, headerIndex, 'sku').slice(0, 200) || null;
 
-    if (!allowedCategories.has(category) || !allowedUnits.has(unit) || !name || !price) {
+    if (!allowedCategories.has(category) || !allowedUnits.has(unit) || !currency || !name || !price) {
       redirect(`/price-book?error=import-row&row=${line}`);
     }
 
@@ -225,7 +233,7 @@ export async function importPriceBookCsv(formData: FormData) {
       manufacturer,
       sku,
       unit,
-      currency: organization.currency,
+      currency,
       purchase_price_minor: purchasePriceMinor,
       parameters_json: parameters,
       source: 'csv',
@@ -251,7 +259,7 @@ export async function updatePriceBookItem(formData: FormData) {
   if (!/^[0-9a-fA-F-]{36}$/.test(itemId)) redirect('/price-book?error=item');
 
   let fields: ReturnType<typeof readPriceFields>;
-  try { fields = readPriceFields(formData); } catch (error) {
+  try { fields = readPriceFields(formData, organization.currency); } catch (error) {
     const code = error instanceof Error ? error.message : 'fields';
     redirect(`/price-book/${itemId}?error=${encodeURIComponent(code)}`);
   }
@@ -264,7 +272,7 @@ export async function updatePriceBookItem(formData: FormData) {
       manufacturer: fields.manufacturer,
       sku: fields.sku,
       unit: fields.unit,
-      currency: organization.currency,
+      currency: fields.currency,
       purchase_price_minor: fields.purchasePriceMinor,
       parameters_json: fields.parameters,
       source: 'manual',
