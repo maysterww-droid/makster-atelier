@@ -17,6 +17,12 @@ function clean(formData: FormData, name: string, max = 100) {
   return String(formData.get(name) ?? '').trim().slice(0, max);
 }
 
+function safeBps(value: unknown, fallback: number, max = 9_500) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(max, Math.round(parsed)));
+}
+
 function stableJson(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
@@ -91,12 +97,17 @@ export async function publishCommercialQuote(formData: FormData) {
   const installation = selectedExtra(commercial.installationItemId, 'installation');
   const other = selectedExtra(commercial.otherItemId, 'other');
   const measured = calculateMeasuredExtras(measuredSettings, priceBook);
-  if (measured.missing.length) redirect(`/projects/${projectId}?error=publish-extras`);
+  const missingFixedExtra = [
+    { id: commercial.deliveryItemId, item: delivery },
+    { id: commercial.installationItemId, item: installation },
+    { id: commercial.otherItemId, item: other },
+  ].some(({ id, item }) => Boolean(id) && !item);
+  if (missingFixedExtra || measured.missing.length) redirect(`/projects/${projectId}?error=publish-extras`);
 
   const quoteSettings = (organization.settings?.quote ?? {}) as Record<string, unknown>;
-  const workspaceMarginBps = Number(quoteSettings.targetMarginBps ?? 3500);
-  const minimumMarginBps = Math.max(0, Math.min(9_500, Number(quoteSettings.minimumMarginBps ?? 1500)));
-  const overheadBps = Number(quoteSettings.overheadBps ?? 0);
+  const workspaceMarginBps = safeBps(quoteSettings.targetMarginBps, 3500);
+  const minimumMarginBps = Math.min(workspaceMarginBps, safeBps(quoteSettings.minimumMarginBps, 1500));
+  const overheadBps = safeBps(quoteSettings.overheadBps, 0);
   const commercialOptions = readCommercialOptions(project.settings, workspaceMarginBps);
   const targetMarginBps = commercialOptions.variantMarginsBps[commercialOptions.selectedVariant];
   const manualTotal = manualCostTotal(commercialOptions.manualCostLines);
@@ -115,7 +126,7 @@ export async function publishCommercialQuote(formData: FormData) {
   const issuedAt = new Date().toISOString();
   const technicalSnapshot = {
     source: 'makster-quote',
-    quoteVersion: '0.1.14',
+    quoteVersion: '0.1.15',
     project: { name: project.name, projectType: project.project_type, currency: project.currency },
     modules: cabinets.map((cabinet) => ({
       id: cabinet.id,
