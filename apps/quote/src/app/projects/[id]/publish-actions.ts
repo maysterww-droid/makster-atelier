@@ -23,6 +23,30 @@ function safeBps(value: unknown, fallback: number, max = 9_500) {
   return Math.max(0, Math.min(max, Math.round(parsed)));
 }
 
+function record(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function addReferencedId(ids: Set<string>, value: unknown) {
+  if (typeof value === 'string' && value.trim()) ids.add(value.trim());
+}
+
+function cabinetReferencedPriceIds(cabinet: { material_refs_json: unknown; hardware_refs_json: unknown; computed_parts_json: unknown }) {
+  const ids = new Set<string>();
+  const material = record(cabinet.material_refs_json);
+  const hardwareRefs = record(cabinet.hardware_refs_json);
+  for (const key of ['boardItemId', 'frontItemId', 'backItemId', 'edgeItemId', 'labourItemId']) addReferencedId(ids, material[key]);
+  for (const key of ['hingeItemId', 'drawerItemId']) addReferencedId(ids, hardwareRefs[key]);
+
+  const computed = record(cabinet.computed_parts_json);
+  for (const collectionKey of ['hardware', 'operations']) {
+    const rows = computed[collectionKey];
+    if (!Array.isArray(rows)) continue;
+    for (const row of rows) addReferencedId(ids, record(row).priceBookItemId);
+  }
+  return ids;
+}
+
 function stableJson(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
@@ -91,6 +115,13 @@ export async function publishCommercialQuote(formData: FormData) {
   const commercial = readProjectCommercialSettings(project.settings);
   const measuredSettings = readMeasuredExtraSettings(project.settings);
   const priceBook = priceResult.data ?? [];
+  const activePriceIds = new Set(priceBook.map((item) => item.id));
+  const cabinets = cabinetsResult.data ?? [];
+  const hasStaleCabinetReferences = cabinets.some((cabinet) =>
+    [...cabinetReferencedPriceIds(cabinet)].some((priceId) => !activePriceIds.has(priceId)),
+  );
+  if (hasStaleCabinetReferences) redirect(`/projects/${projectId}?error=publish-incomplete`);
+
   const selectedExtra = (id: string, category: 'delivery' | 'installation' | 'other') =>
     priceBook.find((item) => item.id === id && item.category === category && item.unit === 'job');
   const delivery = selectedExtra(commercial.deliveryItemId, 'delivery');
@@ -111,7 +142,6 @@ export async function publishCommercialQuote(formData: FormData) {
   const commercialOptions = readCommercialOptions(project.settings, workspaceMarginBps);
   const targetMarginBps = commercialOptions.variantMarginsBps[commercialOptions.selectedVariant];
   const manualTotal = manualCostTotal(commercialOptions.manualCostLines);
-  const cabinets = cabinetsResult.data ?? [];
   const pricing = calculateProjectPricing(cabinets as never[], {
     deliveryMinor: minorFromUnknown(delivery?.purchase_price_minor),
     installationMinor: minorFromUnknown(installation?.purchase_price_minor),
