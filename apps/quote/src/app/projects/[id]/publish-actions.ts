@@ -82,7 +82,7 @@ export async function publishCommercialQuote(formData: FormData) {
       .eq('organization_id', organization.id)
       .order('sort_order')
       .order('created_at'),
-    supabase.from('quote_price_book_items').select('id, category, name, unit, purchase_price_minor').eq('organization_id', organization.id).eq('active', true),
+    supabase.from('quote_price_book_items').select('id, category, name, unit, currency, purchase_price_minor').eq('organization_id', organization.id).eq('active', true).eq('currency', project.currency),
   ]);
 
   if (clientResult.error || !clientResult.data) redirect(`/projects/${projectId}?error=publish-client`);
