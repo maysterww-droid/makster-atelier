@@ -21,11 +21,13 @@ export default async function BillingPage({ searchParams }: Props) {
   const hasManagedSubscription=subscription?.provider==='stripe'&&Boolean(subscription.provider_subscription_id)&&currentStatus!=='expired'&&currentStatus!=='inactive';
   const periodEnd=subscription?.current_period_end?new Intl.DateTimeFormat(INTL_LOCALES[locale],{dateStyle:'medium'}).format(new Date(subscription.current_period_end)):null;
   const description=(plan:QuotePlan)=>billingPlanDescription(locale,plan); const status=billingStatusLabel(locale,currentStatus);
+  const configuredPaidPlans=PAID_PLANS.filter((plan)=>stripeCheckoutConfigured(plan));
 
   return <AppShell organizationName={organization.name} role={role} plan={PLAN_LABELS[currentPlan].toUpperCase()}>
     <header className="topbar"><div><span className="eyebrow">BILLING · MAKSTER QUOTE</span><h1>{m.billingTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       {query.checkout==='success'?<div className="notice success"><strong>{m.checkoutSuccess}</strong> {m.checkoutWebhook}</div>:null}
+      {query.checkout==='cancelled'?<div className="notice warning">{m.billingTitle}: checkout cancelled.</div>:null}
       {query.error==='existing-subscription'?<div className="notice warning">{m.existingSubscription}</div>:null}
       {query.error&&query.error!=='existing-subscription'?<div className="notice error">{m.billingError} ({query.error})</div>:null}
       <section className="metricGrid">
@@ -35,7 +37,7 @@ export default async function BillingPage({ searchParams }: Props) {
       </section>
       <section className="panel" style={{marginBottom:18}}><div className="panelHeader"><div><span className="eyebrow">{m.currentSubscription}</span><h2>{PLAN_LABELS[currentPlan]}</h2></div>{canManage&&subscription?.provider==='stripe'&&subscription.provider_subscription_id?<form action={openCustomerPortal}><button className="secondary" type="submit">{m.managePayment}</button></form>:null}</div><div className="emptyState" style={{textAlign:'left'}}><h3>{status}</h3><p style={{marginLeft:0}}>{description(currentPlan)}{periodEnd?` ${m.currentPaidUntil} ${periodEnd}.`:''}</p></div></section>
       <section className="panel"><div className="panelHeader"><div><span className="eyebrow">{m.plans}</span><h2>{hasManagedSubscription?m.changePlan:m.choosePlan}</h2><p className="muted">{m.pricesFromProvider}</p></div></div>
-        {hasManagedSubscription?<div className="emptyState"><h3>{m.subscriptionActive}</h3><p>{m.portalHelp}</p>{canManage?<form action={openCustomerPortal}><button className="primary" type="submit">{m.openPortal}</button></form>:null}</div>:<div className="metricGrid" style={{padding:16,marginBottom:0}}><article className="metricCard"><span>FREE</span><strong>Free</strong><small>{description('free')}</small></article>{PAID_PLANS.map((plan)=>{const configured=stripeCheckoutConfigured(plan);return <article className="metricCard" key={plan}><span>{plan.toUpperCase()}</span><strong>{PLAN_LABELS[plan]}</strong><small>{description(plan)}</small><div className="formActions" style={{marginTop:14}}>{canManage&&configured?<form action={startCheckout}><input type="hidden" name="plan" value={plan}/><button className="primary" type="submit">{m.choose} {PLAN_LABELS[plan]}</button></form>:null}{!configured?<span className="muted">{m.variantNotConfigured}</span>:null}{!canManage&&configured?<span className="muted">{m.planPermission}</span>:null}</div></article>;})}</div>}
+        {hasManagedSubscription?<div className="emptyState"><h3>{m.subscriptionActive}</h3><p>{m.portalHelp}</p>{canManage?<form action={openCustomerPortal}><button className="primary" type="submit">{m.openPortal}</button></form>:null}</div>:<div className="metricGrid" style={{padding:16,marginBottom:0}}><article className="metricCard"><span>FREE</span><strong>Free</strong><small>{description('free')}</small></article>{configuredPaidPlans.map((plan)=><article className="metricCard" key={plan}><span>{plan.toUpperCase()}</span><strong>{PLAN_LABELS[plan]}</strong><small>{description(plan)}</small><div className="formActions" style={{marginTop:14}}>{canManage?<form action={startCheckout}><input type="hidden" name="plan" value={plan}/><button className="primary" type="submit">{m.choose} {PLAN_LABELS[plan]}</button></form>:<span className="muted">{m.planPermission}</span>}</div></article>)}</div>}
       </section>
     </div>
   </AppShell>;
