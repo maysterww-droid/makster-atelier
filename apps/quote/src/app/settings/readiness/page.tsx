@@ -22,7 +22,7 @@ export default async function ReadinessPage(){
     supabase.from('clients').select('id',{count:'exact',head:true}).eq('organization_id',organization.id).is('archived_at',null),
   ]);
   if(priceBookResult.error)throw new Error(`Failed to check Price Book: ${priceBookResult.error.message}`);
-  const checks=environmentReadiness(); const brand=readQuoteBrand(organization.settings,organization.name); const brandReady=Boolean(brand.tradeName&&brand.address&&(brand.email||brand.phone));
+  const checks=environmentReadiness(locale); const brand=readQuoteBrand(organization.settings,organization.name); const brandReady=Boolean(brand.tradeName&&brand.address&&(brand.email||brand.phone));
   const priceItems=priceBookResult.data??[]; const categories=new Set(priceItems.map((item)=>item.category)); const requiredCategories=['board','front','edge','hardware','operation']; const missingCategories=requiredCategories.filter((category)=>!categories.has(category)); const priceReady=priceItems.length>0&&missingCategories.length===0;
   const quoteSettings=record(record(organization.settings).quote); const pricingConfigured=Number.isInteger(Number(quoteSettings.targetMarginBps))&&Number(quoteSettings.targetMarginBps)>=0&&Number(quoteSettings.targetMarginBps)<10_000&&Number.isInteger(Number(quoteSettings.overheadBps))&&Number(quoteSettings.overheadBps)>=0&&Number(quoteSettings.overheadBps)<10_000; const margin=pricingConfigured?Number(quoteSettings.targetMarginBps)/100:35; const overhead=pricingConfigured?Number(quoteSettings.overheadBps)/100:0;
   checks.push(
