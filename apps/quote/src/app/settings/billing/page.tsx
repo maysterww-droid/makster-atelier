@@ -11,6 +11,8 @@ import { openCustomerPortal, startCheckout } from './actions';
 export const dynamic = 'force-dynamic';
 type Props = { searchParams: Promise<{ checkout?: string; error?: string }> };
 
+const BILLING_TIME_ZONE = 'Europe/Prague';
+
 export default async function BillingPage({ searchParams }: Props) {
   const query=await searchParams;
   const {supabase,organization,role}=await requireWorkspace();
@@ -19,7 +21,7 @@ export default async function BillingPage({ searchParams }: Props) {
   if(error)throw new Error(`Failed to load subscription: ${error.message}`);
   const currentPlan=(subscription?.plan??'free') as QuotePlan; const currentStatus=subscription?.status??'inactive'; const canManage=['owner','admin'].includes(role);
   const hasManagedSubscription=subscription?.provider==='stripe'&&Boolean(subscription.provider_subscription_id)&&currentStatus!=='expired'&&currentStatus!=='inactive';
-  const periodEnd=subscription?.current_period_end?new Intl.DateTimeFormat(INTL_LOCALES[locale],{dateStyle:'medium'}).format(new Date(subscription.current_period_end)):null;
+  const periodEnd=subscription?.current_period_end?new Intl.DateTimeFormat(INTL_LOCALES[locale],{dateStyle:'medium',timeZone:BILLING_TIME_ZONE}).format(new Date(subscription.current_period_end)):null;
   const description=(plan:QuotePlan)=>billingPlanDescription(locale,plan); const status=billingStatusLabel(locale,currentStatus);
   const configuredPaidPlans=PAID_PLANS.filter((plan)=>stripeCheckoutConfigured(plan));
 
