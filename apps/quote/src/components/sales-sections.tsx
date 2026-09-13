@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import type { Locale } from '@/lib/i18n';
+import { getMarketingMessages } from '@/lib/marketing-i18n';
+import localizedStyles from './marketing-localized.module.css';
 import styles from './sales-sections.module.css';
 
 export function SalesCapabilities() {
@@ -117,35 +120,43 @@ export function SalesAudience() {
   );
 }
 
-export function SalesPricing() {
+export function SalesPricing({ locale }: { locale: Locale }) {
+  const { pricing } = getMarketingMessages(locale);
   return (
     <section id="pricing" className={styles.pricing}>
       <header className={styles.pricingHead}>
-        <span>PRICING</span>
-        <h2>Сначала проверьте Quote<br/><em>на своей работе.</em></h2>
+        <span>{pricing.eyebrow}</span>
+        <h2>{pricing.title}<br/><em>{pricing.emphasis}</em></h2>
+        <p className={localizedStyles.pricingNote}>{pricing.note}</p>
       </header>
 
       <div className={styles.pricingMain}>
         <div className={styles.pilotOffer}>
-          <span>STARTER / CLOSED PILOT</span>
-          <strong>0 Kč</strong>
-          <h3>Посчитайте реальный проект.</h3>
-          <p>Quote Builder · Price Book · True Cost · PDF</p>
-          <Link href="/login">Начать пилот <b>→</b></Link>
+          <span>{pricing.pilotBadge}</span>
+          <strong>{pricing.pilotPrice}</strong>
+          <h3>{pricing.pilotTitle}</h3>
+          <p>{pricing.pilotDescription}</p>
+          <Link href="/login">{pricing.pilotCta} <b>→</b></Link>
         </div>
 
         <div className={styles.futurePlans}>
           <article>
-            <span>WORKSHOP</span>
-            <h3>Для мастерской</h3>
-            <strong>На запуске</strong>
-            <p>История версий · расширенные шаблоны · Makster Pro</p>
+            <span>FOUNDER</span>
+            <h3>{pricing.founderName}</h3>
+            <strong>{pricing.founderStatus}</strong>
+            <p>{pricing.founderDescription}</p>
           </article>
           <article>
-            <span>ATELIER</span>
-            <h3>Для команды</h3>
-            <strong>Custom</strong>
-            <p>Роли · командный Price Book · интеграции</p>
+            <span>PRO</span>
+            <h3>{pricing.proName}</h3>
+            <strong>{pricing.proStatus}</strong>
+            <p>{pricing.proDescription}</p>
+          </article>
+          <article>
+            <span>WORKSHOP</span>
+            <h3>{pricing.workshopName}</h3>
+            <strong>{pricing.workshopStatus}</strong>
+            <p>{pricing.workshopDescription}</p>
           </article>
         </div>
       </div>

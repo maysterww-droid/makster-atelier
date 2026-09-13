@@ -1,0 +1,14 @@
+.pricingNote {
+  max-width: 720px;
+  margin: 22px 0 0;
+  color: #76675d;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+@media (max-width: 780px) {
+  .pricingNote {
+    margin-top: 18px;
+    font-size: 12px;
+  }
+}
