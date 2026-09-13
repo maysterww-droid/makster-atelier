@@ -14,9 +14,10 @@ export const dynamic = 'force-dynamic';
 
 const acceptedEvents = new Set([
   'checkout.session.completed',
-  'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
+  'invoice.paid',
+  'invoice.payment_failed',
 ]);
 
 function isUuid(value: unknown) {
@@ -52,6 +53,12 @@ function stringValue(value: unknown) {
   return text || null;
 }
 
+function objectId(value: unknown) {
+  if (typeof value === 'string') return stringValue(value);
+  if (value && typeof value === 'object') return stringValue((value as { id?: unknown }).id);
+  return null;
+}
+
 type StripeEvent = {
   id?: string;
   type?: string;
@@ -60,24 +67,50 @@ type StripeEvent = {
   data?: { object?: Record<string, unknown> };
 };
 
+type StripeSubscriptionItem = {
+  current_period_end?: number;
+  price?: { id?: string };
+};
+
 type StripeSubscription = Record<string, unknown> & {
   id?: string;
   customer?: string | { id?: string };
   status?: string;
-  current_period_end?: number;
   metadata?: Record<string, unknown>;
-  items?: { data?: Array<{ price?: { id?: string } }> };
+  items?: { data?: StripeSubscriptionItem[] };
 };
+
+function subscriptionIdFromObject(object: Record<string, unknown>) {
+  const direct = objectId(object.subscription);
+  if (direct) return direct;
+
+  const parent = object.parent && typeof object.parent === 'object'
+    ? object.parent as Record<string, unknown>
+    : null;
+  const subscriptionDetails = parent?.subscription_details && typeof parent.subscription_details === 'object'
+    ? parent.subscription_details as Record<string, unknown>
+    : null;
+  return objectId(subscriptionDetails?.subscription);
+}
 
 async function resolveSubscription(eventName: string, object: Record<string, unknown>) {
   if (eventName.startsWith('customer.subscription.')) {
     return object as StripeSubscription;
   }
-  const subscriptionId = stringValue(object.subscription);
+
+  const subscriptionId = subscriptionIdFromObject(object);
   if (!subscriptionId) return null;
   const response = await stripeGet(`subscriptions/${encodeURIComponent(subscriptionId)}`);
   if (!response?.ok) return null;
   return await response.json() as StripeSubscription;
+}
+
+function subscriptionPeriodEnd(subscription: StripeSubscription) {
+  const values = (subscription.items?.data ?? [])
+    .map((item) => Number(item.current_period_end ?? 0))
+    .filter((value) => Number.isFinite(value) && value > 0);
+  if (values.length === 0) return null;
+  return new Date(Math.max(...values) * 1000).toISOString();
 }
 
 export async function POST(request: Request) {
@@ -104,7 +137,12 @@ export async function POST(request: Request) {
   if (!acceptedEvents.has(eventName)) return NextResponse.json({ ok: true, ignored: true }, { status: 202 });
 
   const subscription = await resolveSubscription(eventName, object);
-  if (!subscription?.id) return NextResponse.json({ error: 'subscription-not-found' }, { status: 422 });
+  if (!subscription?.id) {
+    if (eventName.startsWith('invoice.')) {
+      return NextResponse.json({ ok: true, ignored: true, reason: 'non-subscription-invoice' }, { status: 202 });
+    }
+    return NextResponse.json({ error: 'subscription-not-found' }, { status: 422 });
+  }
 
   const sessionMetadata = object.metadata && typeof object.metadata === 'object' ? object.metadata as Record<string, unknown> : {};
   const subscriptionMetadata = subscription.metadata ?? {};
@@ -125,9 +163,7 @@ export async function POST(request: Request) {
   const providerUpdatedAt = event.created
     ? new Date(event.created * 1000).toISOString()
     : new Date().toISOString();
-  const currentPeriodEnd = subscription.current_period_end
-    ? new Date(subscription.current_period_end * 1000).toISOString()
-    : null;
+  const currentPeriodEnd = subscriptionPeriodEnd(subscription);
   const providerStatus = eventName === 'customer.subscription.deleted'
     ? 'cancelled'
     : normalizeStripeStatus(subscription.status);
