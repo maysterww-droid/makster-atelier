@@ -11,6 +11,18 @@ function redirectToLogin(request: NextRequest) {
 export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  const localeRoute = pathname.match(/^\/(ru|en|cs|de|pl)\/?$/)?.[1];
+  if (localeRoute) {
+    request.cookies.set('mq_locale', localeRoute);
+    const response = NextResponse.next({ request });
+    response.cookies.set('mq_locale', localeRoute, {
+      path: '/',
+      maxAge: 31_536_000,
+      sameSite: 'lax',
+    });
+    return response;
+  }
+
   if (pathname.startsWith('/api/webhooks/lemonsqueezy')) {
     return NextResponse.next({ request });
   }
@@ -18,7 +30,10 @@ export async function updateSession(request: NextRequest) {
   const isPublicRoute = pathname === '/'
     || pathname.startsWith('/login')
     || pathname.startsWith('/auth')
-    || pathname.startsWith('/q/');
+    || pathname.startsWith('/q/')
+    || pathname === '/robots.txt'
+    || pathname === '/sitemap.xml'
+    || pathname === '/manifest.webmanifest';
 
   // Public pages do not need an auth lookup. Keeping them independent from
   // Supabase session refresh prevents a transient auth failure from taking

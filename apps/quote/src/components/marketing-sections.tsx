@@ -1,14 +1,8 @@
 import Link from 'next/link';
+import type { Locale } from '@/lib/i18n';
+import { getMarketingMessages } from '@/lib/marketing-i18n';
 import { MaksterQuoteLogo } from './brand-logo';
 import styles from '@/app/marketing.module.css';
-
-const faqs = [
-  ['Makster Quote — это замена Excel?', 'Да, но не просто более красивый Excel. Quote строит расчёт вокруг реальной мебельной конструкции, Price Book и себестоимости, чтобы коммерческая часть не жила отдельно от проекта.'],
-  ['Нужно ли сразу заполнять весь прайс-лист?', 'Нет. Можно начать с основных материалов и фурнитуры. Если цены нет, Makster показывает это явно, а не подставляет вымышленную стоимость.'],
-  ['Можно ли использовать Quote без Makster Pro?', 'Да. Quote проектируется как самостоятельный облачный продукт. При этом структура данных сразу готовится к связке с Makster Pro.'],
-  ['Будет ли мобильная версия?', 'Да. Публичный сайт и ключевые сценарии Quote проектируются адаптивно. Полноценное инженерное редактирование удобнее на большом экране, но просмотр проектов и быстрые действия должны работать и на телефоне.'],
-  ['Какие языки планируются?', 'Launch Pack: English как fallback, русский, чешский, немецкий и польский.'],
-];
 
 export function MarketingHeader() {
   return (
@@ -33,31 +27,33 @@ export function MarketingHeader() {
   );
 }
 
-export function FAQSection() {
+export function FAQSection({ locale }: { locale: Locale }) {
+  const { faq } = getMarketingMessages(locale);
   return (
     <section id="faq" className={styles.section}>
       <div className={styles.faqLayout}>
         <div className={styles.sectionHead}>
           <span className={styles.eyebrow}>FAQ</span>
-          <h2>Вопросы до первого расчёта.</h2>
+          <h2>{faq.title}</h2>
         </div>
         <div className={styles.faqList}>
-          {faqs.map(([q, a]) => <details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}
+          {faq.items.map(({ question, answer }) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}
         </div>
       </div>
     </section>
   );
 }
 
-export function FinalCTA() {
+export function FinalCTA({ locale }: { locale: Locale }) {
+  const { final } = getMarketingMessages(locale);
   return (
     <section id="final-cta" className={styles.finalCta}>
       <div>
         <span className={styles.eyebrow}>MAKSTER QUOTE</span>
-        <h2>Следующая смета должна занимать меньше времени — и оставлять больше маржи.</h2>
-        <p>Запустите пилот на реальном проекте и настройте Quote под собственную мастерскую.</p>
+        <h2>{final.title}</h2>
+        <p>{final.body}</p>
       </div>
-      <Link href="/login" className={styles.lightButton}>Открыть Makster Quote <span>→</span></Link>
+      <Link href="/login" className={styles.lightButton}>{final.cta} <span>→</span></Link>
     </section>
   );
 }
