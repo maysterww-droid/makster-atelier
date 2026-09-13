@@ -11,19 +11,19 @@ function QuoteCockpit({ locale }: { locale: Locale }) {
       <div className={styles.cockpitChrome}>
         <div className={styles.chromeDots}><i/><i/><i/></div>
         <span>Kitchen Praha · MQ-0082</span>
-        <b>LIVE</b>
+        <b>{t(locale, 'statusActive')}</b>
       </div>
       <div className={styles.cockpitBody}>
         <aside>
           <MaksterQuoteLogo compact variant="light" />
           <span className={styles.activeNav}>{hero.overview}</span>
           <span>{hero.structure}</span>
-          <span>Price Book</span>
+          <span>{t(locale, 'priceBook')}</span>
           <span>{hero.documents}</span>
         </aside>
         <div className={styles.workspace}>
           <div className={styles.workspaceHead}>
-            <div><small>PROJECT MQ-0082</small><strong>Kitchen Praha</strong></div>
+            <div><small>{t(locale, 'project').toUpperCase()} MQ-0082</small><strong>Kitchen Praha</strong></div>
             <button>PDF</button>
           </div>
           <div className={styles.metrics}>
@@ -39,7 +39,7 @@ function QuoteCockpit({ locale }: { locale: Locale }) {
               <div><i/><span><b>Tall Oven</b><small>{hero.moduleOven}</small></span><em>14 760</em></div>
             </div>
             <div className={styles.trueCost}>
-              <small>TRUE COST</small>
+              <small>{t(locale, 'trueCost')}</small>
               <p><span>{t(locale, 'materials')}</span><b>66 340</b></p>
               <p><span>{t(locale, 'hardware')}</span><b>31 520</b></p>
               <p><span>{t(locale, 'labour')}</span><b>21 600</b></p>
@@ -69,8 +69,8 @@ export function PremiumHero({ locale }: { locale: Locale }) {
         </div>
       </div>
       <div className={styles.visualStage}>
-        <div className="mq-software-tag">FURNITURE PRICING SOFTWARE</div>
-        <div className="mq-live-project"><span>{hero.liveProject}</span><b>MQ-0082</b><em>{hero.modulesMargin}</em></div>
+        <div className="mq-software-tag">{hero.eyebrow}</div>
+        <div className="mq-live-project"><span>{t(locale, 'statusActive')} · {t(locale, 'project')}</span><b>MQ-0082</b><em>{hero.modulesMargin}</em></div>
         <QuoteCockpit locale={locale} />
       </div>
     </section>

@@ -17,6 +17,7 @@
   margin-top:86px!important;
   box-shadow:0 30px 78px rgba(48,28,17,.18)!important;
 }
+.mq-software-tag{max-width:calc(100% - 175px);white-space:normal;line-height:1.35}
 .mq-live-project{
   position:absolute;right:22px;top:20px;z-index:5;display:grid;grid-template-columns:auto auto;column-gap:8px;align-items:center;
   padding:10px 12px;border-radius:14px;background:rgba(255,252,247,.92);border:1px solid #d9c8b9;box-shadow:0 10px 26px rgba(62,37,22,.09);backdrop-filter:blur(10px)
@@ -40,7 +41,7 @@
   .mq-premium [class*="heroCopy"]>p{font-size:15px!important;line-height:1.5!important;max-width:32ch}
   .mq-premium [class*="visualStage"]{padding:12px!important;border-radius:22px!important}
   .mq-premium [class*="visualStage"] [class*="cockpit"]{margin-top:70px!important}
-  .mq-software-tag{top:12px;left:12px}
+  .mq-software-tag{top:12px;left:12px;max-width:calc(100% - 130px)}
   .mq-live-project{right:12px;top:10px;padding:8px 9px}.mq-live-project em{display:none}.mq-live-project b{font-size:10px}
 
   .mq-premium [class*="productCards"] article>div:first-child p{display:none!important}

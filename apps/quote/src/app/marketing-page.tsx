@@ -33,6 +33,9 @@ export function MarketingPageContent({ locale, canonicalPath = `/${locale}` }: {
       priceBook: t(locale, 'priceBook'),
       cabinetLibrary: t(locale, 'cabinetLibrary'),
       plan: t(locale, 'plan'),
+      statusActive: t(locale, 'statusActive'),
+      trueCost: t(locale, 'trueCost'),
+      clientQuote: t(locale, 'clientQuote'),
       materials: t(locale, 'materials'),
       hardware: t(locale, 'hardware'),
       labour: t(locale, 'labour'),
@@ -55,7 +58,7 @@ export function MarketingPageContent({ locale, canonicalPath = `/${locale}` }: {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'CZK',
-      description: 'Closed pilot',
+      description: marketing.pricing.pilotTitle,
     },
   };
 

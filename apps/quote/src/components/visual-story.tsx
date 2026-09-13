@@ -33,7 +33,7 @@ export function VisualStory({ locale }: { locale: Locale }) {
       <div className={styles.flowArrow}><span>↓</span></div>
 
       <div className={styles.sceneMoney}>
-        <div className={styles.sceneLabel}><span>02</span><b>TRUE COST</b></div>
+        <div className={styles.sceneLabel}><span>02</span><b>{story.cost}</b></div>
         <div className={styles.moneyBoard}>
           <div className={styles.costBars}>
             <div style={{'--w':'100%'} as React.CSSProperties}><span>{t(locale, 'materials')}</span><b>66 340</b><i/></div>

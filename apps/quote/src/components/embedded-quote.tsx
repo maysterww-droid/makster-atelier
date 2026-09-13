@@ -24,6 +24,9 @@ export type EmbeddedQuoteCopy = {
     priceBook: string;
     cabinetLibrary: string;
     plan: string;
+    statusActive: string;
+    trueCost: string;
+    clientQuote: string;
     materials: string;
     hardware: string;
     labour: string;
@@ -56,9 +59,9 @@ function ProjectView({ app, m }: { app: EmbeddedQuoteCopy['app']; m: DemoMessage
       <div className={styles.engine}><span>{m.construction}</span><b>{m.engineeringRule}</b><i>✓</i></div>
     </section>
     <aside className={styles.cost}>
-      <div className={styles.live}><i/> {m.liveCost}</div>
+      <div className={styles.live}><i/> {app.trueCost}</div>
       <div className={styles.costRows}><p><span>{app.materials}</span><b>66 340</b></p><p><span>{app.hardware}</span><b>31 520</b></p><p><span>{app.labour}</span><b>21 600</b></p><p><span>{app.overhead}</span><b>9 000</b></p></div>
-      <div className={styles.trueCost}><span>TRUE COST</span><strong>128 460 Kč</strong></div>
+      <div className={styles.trueCost}><span>{app.trueCost}</span><strong>128 460 Kč</strong></div>
       <div className={styles.margin}><span>{app.margin}</span><b>34.8%</b></div>
       <div className={styles.clientPrice}><span>{app.sellingPrice}</span><strong>196 900 Kč</strong><small>{m.withoutManual}</small></div>
     </aside>
@@ -68,7 +71,7 @@ function ProjectView({ app, m }: { app: EmbeddedQuoteCopy['app']; m: DemoMessage
 function PriceView({ app, m }: { app: EmbeddedQuoteCopy['app']; m: DemoMessages }) {
   const rows = [[m.material,'EGGER U702 ST9 · 18 mm',m.sheet,'1 780 Kč'],[m.hardware,'Blum LEGRABOX M',m.set,'1 190 Kč'],[m.edge,'ABS U702 · 1 mm',m.metre,'18 Kč'],[app.labour,m.assembly,m.hour,'620 Kč'],[app.installation,m.installation,m.hour,'850 Kč']];
   return <div className={styles.priceView}>
-    <div className={styles.priceHead}><div><small>YOUR PRICE BOOK</small><h3>{m.purchasePrices}</h3></div><button type="button">{m.addItem}</button></div>
+    <div className={styles.priceHead}><div><small>{app.priceBook}</small><h3>{m.purchasePrices}</h3></div><button type="button">{m.addItem}</button></div>
     <div className={styles.priceTable}><div className={styles.tableHead}><span>{m.category}</span><span>{m.item}</span><span>{m.unit}</span><span>{m.price}</span></div>
       {rows.map(([a,b,c,d],i)=><div key={b} className={i===1?styles.priceActive:''}><span>{a}</span><strong>{b}</strong><span>{c}</span><b>{d}</b></div>)}
     </div>
@@ -85,7 +88,7 @@ function ProposalView({ app, m }: { app: EmbeddedQuoteCopy['app']; m: DemoMessag
       <div className={styles.documentRows}><p><span>{m.bodyAndFronts}</span><b>{m.included}</b></p><p><span>{m.hardware} Blum</span><b>{m.included}</b></p><p><span>{m.manufacturing}</span><b>{m.included}</b></p><p><span>{app.installation}</span><b>{m.included}</b></p></div>
       <div className={styles.documentTotal}><span>{m.total}</span><strong>196 900 Kč</strong></div>
     </div>
-    <aside className={styles.pdfStatus}><span>CLIENT OUTPUT</span><strong>{m.pdfReady}</strong><div>✓</div><p>{m.versionSaved}</p><button type="button">{m.openPdf}</button></aside>
+    <aside className={styles.pdfStatus}><span>{app.clientQuote}</span><strong>{m.pdfReady}</strong><div>✓</div><p>{m.versionSaved}</p><button type="button">{m.openPdf}</button></aside>
   </div>;
 }
 
@@ -95,14 +98,14 @@ export function EmbeddedQuote({ copy }: { copy: EmbeddedQuoteCopy }) {
   return <section className={styles.section} id="workflow"><span id="product" aria-hidden="true"/>
     <header className={styles.heading}><span>{m.sectionLabel}</span><h2>{m.title}<em>{m.emphasis}</em></h2></header>
     <div className={styles.browser}>
-      <div className={styles.chrome}><div><i/><i/><i/></div><span>Makster Quote · Kitchen Praha</span><b>{m.liveDemo}</b></div>
+      <div className={styles.chrome}><div><i/><i/><i/></div><span>Makster Quote · Kitchen Praha</span><b>{app.statusActive}</b></div>
       <div className={styles.shell}>
         <aside className={styles.sidebar}><MaksterQuoteLogo variant="light"/><div className={styles.workshop}><small>{m.workshop}</small><b>Makster Atelier</b></div><nav><span>{app.dashboard}</span><strong>{app.newQuote}</strong><span>{app.priceBook}</span><span>{app.cabinetLibrary}</span><span>{copy.documents}</span></nav><div className={styles.plan}><small>{app.plan}</small><b>{m.pilot}</b></div></aside>
         <main className={styles.workspace}>
           <div className={styles.topbar}><div><small>{m.projectActive}</small><h3>Kitchen Praha</h3></div><div><button type="button">{app.priceBook}</button><button type="button" className={styles.primary}>{m.clientPdf}</button></div></div>
           <div className={styles.tabs}>
             <button type="button" className={view==='project'?styles.activeTab:''} onClick={()=>setView('project')}><span>01</span><b>{m.calculation}</b></button>
-            <button type="button" className={view==='prices'?styles.activeTab:''} onClick={()=>setView('prices')}><span>02</span><b>Price Book</b></button>
+            <button type="button" className={view==='prices'?styles.activeTab:''} onClick={()=>setView('prices')}><span>02</span><b>{app.priceBook}</b></button>
             <button type="button" className={view==='proposal'?styles.activeTab:''} onClick={()=>setView('proposal')}><span>03</span><b>{m.proposal}</b></button>
           </div>
           <div className={styles.view}>{view==='project'?<ProjectView app={app} m={m}/>:view==='prices'?<PriceView app={app} m={m}/>:<ProposalView app={app} m={m}/>}</div>
