@@ -19,7 +19,7 @@ export function environmentReadiness(): ReadinessCheck[] {
   const supabasePublic = has('NEXT_PUBLIC_SUPABASE_URL') && has('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
   const emailReady = has('RESEND_API_KEY') && has('QUOTE_EMAIL_FROM');
   const billingWebhookReady = stripeWebhookConfigured();
-  const billingCheckoutReady = stripeCheckoutConfigured('founder') && stripeCheckoutConfigured('pro') && stripeCheckoutConfigured('workshop');
+  const billingCheckoutReady = stripeCheckoutConfigured('pro');
 
   return [
     {
@@ -54,9 +54,9 @@ export function environmentReadiness(): ReadinessCheck[] {
     },
     {
       key: 'stripe-checkout',
-      label: 'Paid plan checkout prices',
+      label: 'Makster Quote Pro checkout',
       state: billingCheckoutReady ? 'ready' : 'warning',
-      detail: billingCheckoutReady ? 'Founder, Pro and Workshop Stripe prices are configured.' : 'One or more Founder / Pro / Workshop Stripe Price IDs are missing.',
+      detail: billingCheckoutReady ? 'Makster Quote Pro Stripe price is configured.' : 'STRIPE_PRO_MONTHLY_PRICE_ID is missing.',
     },
   ];
 }
