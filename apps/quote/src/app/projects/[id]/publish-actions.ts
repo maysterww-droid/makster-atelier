@@ -101,12 +101,12 @@ export async function publishCommercialQuote(formData: FormData) {
   const [clientResult, cabinetsResult, priceResult] = await Promise.all([
     supabase.from('clients').select('id, display_name, email, phone, address').eq('id', project.client_id).eq('organization_id', organization.id).maybeSingle(),
     supabase.from('quote_cabinets')
-      .select('id, module_key, name, sort_order, width_mm, height_mm, depth_mm, quantity, construction_json, material_refs_json, hardware_refs_json, computed_parts_json, engine_version, computed_cost_json')
+      .select('id, module_key, name, sort_order, width_mm, height_mm, depth_mm, quantity, construction_json, material_refs_json, hardware_refs_json, computed_parts_json, engine_version, computed_cost_json, updated_at')
       .eq('project_id', projectId)
       .eq('organization_id', organization.id)
       .order('sort_order')
       .order('created_at'),
-    supabase.from('quote_price_book_items').select('id, category, name, unit, currency, purchase_price_minor').eq('organization_id', organization.id).eq('active', true).eq('currency', project.currency),
+    supabase.from('quote_price_book_items').select('id, category, name, unit, currency, purchase_price_minor, updated_at').eq('organization_id', organization.id).eq('active', true).eq('currency', project.currency),
   ]);
 
   if (clientResult.error || !clientResult.data) redirect(`/projects/${projectId}?error=publish-client`);
@@ -116,11 +116,22 @@ export async function publishCommercialQuote(formData: FormData) {
   const measuredSettings = readMeasuredExtraSettings(project.settings);
   const priceBook = priceResult.data ?? [];
   const activePriceIds = new Set(priceBook.map((item) => item.id));
+  const priceBookById = new Map(priceBook.map((item) => [item.id, item]));
   const cabinets = cabinetsResult.data ?? [];
   const hasStaleCabinetReferences = cabinets.some((cabinet) =>
     [...cabinetReferencedPriceIds(cabinet)].some((priceId) => !activePriceIds.has(priceId)),
   );
   if (hasStaleCabinetReferences) redirect(`/projects/${projectId}?error=publish-incomplete`);
+
+  const hasPriceBookChangesAfterCabinetSave = cabinets.some((cabinet) => {
+    const cabinetUpdatedAt = Date.parse(String(cabinet.updated_at ?? ''));
+    if (!Number.isFinite(cabinetUpdatedAt)) return true;
+    return [...cabinetReferencedPriceIds(cabinet)].some((priceId) => {
+      const itemUpdatedAt = Date.parse(String(priceBookById.get(priceId)?.updated_at ?? ''));
+      return Number.isFinite(itemUpdatedAt) && itemUpdatedAt > cabinetUpdatedAt;
+    });
+  });
+  if (hasPriceBookChangesAfterCabinetSave) redirect(`/projects/${projectId}?error=publish-incomplete`);
 
   const selectedExtra = (id: string, category: 'delivery' | 'installation' | 'other') =>
     priceBook.find((item) => item.id === id && item.category === category && item.unit === 'job');
