@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
 import { checkoutConfigured, PAID_PLANS, PLAN_LABELS, type QuotePlan, webhookConfigured } from '@/lib/billing';
+import { getBillingRuntimeMessages } from '@/lib/i18n-billing-runtime';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import { INTL_LOCALES } from '@/lib/i18n';
 import { billingPlanDescription, billingStatusLabel, getSettingsMessages } from '@/lib/i18n-settings';
@@ -13,7 +14,7 @@ type Props = { searchParams: Promise<{ checkout?: string; error?: string }> };
 export default async function BillingPage({ searchParams }: Props) {
   const query=await searchParams;
   const {supabase,organization,role}=await requireWorkspace();
-  const locale=await getInterfaceLocale(); const m=getSettingsMessages(locale);
+  const locale=await getInterfaceLocale(); const m=getSettingsMessages(locale); const runtime=getBillingRuntimeMessages(locale);
   const {data:subscription,error}=await supabase.from('quote_subscriptions').select('plan, status, provider, provider_subscription_id, current_period_end, provider_variant_id, test_mode').eq('organization_id',organization.id).maybeSingle();
   if(error)throw new Error(`Failed to load subscription: ${error.message}`);
   const currentPlan=(subscription?.plan??'free') as QuotePlan; const currentStatus=subscription?.status??'inactive'; const canManage=['owner','admin'].includes(role);
@@ -22,7 +23,7 @@ export default async function BillingPage({ searchParams }: Props) {
   const description=(plan:QuotePlan)=>billingPlanDescription(locale,plan); const status=billingStatusLabel(locale,currentStatus);
 
   return <AppShell organizationName={organization.name} role={role} plan={PLAN_LABELS[currentPlan].toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">BILLING · MAKSTER QUOTE</span><h1>{m.billingTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
+    <header className="topbar"><div><span className="eyebrow">{runtime.eyebrow}</span><h1>{m.billingTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       {query.checkout==='success'?<div className="notice success"><strong>{m.checkoutSuccess}</strong> {m.checkoutWebhook}</div>:null}
       {query.error==='existing-subscription'?<div className="notice warning">{m.existingSubscription}</div>:null}
@@ -30,7 +31,7 @@ export default async function BillingPage({ searchParams }: Props) {
       <section className="metricGrid">
         <article className="metricCard"><span>{m.currentPlan}</span><strong>{PLAN_LABELS[currentPlan]}</strong><small>{m.forWorkshop}</small></article>
         <article className="metricCard"><span>{m.status}</span><strong>{status}</strong><small>{periodEnd?`${m.until} ${periodEnd}`:m.noEndDate}</small></article>
-        <article className="metricCard"><span>{m.billingBackend}</span><strong>{webhookConfigured()?'Ready':'Setup'}</strong><small>{subscription?.test_mode?'Lemon Squeezy test mode':(subscription?'live billing state':m.awaitsSetup)}</small></article>
+        <article className="metricCard"><span>{m.billingBackend}</span><strong>{webhookConfigured()?runtime.backendReady:runtime.backendSetup}</strong><small>{subscription?.test_mode?runtime.testMode:(subscription?runtime.liveState:m.awaitsSetup)}</small></article>
       </section>
       <section className="panel" style={{marginBottom:18}}><div className="panelHeader"><div><span className="eyebrow">{m.currentSubscription}</span><h2>{PLAN_LABELS[currentPlan]}</h2></div>{canManage&&subscription?.provider==='lemonsqueezy'&&subscription.provider_subscription_id?<form action={openCustomerPortal}><button className="secondary" type="submit">{m.managePayment}</button></form>:null}</div><div className="emptyState" style={{textAlign:'left'}}><h3>{status}</h3><p style={{marginLeft:0}}>{description(currentPlan)}{periodEnd?` ${m.currentPaidUntil} ${periodEnd}.`:''}</p></div></section>
       <section className="panel"><div className="panelHeader"><div><span className="eyebrow">{m.plans}</span><h2>{hasManagedSubscription?m.changePlan:m.choosePlan}</h2><p className="muted">{m.pricesFromProvider}</p></div></div>
