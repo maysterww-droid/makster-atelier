@@ -51,6 +51,7 @@ export async function startCheckout(formData: FormData) {
   const cancelUrl = `${appBaseUrl()}/settings/billing?checkout=cancelled`;
   const params = new URLSearchParams();
   params.set('mode', 'subscription');
+  params.set('managed_payments[enabled]', 'true');
   params.set('success_url', successUrl);
   params.set('cancel_url', cancelUrl);
   params.set('line_items[0][price]', priceId);
