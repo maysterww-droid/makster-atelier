@@ -1,0 +1,44 @@
+name: MQ Refresh Package Lock
+
+on:
+  push:
+    branches:
+      - makster-quote-release-hygiene-0.1.15
+    paths:
+      - .github/workflows/mq-refresh-package-lock.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: makster-quote-release-hygiene-0.1.15
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/quote/package-lock.json
+
+      - name: Refresh package-lock metadata
+        working-directory: apps/quote
+        run: npm install --package-lock-only
+
+      - name: Commit generated lockfile
+        run: |
+          if git diff --quiet -- apps/quote/package-lock.json; then
+            echo "package-lock.json already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/quote/package-lock.json
+          git commit -m "chore(quote): sync package-lock release metadata"
+          git push origin HEAD:makster-quote-release-hygiene-0.1.15
