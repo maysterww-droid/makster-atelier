@@ -25,6 +25,28 @@ function activeSubscription(subscription: { provider_subscription_id?: string | 
   );
 }
 
+function safeToken(value: unknown) {
+  return String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
+async function stripeFailureToken(response: Response) {
+  try {
+    const payload = await response.clone().json() as {
+      error?: { code?: unknown; param?: unknown; type?: unknown };
+    };
+    const code = safeToken(payload.error?.code) || safeToken(payload.error?.type);
+    const param = safeToken(payload.error?.param);
+    return [response.status, code, param].filter(Boolean).join('-');
+  } catch {
+    return String(response.status);
+  }
+}
+
 export async function startCheckout(formData: FormData) {
   const { supabase, organization, userId, role } = await requireWorkspace();
   if (!billingRoles.has(role)) redirect('/settings/billing?error=permission');
@@ -67,7 +89,10 @@ export async function startCheckout(formData: FormData) {
 
   const response = await stripePost('checkout/sessions', params);
   if (!response) redirect('/settings/billing?error=config');
-  if (!response.ok) redirect(`/settings/billing?error=checkout-${response.status}`);
+  if (!response.ok) {
+    const token = await stripeFailureToken(response);
+    redirect(`/settings/billing?error=checkout-${encodeURIComponent(token)}`);
+  }
 
   const payload = await response.json() as { url?: string };
   if (!payload.url || !/^https:\/\//.test(payload.url)) {
@@ -106,7 +131,10 @@ export async function openCustomerPortal() {
   params.set('return_url', `${appBaseUrl()}/settings/billing`);
   const response = await stripePost('billing_portal/sessions', params);
   if (!response) redirect('/settings/billing?error=config');
-  if (!response.ok) redirect(`/settings/billing?error=portal-${response.status}`);
+  if (!response.ok) {
+    const token = await stripeFailureToken(response);
+    redirect(`/settings/billing?error=portal-${encodeURIComponent(token)}`);
+  }
 
   const payload = await response.json() as { url?: string };
   if (!payload.url || !/^https:\/\//.test(payload.url)) {
