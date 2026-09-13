@@ -1,5 +1,7 @@
 import { appBaseUrl, type QuotePlan, type QuoteSubscriptionStatus } from '@/lib/billing';
 
+const MANAGED_PAYMENTS_API_VERSION = '2026-03-04.preview';
+
 function env(name: string) {
   return String(process.env[name] ?? '').trim();
 }
@@ -61,12 +63,24 @@ export function stripeReturnUrl() {
 export async function stripePost(path: string, params: URLSearchParams) {
   const secret = stripeSecretKey();
   if (!secret) return null;
-  return fetch(`https://api.stripe.com/v1/${path.replace(/^\/+/, '')}`, {
+
+  const normalizedPath = path.replace(/^\/+/, '');
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${secret}`,
+    'Content-Type': 'application/x-www-form-urlencoded',
+  };
+
+  // Managed Payments is a public-preview feature. Stripe requires a Preview
+  // API version specifically when creating a Checkout Session with
+  // managed_payments[enabled]=true. Keep portal and other API calls on the
+  // account/default API version.
+  if (normalizedPath === 'checkout/sessions' && params.get('managed_payments[enabled]') === 'true') {
+    headers['Stripe-Version'] = MANAGED_PAYMENTS_API_VERSION;
+  }
+
+  return fetch(`https://api.stripe.com/v1/${normalizedPath}`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${secret}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers,
     body: params.toString(),
     cache: 'no-store',
   });
