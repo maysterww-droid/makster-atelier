@@ -1,3 +1,4 @@
+import { MaksterQuoteLogo } from '@/components/brand-logo';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import { getAuthMessages } from '@/lib/i18n-auth';
@@ -11,7 +12,7 @@ export default async function LoginPage({searchParams}:Props){
   const query=await searchParams;const locale=await getInterfaceLocale();const m=getAuthMessages(locale);const signupErrors=getAuthSignupErrors(locale);
   const errors:Record<string,string>={missing:m.missing,invalid:m.invalid,password:m.passwordError,signup:m.signupError,'signup-email':signupErrors.emailNotAuthorized,'signup-rate':signupErrors.rateLimited};
   return <main className="authPage"><section className="authCard">
-    <div className="authBrand"><span className="brandMark">M</span><div><strong>Makster</strong><small>Quote</small></div></div>
+    <div className="authBrand"><MaksterQuoteLogo /></div>
     <h1>{m.headline}</h1><p className="muted">{m.loginHelp}</p>
     <LocaleSwitcher locale={locale} label={m.interfaceLanguage}/>
     {query.error?<div className="notice error">{errors[query.error]??m.genericError}</div>:null}
