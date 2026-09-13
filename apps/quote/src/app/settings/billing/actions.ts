@@ -11,6 +11,7 @@ import {
   type QuotePlan,
   variantIdForPlan,
 } from '@/lib/billing';
+import { isPositiveIntegerId, isValidHttpsAppUrl } from '@/lib/billing-config-guard';
 import { requireWorkspace } from '@/lib/workspace';
 
 const billingRoles = new Set(['owner', 'admin']);
@@ -47,6 +48,10 @@ export async function startCheckout(formData: FormData) {
   const apiKey = lemonApiKey();
   const storeId = lemonStoreId();
   const variantId = variantIdForPlan(plan);
+  const baseUrl = appBaseUrl();
+  if (!isPositiveIntegerId(storeId) || !isPositiveIntegerId(variantId) || !isValidHttpsAppUrl(baseUrl)) {
+    redirect('/settings/billing?error=config');
+  }
   const { data: authData } = await supabase.auth.getUser();
   const email = authData.user?.email ?? undefined;
 
@@ -64,7 +69,7 @@ export async function startCheckout(formData: FormData) {
           test_mode: lemonTestMode(),
           product_options: {
             enabled_variants: [Number(variantId)],
-            redirect_url: `${appBaseUrl()}/settings/billing?checkout=success`,
+            redirect_url: `${baseUrl}/settings/billing?checkout=success`,
           },
           checkout_data: {
             ...(email ? { email } : {}),
