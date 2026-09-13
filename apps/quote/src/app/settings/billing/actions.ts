@@ -1,16 +1,13 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { appBaseUrl, PAID_PLANS, type QuotePlan } from '@/lib/billing';
 import {
-  appBaseUrl,
-  checkoutConfigured,
-  lemonApiKey,
-  lemonStoreId,
-  lemonTestMode,
-  PAID_PLANS,
-  type QuotePlan,
-  variantIdForPlan,
-} from '@/lib/billing';
+  stripeCheckoutConfigured,
+  stripeGet,
+  stripePost,
+  stripePriceIdForPlan,
+} from '@/lib/stripe-billing';
 import { requireWorkspace } from '@/lib/workspace';
 
 const billingRoles = new Set(['owner', 'admin']);
@@ -20,13 +17,21 @@ function cleanPlan(value: FormDataEntryValue | null): QuotePlan | null {
   return PAID_PLANS.includes(plan) ? plan : null;
 }
 
+function activeSubscription(subscription: { provider_subscription_id?: string | null; status?: string | null } | null | undefined) {
+  return Boolean(
+    subscription?.provider_subscription_id
+    && subscription.status !== 'expired'
+    && subscription.status !== 'inactive',
+  );
+}
+
 export async function startCheckout(formData: FormData) {
   const { supabase, organization, userId, role } = await requireWorkspace();
   if (!billingRoles.has(role)) redirect('/settings/billing?error=permission');
 
   const plan = cleanPlan(formData.get('plan'));
   if (!plan) redirect('/settings/billing?error=plan');
-  if (!checkoutConfigured(plan)) redirect('/settings/billing?error=config');
+  if (!stripeCheckoutConfigured(plan)) redirect('/settings/billing?error=config');
 
   const { data: currentSubscription, error: subscriptionError } = await supabase
     .from('quote_subscriptions')
@@ -35,92 +40,76 @@ export async function startCheckout(formData: FormData) {
     .maybeSingle();
 
   if (subscriptionError) redirect('/settings/billing?error=subscription-read');
-  if (
-    currentSubscription?.provider === 'lemonsqueezy'
-    && currentSubscription.provider_subscription_id
-    && currentSubscription.status !== 'expired'
-    && currentSubscription.status !== 'inactive'
-  ) {
+  if (activeSubscription(currentSubscription)) {
     redirect('/settings/billing?error=existing-subscription');
   }
 
-  const apiKey = lemonApiKey();
-  const storeId = lemonStoreId();
-  const variantId = variantIdForPlan(plan);
+  const priceId = stripePriceIdForPlan(plan);
   const { data: authData } = await supabase.auth.getUser();
-  const email = authData.user?.email ?? undefined;
+  const email = authData.user?.email?.trim();
+  const successUrl = `${appBaseUrl()}/settings/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${appBaseUrl()}/settings/billing?checkout=cancelled`;
+  const params = new URLSearchParams();
+  params.set('mode', 'subscription');
+  params.set('success_url', successUrl);
+  params.set('cancel_url', cancelUrl);
+  params.set('line_items[0][price]', priceId);
+  params.set('line_items[0][quantity]', '1');
+  params.set('client_reference_id', organization.id);
+  if (email) params.set('customer_email', email);
+  params.set('metadata[organization_id]', organization.id);
+  params.set('metadata[user_id]', userId);
+  params.set('metadata[plan]', plan);
+  params.set('subscription_data[metadata][organization_id]', organization.id);
+  params.set('subscription_data[metadata][user_id]', userId);
+  params.set('subscription_data[metadata][plan]', plan);
 
-  const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/vnd.api+json',
-      'Content-Type': 'application/vnd.api+json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      data: {
-        type: 'checkouts',
-        attributes: {
-          test_mode: lemonTestMode(),
-          product_options: {
-            enabled_variants: [Number(variantId)],
-            redirect_url: `${appBaseUrl()}/settings/billing?checkout=success`,
-          },
-          checkout_data: {
-            ...(email ? { email } : {}),
-            custom: {
-              organization_id: organization.id,
-              user_id: userId,
-              plan,
-            },
-          },
-        },
-        relationships: {
-          store: { data: { type: 'stores', id: storeId } },
-          variant: { data: { type: 'variants', id: variantId } },
-        },
-      },
-    }),
-    cache: 'no-store',
-  });
+  const response = await stripePost('checkout/sessions', params);
+  if (!response) redirect('/settings/billing?error=config');
+  if (!response.ok) redirect(`/settings/billing?error=checkout-${response.status}`);
 
-  if (!response.ok) {
-    redirect(`/settings/billing?error=checkout-${response.status}`);
+  const payload = await response.json() as { url?: string };
+  if (!payload.url || !/^https:\/\//.test(payload.url)) {
+    redirect('/settings/billing?error=checkout-url');
   }
-
-  const payload = await response.json() as { data?: { attributes?: { url?: string } } };
-  const url = payload.data?.attributes?.url;
-  if (!url || !/^https:\/\//.test(url)) redirect('/settings/billing?error=checkout-url');
-  redirect(url);
+  redirect(payload.url);
 }
 
 export async function openCustomerPortal() {
   const { supabase, organization, role } = await requireWorkspace();
   if (!billingRoles.has(role)) redirect('/settings/billing?error=permission');
-  if (!lemonApiKey()) redirect('/settings/billing?error=config');
 
   const { data: subscription, error } = await supabase
     .from('quote_subscriptions')
-    .select('provider, provider_subscription_id')
+    .select('provider, provider_subscription_id, provider_customer_id')
     .eq('organization_id', organization.id)
     .maybeSingle();
 
-  if (error || subscription?.provider !== 'lemonsqueezy' || !subscription.provider_subscription_id) {
+  if (error || subscription?.provider !== 'stripe' || !subscription.provider_subscription_id) {
     redirect('/settings/billing?error=subscription');
   }
 
-  const response = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${encodeURIComponent(subscription.provider_subscription_id)}`, {
-    headers: {
-      Accept: 'application/vnd.api+json',
-      'Content-Type': 'application/vnd.api+json',
-      Authorization: `Bearer ${lemonApiKey()}`,
-    },
-    cache: 'no-store',
-  });
+  let customerId = String(subscription.provider_customer_id ?? '').trim();
+  if (!customerId) {
+    const subscriptionResponse = await stripeGet(`subscriptions/${encodeURIComponent(subscription.provider_subscription_id)}`);
+    if (!subscriptionResponse?.ok) redirect('/settings/billing?error=portal-customer');
+    const stripeSubscription = await subscriptionResponse.json() as { customer?: string | { id?: string } };
+    customerId = typeof stripeSubscription.customer === 'string'
+      ? stripeSubscription.customer
+      : String(stripeSubscription.customer?.id ?? '').trim();
+  }
+  if (!customerId) redirect('/settings/billing?error=portal-customer');
 
+  const params = new URLSearchParams();
+  params.set('customer', customerId);
+  params.set('return_url', `${appBaseUrl()}/settings/billing`);
+  const response = await stripePost('billing_portal/sessions', params);
+  if (!response) redirect('/settings/billing?error=config');
   if (!response.ok) redirect(`/settings/billing?error=portal-${response.status}`);
-  const payload = await response.json() as { data?: { attributes?: { urls?: { customer_portal?: string } } } };
-  const url = payload.data?.attributes?.urls?.customer_portal;
-  if (!url || !/^https:\/\//.test(url)) redirect('/settings/billing?error=portal-url');
-  redirect(url);
+
+  const payload = await response.json() as { url?: string };
+  if (!payload.url || !/^https:\/\//.test(payload.url)) {
+    redirect('/settings/billing?error=portal-url');
+  }
+  redirect(payload.url);
 }
