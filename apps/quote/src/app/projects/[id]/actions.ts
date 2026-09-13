@@ -53,7 +53,7 @@ export async function saveCabinet(formData:FormData){
     material_refs_json:{boardItemId:input.boardItemId??null,frontItemId:input.frontItemId??null,backItemId:input.backItemId??null,edgeItemId:input.edgeItemId??null,labourItemId:input.labourItemId??null},hardware_refs_json:{hingeItemId:input.hingeItemId??null,drawerItemId:input.drawerItemId??null},
     computed_parts_json:{usage:preview.usage,parts:preview.parts,hardware:preview.hardware.map((line)=>({...line,costMinor:line.costMinor.toString()})),operations:preview.operations.map((line)=>({...line,costMinor:line.costMinor.toString()})),notes:preview.notes},computed_cost_json:costPreviewToJson(preview),engine_version:'mq-0.1.11-engineering',created_by:userId,updated_at:new Date().toISOString()};
   const result=cabinetId?await supabase.from('quote_cabinets').update(payload).eq('id',cabinetId).eq('project_id',projectId).eq('organization_id',organization.id):await supabase.from('quote_cabinets').insert(payload);
-  if(result.error)redirect(`/projects/${projectId}?error=save`); revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard');
+  if(result.error)redirect(`/projects/${projectId}?error=save`); revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard'); redirect(`/projects/${projectId}?saved=module-saved`);
 }
 
 export async function duplicateCabinet(formData:FormData){
