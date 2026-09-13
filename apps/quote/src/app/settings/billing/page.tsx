@@ -27,7 +27,6 @@ export default async function BillingPage({ searchParams }: Props) {
     <header className="topbar"><div><span className="eyebrow">BILLING · MAKSTER QUOTE</span><h1>{m.billingTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       {query.checkout==='success'?<div className="notice success"><strong>{m.checkoutSuccess}</strong> {m.checkoutWebhook}</div>:null}
-      {query.checkout==='cancelled'?<div className="notice warning">{m.billingTitle}: checkout cancelled.</div>:null}
       {query.error==='existing-subscription'?<div className="notice warning">{m.existingSubscription}</div>:null}
       {query.error&&query.error!=='existing-subscription'?<div className="notice error">{m.billingError} ({query.error})</div>:null}
       <section className="metricGrid">
