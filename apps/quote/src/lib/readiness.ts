@@ -1,4 +1,5 @@
-import { checkoutConfigured, webhookConfigured } from '@/lib/billing';
+import { checkoutConfigured, lemonStoreId, PAID_PLANS, variantIdForPlan, webhookConfigured } from '@/lib/billing';
+import { isPositiveIntegerId, isValidHttpsAppUrl } from '@/lib/billing-config-guard';
 import type { Locale } from '@/lib/i18n';
 import { getReadinessEnvironmentMessages } from '@/lib/i18n-readiness';
 
@@ -18,11 +19,13 @@ function has(name: string) {
 export function environmentReadiness(locale: Locale): ReadinessCheck[] {
   const m = getReadinessEnvironmentMessages(locale);
   const appUrl = String(process.env.NEXT_PUBLIC_APP_URL ?? '').trim();
-  const validAppUrl = /^https:\/\//.test(appUrl);
+  const validAppUrl = isValidHttpsAppUrl(appUrl);
   const supabasePublic = has('NEXT_PUBLIC_SUPABASE_URL') && has('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
   const emailReady = has('RESEND_API_KEY') && has('QUOTE_EMAIL_FROM');
   const billingWebhookReady = webhookConfigured();
-  const billingCheckoutReady = checkoutConfigured('founder') && checkoutConfigured('pro') && checkoutConfigured('workshop');
+  const billingCheckoutReady = validAppUrl
+    && isPositiveIntegerId(lemonStoreId())
+    && PAID_PLANS.every((plan) => checkoutConfigured(plan) && isPositiveIntegerId(variantIdForPlan(plan)));
 
   return [
     {
