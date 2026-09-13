@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import './globals.css';
+import './app-theme.css';
 
 export const metadata: Metadata = {
   title: {
