@@ -11,7 +11,11 @@ function redirectToLogin(request: NextRequest) {
 export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  if (pathname.startsWith('/api/webhooks/stripe') || pathname.startsWith('/api/webhooks/lemonsqueezy')) {
+  if (
+    pathname.startsWith('/api/webhooks/stripe')
+    || pathname.startsWith('/api/stripe/webhook')
+    || pathname.startsWith('/api/webhooks/lemonsqueezy')
+  ) {
     return NextResponse.next({ request });
   }
 
