@@ -31,7 +31,10 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
   const p1 = getPhase1Messages(locale);
   const projectHref = `/projects/${projectId}`;
   const measurementHref = `${projectHref}/measurements`;
-  const moduleHref = projectHref;
+  const moduleHref = `${projectHref}#modules`;
+  const materialsHref = `${projectHref}#materials`;
+  const costHref = materialsHref;
+  const priceHref = `${projectHref}#price`;
   const proposalHref = `${projectHref}/quote`;
   const materialsReady = cabinetCount > 0 && completeCabinetCount === cabinetCount;
 
@@ -54,11 +57,11 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
     if (target === 'modules') return null;
     if (cabinetCount === 0) return { text:p1.blockedByModules, href:moduleHref };
     if (target === 'materials') return null;
-    if (!materialsReady) return { text:p1.blockedByMaterials, href:projectHref };
+    if (!materialsReady) return { text:p1.blockedByMaterials, href:materialsHref };
     if (target === 'cost') return null;
-    if (!costReady) return { text:p1.blockedByCost, href:projectHref };
+    if (!costReady) return { text:p1.blockedByCost, href:costHref };
     if (target === 'price') return null;
-    if (!priceReady) return { text:p1.blockedByPrice, href:projectHref };
+    if (!priceReady) return { text:p1.blockedByPrice, href:priceHref };
     return null;
   };
 
@@ -66,9 +69,9 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
     { key:'project', label:m.projectStep, href:projectHref, complete:true, meta:m.complete },
     { key:'measurements', label:m.measurementsStep, href:measurementHref, complete:measurementComplete, meta:measurementComplete?m.complete:m.notStarted },
     { key:'modules', label:m.modulesStep, href:moduleHref, complete:cabinetCount>0, meta:cabinetCount>0?`${cabinetCount}`:m.notStarted },
-    { key:'materials', label:m.materialsStep, href:projectHref, complete:materialsReady, meta:cabinetCount>0?`${completeCabinetCount}/${cabinetCount}`:m.notStarted },
-    { key:'cost', label:m.costStep, href:projectHref, complete:costReady, meta:costReady?m.complete:m.inProgress },
-    { key:'price', label:m.priceStep, href:projectHref, complete:priceReady, meta:priceReady?m.complete:m.inProgress },
+    { key:'materials', label:m.materialsStep, href:materialsHref, complete:materialsReady, meta:cabinetCount>0?`${completeCabinetCount}/${cabinetCount}`:m.notStarted },
+    { key:'cost', label:m.costStep, href:costHref, complete:costReady, meta:costReady?m.complete:m.inProgress },
+    { key:'price', label:m.priceStep, href:priceHref, complete:priceReady, meta:priceReady?m.complete:m.inProgress },
     { key:'proposal', label:m.proposalStep, href:proposalHref, complete:proposalReady, meta:proposalReady?m.complete:m.notStarted },
   ] as const;
 
@@ -92,16 +95,21 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
     nextHref = moduleHref;
   } else if (!materialsReady) {
     nextText = `${p1.nextMaterials} ${p1.modulesIncomplete}: ${cabinetCount-completeCabinetCount}.`;
+    nextHref = materialsHref;
   } else if (!costReady) {
     nextText = p1.nextCost;
+    nextHref = costHref;
   } else if (!priceReady) {
     nextText = p1.nextPrice;
+    nextHref = priceHref;
   } else if (!proposalReady) {
     nextText = p1.nextProposal;
     nextHref = proposalHref;
   }
 
   const remaining = steps.filter((step)=>step.key!=='project'&&!step.complete).length;
+  const loadingLabel=locale==='ru'?'Переходим к этапу…':locale==='cs'?'Přecházíme na krok…':locale==='de'?'Schritt wird geöffnet…':locale==='pl'?'Przechodzimy do etapu…':'Opening step…';
+  const nextLoadingLabel=locale==='ru'?'Переходим к следующему этапу…':locale==='cs'?'Přecházíme na další krok…':locale==='de'?'Nächster Schritt wird geöffnet…':locale==='pl'?'Przechodzimy do następnego etapu…':'Opening next step…';
 
   return <div className={styles.wrap}>
     <nav className={styles.flow} aria-label="Project workflow">
@@ -113,7 +121,7 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
           href={href}
           title={step.blocked?`${p1.blocked}: ${step.meta}`:step.meta}
           aria-current={isActive?'step':undefined}
-          data-loading-label={locale==='ru'?'Переходим к этапу…':locale==='cs'?'Přecházíme na krok…':locale==='de'?'Schritt wird geöffnet…':locale==='pl'?'Przechodzimy do etapu…':'Opening step…'}
+          data-loading-label={loadingLabel}
           className={`${styles.step} ${step.complete?styles.complete:styles.incomplete} ${step.blocked?styles.blocked:''} ${isActive?styles.active:''}`}
         >
           <span className={styles.top}><i className={styles.dot}/><span className={styles.label}>{step.label}</span>{step.blocked?<span className={styles.lock} aria-hidden="true">×</span>:null}</span>
@@ -122,7 +130,7 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
         </Link>;
       })}
     </nav>
-    <Link href={nextHref} className={styles.guidance} data-loading-label={locale==='ru'?'Переходим к следующему этапу…':locale==='cs'?'Přecházíme na další krok…':locale==='de'?'Nächster Schritt wird geöffnet…':locale==='pl'?'Przechodzimy do następnego etapu…':'Opening next step…'}>
+    <Link href={nextHref} className={styles.guidance} data-loading-label={nextLoadingLabel}>
       <strong>{p1.nextAction}</strong>
       <span>{nextText}</span>
       {remaining>0?<em>{p1.remaining}: {remaining}</em>:null}
