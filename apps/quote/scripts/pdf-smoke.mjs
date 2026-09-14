@@ -6,10 +6,12 @@ pdfMake.addVirtualFileSystem(pdfFonts);
 const buffer = await pdfMake.createPdf({
   defaultStyle: { font: 'Roboto' },
   content: [
-    { text: 'Makster Quote 0.1.4', bold: true, fontSize: 18 },
-    'Проверка PDF · Cenová nabídka · Angebot · Oferta',
+    { text: 'Makster Quote', bold: true, fontSize: 18 },
+    'Проверка PDF · Cenová nabídka · Quotation · Angebot · Oferta',
     'Русский: шкаф, фасад, кромка, монтаж.',
     'Čeština: cenová nabídka, montáž, záloha.',
+    'English: quotation, installation, deposit.',
+    'Deutsch: Angebot, Montage, Anzahlung.',
     'Polski: oferta, montaż, zaliczka.',
   ],
 }).getBuffer();
