@@ -31,6 +31,7 @@ export type ProjectPricingResult = {
 };
 
 const DOCUMENT_LOCALES = new Set<DocumentLocale>(['ru', 'en', 'cs', 'de', 'pl']);
+const REQUIRED_COST_KEYS: Array<Exclude<keyof CostBreakdown, 'other'>> = ['board','fronts','edges','hardware','production','labour','delivery','installation'];
 
 function safeInteger(value: unknown, fallback: number) {
   const number = Number(value);
@@ -46,6 +47,12 @@ export function minorFromUnknown(value: unknown): bigint {
     // Invalid external data becomes zero rather than breaking a quote screen.
   }
   return 0n;
+}
+
+function validNonNegativeMinor(value: unknown) {
+  if (typeof value === 'bigint') return value >= 0n;
+  if (typeof value === 'number') return Number.isSafeInteger(value) && value >= 0;
+  return typeof value === 'string' && /^\d+$/.test(value);
 }
 
 function record(value: unknown): Record<string, unknown> {
@@ -82,14 +89,32 @@ function cabinetQuantity(cabinet: StoredCabinetCost) {
   return Math.max(1, Math.min(999, safeInteger(cabinet.quantity, 1)));
 }
 
+function cabinetQuantityValid(cabinet: StoredCabinetCost) {
+  if (cabinet.quantity === undefined || cabinet.quantity === null) return true;
+  const value = Number(cabinet.quantity);
+  return Number.isInteger(value) && value >= 1 && value <= 999;
+}
+
 function cabinetCost(cabinet: StoredCabinetCost, key: keyof CostBreakdown) {
   const computed = record(cabinet.computed_cost_json);
   const costs = record(computed.costs);
-  return minorFromUnknown(costs[key]) * BigInt(cabinetQuantity(cabinet));
+  const raw = costs[key];
+  if (raw === undefined && key === 'other') return 0n;
+  if (!validNonNegativeMinor(raw)) return 0n;
+  return minorFromUnknown(raw) * BigInt(cabinetQuantity(cabinet));
+}
+
+function cabinetCostDataValid(cabinet: StoredCabinetCost) {
+  const computed = record(cabinet.computed_cost_json);
+  const costs = record(computed.costs);
+  if (!REQUIRED_COST_KEYS.every((key) => validNonNegativeMinor(costs[key]))) return false;
+  return costs.other === undefined || validNonNegativeMinor(costs.other);
 }
 
 function cabinetComplete(cabinet: StoredCabinetCost) {
-  return record(cabinet.computed_cost_json).complete === true;
+  return record(cabinet.computed_cost_json).complete === true
+    && cabinetQuantityValid(cabinet)
+    && cabinetCostDataValid(cabinet);
 }
 
 export function calculateProjectPricing(
