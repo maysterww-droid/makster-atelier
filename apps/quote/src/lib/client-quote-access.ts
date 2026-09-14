@@ -13,6 +13,8 @@ export type PublicQuoteAccess = {
   snapshot: QuoteSnapshot;
 };
 
+const PUBLIC_STATUSES = new Set(['approved', 'sent', 'accepted', 'rejected', 'expired']);
+
 export function hashClientQuoteToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
 }
@@ -25,6 +27,10 @@ function record(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
 
+function validIso(value: unknown, fallback: string) {
+  return typeof value === 'string' && Number.isFinite(Date.parse(value)) ? value : fallback;
+}
+
 export async function loadPublicQuote(token: string): Promise<PublicQuoteAccess | null> {
   if (!validClientQuoteToken(token)) return null;
   const supabase = await createClient();
@@ -35,11 +41,12 @@ export async function loadPublicQuote(token: string): Promise<PublicQuoteAccess 
   if (!snapshot) return null;
   const quoteId = typeof root.quoteId === 'string' ? root.quoteId : '';
   const quoteVersion = Number(root.quoteVersion ?? 0);
-  const issuedAt = typeof root.issuedAt === 'string' ? root.issuedAt : snapshot.issuedAt;
-  const validUntil = typeof root.validUntil === 'string' ? root.validUntil : snapshot.validUntil;
-  const linkExpiresAt = typeof root.linkExpiresAt === 'string' ? root.linkExpiresAt : validUntil;
-  const status = typeof root.status === 'string' ? root.status : 'approved';
-  if (!quoteId || !Number.isFinite(quoteVersion) || quoteVersion < 1) return null;
+  const issuedAt = validIso(root.issuedAt, snapshot.issuedAt);
+  const validUntil = validIso(root.validUntil, snapshot.validUntil);
+  const linkExpiresAt = validIso(root.linkExpiresAt, validUntil);
+  const rawStatus = typeof root.status === 'string' ? root.status : 'approved';
+  const status = PUBLIC_STATUSES.has(rawStatus) ? rawStatus : 'approved';
+  if (!quoteId || !Number.isInteger(quoteVersion) || quoteVersion < 1) return null;
   return {
     quoteId,
     quoteVersion,
