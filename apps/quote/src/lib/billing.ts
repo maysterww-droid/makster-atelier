@@ -1,29 +1,27 @@
-export type QuotePlan = 'free' | 'starter' | 'workshop' | 'atelier';
+// Legacy type kept temporarily for old Lemon Squeezy localization and webhook
+// compatibility. New product code must use CanonicalQuotePlan.
+export type QuotePlan = 'free' | 'founder' | 'pro' | 'workshop';
+export type CanonicalQuotePlan = 'free' | 'starter' | 'workshop' | 'atelier';
 export type QuoteSubscriptionStatus = 'inactive' | 'trialing' | 'active' | 'past_due' | 'paused' | 'cancelled' | 'expired';
 
-export const PLAN_LABELS: Record<QuotePlan, string> = {
+export const PLAN_LABELS: Record<CanonicalQuotePlan, string> = {
   free: 'Free Pilot',
   starter: 'Starter',
   workshop: 'Workshop',
   atelier: 'Atelier',
 };
 
-export const PLAN_MONTHLY_EUR: Record<QuotePlan, number> = {
+export const PLAN_MONTHLY_EUR: Record<CanonicalQuotePlan, number> = {
   free: 0,
   starter: 9,
   workshop: 29,
   atelier: 79,
 };
 
-export const PAID_PLANS: QuotePlan[] = ['starter', 'workshop', 'atelier'];
+export const PAID_PLANS: CanonicalQuotePlan[] = ['starter', 'workshop', 'atelier'];
 
-/**
- * During the Stripe migration staging can still contain the historical
- * Founder/Pro plan names. Normalize them at the product boundary so the UI and
- * all new billing events use the canonical 0.2 plan model without breaking an
- * already-running sandbox subscription.
- */
-export function normalizeQuotePlan(value: unknown): QuotePlan {
+/** Normalize old Founder/Pro rows into the 0.2 canonical plan model. */
+export function normalizeQuotePlan(value: unknown): CanonicalQuotePlan {
   switch (String(value ?? '').trim().toLowerCase()) {
     case 'starter':
     case 'founder':
@@ -68,7 +66,7 @@ export function lemonTestMode() {
   return env('LEMONSQUEEZY_TEST_MODE').toLowerCase() !== 'false';
 }
 
-function legacyVariantMappings(): Array<[string, QuotePlan]> {
+function legacyVariantMappings(): Array<[string, CanonicalQuotePlan]> {
   return [
     [env('LEMONSQUEEZY_VARIANT_FOUNDER'), 'starter'],
     [env('LEMONSQUEEZY_VARIANT_PRO'), 'starter'],
@@ -76,13 +74,13 @@ function legacyVariantMappings(): Array<[string, QuotePlan]> {
   ];
 }
 
-export function variantIdForPlan(plan: QuotePlan) {
+export function variantIdForPlan(plan: CanonicalQuotePlan) {
   if (plan === 'starter') return env('LEMONSQUEEZY_VARIANT_PRO') || env('LEMONSQUEEZY_VARIANT_FOUNDER');
   if (plan === 'workshop') return env('LEMONSQUEEZY_VARIANT_WORKSHOP');
   return '';
 }
 
-export function planForVariantId(variantId: string | number | null | undefined): QuotePlan | null {
+export function planForVariantId(variantId: string | number | null | undefined): CanonicalQuotePlan | null {
   const value = String(variantId ?? '').trim();
   if (!value) return null;
   for (const [candidate, plan] of legacyVariantMappings()) {
@@ -91,7 +89,7 @@ export function planForVariantId(variantId: string | number | null | undefined):
   return null;
 }
 
-export function checkoutConfigured(plan?: QuotePlan) {
+export function checkoutConfigured(plan?: CanonicalQuotePlan) {
   if (!lemonApiKey() || !lemonStoreId()) return false;
   return plan ? Boolean(variantIdForPlan(plan)) : PAID_PLANS.some((candidate) => Boolean(variantIdForPlan(candidate)));
 }
