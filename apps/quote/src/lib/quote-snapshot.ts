@@ -68,6 +68,10 @@ function nonEmptyText(value: unknown) {
   return result && result.trim() ? result : null;
 }
 
+function optionalTextFields(row: Record<string, unknown>, keys: string[]) {
+  return keys.every((key) => row[key] === undefined || typeof row[key] === 'string');
+}
+
 function integer(value: unknown, minimum?: number, maximum?: number) {
   const number = Number(value);
   if (!Number.isInteger(number)) return null;
@@ -93,6 +97,11 @@ function isoDate(value: unknown) {
   if (typeof value !== 'string' || !value.trim()) return null;
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+function roundDiv(numerator: bigint, denominator: bigint) {
+  if (numerator >= 0n) return (numerator + denominator / 2n) / denominator;
+  return -((-numerator + denominator / 2n) / denominator);
 }
 
 function validModule(value: unknown) {
@@ -133,11 +142,26 @@ function validCommercial(value: unknown) {
     && nonEmptyText(row.variantLabel)
     && integer(row.targetMarginBps, 0, 9_999) !== null
     && adjustmentMode && ADJUSTMENT_MODES.has(adjustmentMode)
-    && integer(row.adjustmentBps, 0, 10_000) !== null
+    && integer(row.adjustmentBps, 0, 5_000) !== null
     && nonNegativeIntegerString(row.listNetMinor)
     && integerString(row.adjustmentMinor)
     && integer(row.actualMarginBps, -100_000, 100_000) !== null,
   );
+}
+
+function commercialMoneyIsConsistent(value: unknown, netMinor: bigint) {
+  if (value === undefined || value === null) return true;
+  const row = record(value);
+  const listText = nonNegativeIntegerString(row.listNetMinor);
+  const adjustmentText = integerString(row.adjustmentMinor);
+  const bps = integer(row.adjustmentBps, 0, 5_000);
+  const mode = text(row.adjustmentMode) as QuoteSnapshotCommercial['adjustmentMode'] | null;
+  if (!listText || !adjustmentText || bps === null || !mode) return false;
+  const list = BigInt(listText);
+  const adjustment = BigInt(adjustmentText);
+  const signedBps = mode === 'discount' ? -bps : mode === 'surcharge' ? bps : 0;
+  const expectedAdjustment = roundDiv(list * BigInt(signedBps), 10_000n);
+  return adjustment === expectedAdjustment && list + adjustment === netMinor;
 }
 
 export function readQuoteSnapshot(value: unknown): QuoteSnapshot | null {
@@ -160,13 +184,16 @@ export function readQuoteSnapshot(value: unknown): QuoteSnapshot | null {
 
   if (!nonEmptyText(project.id) || !nonEmptyText(project.name) || integer(project.revisionNumber, 1) === null) return null;
   if (!nonEmptyText(client.id) || !nonEmptyText(client.name)) return null;
+  if (!optionalTextFields(client, ['email', 'phone', 'address'])) return null;
   if (!nonEmptyText(supplier.tradeName)) return null;
+  if (!optionalTextFields(supplier, ['legalName', 'registrationId', 'vatId', 'address', 'email', 'phone', 'website', 'bankAccount', 'iban', 'footerText'])) return null;
 
-  if (!Array.isArray(root.modules) || !root.modules.every(validModule)) return null;
+  if (!Array.isArray(root.modules) || root.modules.length === 0 || !root.modules.every(validModule)) return null;
   if (!Array.isArray(root.extras) || !root.extras.every(validExtra)) return null;
   if (!validCommercial(root.commercial)) return null;
 
-  if (integer(terms.depositBps, 0, 10_000) === null) return null;
+  const depositBps = integer(terms.depositBps, 0, 10_000);
+  if (depositBps === null) return null;
   for (const key of ['productionLeadText', 'paymentTerms', 'warrantyText', 'clientNote']) {
     if (terms[key] !== undefined && typeof terms[key] !== 'string') return null;
   }
@@ -175,10 +202,17 @@ export function readQuoteSnapshot(value: unknown): QuoteSnapshot | null {
   const taxMinor = nonNegativeIntegerString(amounts.taxMinor);
   const totalMinor = nonNegativeIntegerString(amounts.totalMinor);
   const depositMinor = nonNegativeIntegerString(amounts.depositMinor);
-  if (!netMinor || !taxMinor || !totalMinor || !depositMinor) return null;
-  if (BigInt(totalMinor) !== BigInt(netMinor) + BigInt(taxMinor)) return null;
-  if (BigInt(depositMinor) > BigInt(totalMinor)) return null;
-  if (integer(amounts.taxBps, 0, 100_000) === null) return null;
+  const taxBps = integer(amounts.taxBps, 0, 100_000);
+  if (!netMinor || !taxMinor || !totalMinor || !depositMinor || taxBps === null) return null;
+
+  const net = BigInt(netMinor);
+  const tax = BigInt(taxMinor);
+  const total = BigInt(totalMinor);
+  const deposit = BigInt(depositMinor);
+  if (tax !== roundDiv(net * BigInt(taxBps), 10_000n)) return null;
+  if (total !== net + tax) return null;
+  if (deposit !== roundDiv(total * BigInt(depositBps), 10_000n)) return null;
+  if (!commercialMoneyIsConsistent(root.commercial, net)) return null;
 
   return value as QuoteSnapshot;
 }
