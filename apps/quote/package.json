@@ -8,6 +8,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "calculation:qa": "node --experimental-strip-types scripts/calculation-qa.ts",
+    "snapshot:qa": "node --experimental-strip-types scripts/snapshot-qa.ts",
     "pdf:smoke": "node scripts/pdf-smoke.mjs"
   },
   "dependencies": {
