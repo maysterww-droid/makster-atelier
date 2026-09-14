@@ -8,6 +8,7 @@ import { getInterfaceLocale } from '@/lib/interface-locale';
 import { localizePreset } from '@/lib/i18n-library';
 import { quoteModulePreset } from '@/lib/module-presets';
 import { validatedPriceBookDefaults } from '@/lib/price-book-defaults';
+import { specialHardwarePreset } from '@/lib/special-hardware-presets';
 import { requireWorkspace } from '@/lib/workspace';
 
 const libraryRoles = new Set(['owner', 'admin', 'sales', 'designer', 'technologist']);
@@ -26,6 +27,8 @@ function safeBps(value: unknown, fallback: number, max = 9_500) {
   if (!Number.isFinite(parsed)) return fallback;
   return Math.max(0, Math.min(max, Math.round(parsed)));
 }
+function resolvePreset(key:string){return quoteModulePreset(key)??specialHardwarePreset(key);}
+function hardwareRole(item:PriceBookItem){const value=item.parameters_json?.hardwareRole;return typeof value==='string'?value:'';}
 
 export async function addPresetToProject(formData: FormData) {
   const { supabase, organization, userId, role } = await requireWorkspace();
@@ -33,7 +36,8 @@ export async function addPresetToProject(formData: FormData) {
   const projectId = uuid(formData.get('projectId'));
   const presetKey = String(formData.get('presetKey') ?? '').trim();
   const quantity = quantityValue(formData.get('quantity'));
-  const preset = quoteModulePreset(presetKey);
+  const preset = resolvePreset(presetKey);
+  const specialPreset = specialHardwarePreset(presetKey);
   if (!projectId) redirect('/library?error=project');
   if (!preset) redirect(`/library?project=${projectId}&error=preset`);
 
@@ -48,6 +52,7 @@ export async function addPresetToProject(formData: FormData) {
 
   const projectPriceBook = (priceBook ?? []).filter((item) => item.currency === project.currency) as PriceBookItem[];
   const defaults = validatedPriceBookDefaults(organization.settings, projectPriceBook);
+  const specialItem = specialPreset ? projectPriceBook.find((item)=>item.category==='hardware'&&hardwareRole(item)===specialPreset.specialHardwareRole) : undefined;
   const quoteSettings = organization.settings?.quote && typeof organization.settings.quote === 'object' && !Array.isArray(organization.settings.quote) ? organization.settings.quote as Record<string, unknown> : {};
   const targetMarginBps = safeBps(quoteSettings.targetMarginBps, 3500);
   const overheadBps = safeBps(quoteSettings.overheadBps, 0);
@@ -64,6 +69,9 @@ export async function addPresetToProject(formData: FormData) {
     frontEdgeIncluded:preset.frontEdgeIncluded, labourHours:0,
     boardItemId:defaults.boardItemId, frontItemId:defaults.frontItemId, backItemId:defaults.backItemId, edgeItemId:defaults.edgeItemId,
     hingeItemId:defaults.hingeItemId, drawerItemId:defaults.drawerItemId, labourItemId:defaults.labourItemId,
+    specialHardwareRole:specialPreset?.specialHardwareRole,
+    specialHardwareQty:specialPreset?.specialHardwareQty,
+    specialHardwareItemId:specialItem?.id,
   };
   const preview = calculateQuoteCabinetPreview(input, projectPriceBook, { targetMarginBps, overheadBps, taxBps });
   const now = new Date().toISOString();
@@ -77,11 +85,12 @@ export async function addPresetToProject(formData: FormData) {
       stretcherDepthMm:preset.stretcherDepthMm, shelfSetbackMm:preset.shelfSetbackMm, applianceOpeningHeightMm:preset.applianceOpeningHeightMm ?? null,
       frontWidthMm:preset.frontWidthMm ?? null, backMode:preset.backMode, backThicknessMm:preset.backThicknessMm, backInsetMm:preset.backInsetMm,
       backGrooveDepthMm:preset.backGrooveDepthMm, frontEdgeIncluded:preset.frontEdgeIncluded, labourHours:0, presetKey:preset.key,
+      specialHardwareRole:specialPreset?.specialHardwareRole??null,specialHardwareQty:specialPreset?.specialHardwareQty??0,
     },
     material_refs_json:{boardItemId:defaults.boardItemId??null,frontItemId:defaults.frontItemId??null,backItemId:defaults.backItemId??null,edgeItemId:defaults.edgeItemId??null,labourItemId:defaults.labourItemId??null},
-    hardware_refs_json:{hingeItemId:defaults.hingeItemId??null,drawerItemId:defaults.drawerItemId??null},
+    hardware_refs_json:{hingeItemId:defaults.hingeItemId??null,drawerItemId:defaults.drawerItemId??null,specialHardwareItemId:specialItem?.id??null},
     computed_parts_json:{usage:preview.usage,parts:preview.parts,hardware:preview.hardware.map((line)=>({...line,costMinor:line.costMinor.toString()})),operations:preview.operations.map((line)=>({...line,costMinor:line.costMinor.toString()})),notes:preview.notes},
-    computed_cost_json:costPreviewToJson(preview), engine_version:'mq-0.1.11-engineering', created_by:userId, created_at:now, updated_at:now,
+    computed_cost_json:costPreviewToJson(preview), engine_version:'mq-0.2-special-hardware', created_by:userId, created_at:now, updated_at:now,
   });
   if (error) redirect(`/library?project=${projectId}&error=add`);
   const {data:pref}=await supabase.from('quote_library_prefs').select('is_favorite,use_count').eq('organization_id',organization.id).eq('user_id',userId).eq('preset_key',presetKey).maybeSingle();
@@ -93,7 +102,7 @@ export async function addPresetToProject(formData: FormData) {
 export async function togglePresetFavorite(formData:FormData){
   const {supabase,organization,userId}=await requireWorkspace();
   const presetKey=String(formData.get('presetKey')??'').trim();
-  if(!quoteModulePreset(presetKey))redirect('/library?error=preset');
+  if(!resolvePreset(presetKey))redirect('/library?error=preset');
   const {data:pref}=await supabase.from('quote_library_prefs').select('is_favorite,use_count,last_used_at').eq('organization_id',organization.id).eq('user_id',userId).eq('preset_key',presetKey).maybeSingle();
   const {error}=await supabase.from('quote_library_prefs').upsert({organization_id:organization.id,user_id:userId,preset_key:presetKey,is_favorite:!Boolean(pref?.is_favorite),use_count:Number(pref?.use_count??0),last_used_at:pref?.last_used_at??null,updated_at:new Date().toISOString()},{onConflict:'organization_id,user_id,preset_key'});
   if(error)redirect('/library?error=favorite');revalidatePath('/library');redirect('/library');
