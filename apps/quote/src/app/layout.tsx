@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { CommercialVariantEnhancer } from '@/components/commercial-variant-enhancer';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import './globals.css';
 import './app-theme.css';
+import './phase5-polish.css';
 
 export const metadata: Metadata = {
   title: {
@@ -16,5 +16,5 @@ export const dynamic = 'force-dynamic';
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getInterfaceLocale();
-  return <html lang={locale}><body><CommercialVariantEnhancer/>{children}</body></html>;
+  return <html lang={locale}><body>{children}</body></html>;
 }
