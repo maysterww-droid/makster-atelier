@@ -1,4 +1,4 @@
-import { appBaseUrl, type QuotePlan, type QuoteSubscriptionStatus } from '@/lib/billing';
+import { appBaseUrl, PAID_PLANS, type QuotePlan, type QuoteSubscriptionStatus } from '@/lib/billing';
 
 const MANAGED_PAYMENTS_API_VERSION = '2026-03-04.preview';
 
@@ -15,24 +15,30 @@ export function stripeWebhookSecret() {
 }
 
 export function stripePriceIdForPlan(plan: QuotePlan) {
-  if (plan === 'founder') return env('STRIPE_FOUNDER_MONTHLY_PRICE_ID');
-  if (plan === 'pro') return env('STRIPE_PRO_MONTHLY_PRICE_ID');
+  if (plan === 'starter') return env('STRIPE_STARTER_MONTHLY_PRICE_ID');
   if (plan === 'workshop') return env('STRIPE_WORKSHOP_MONTHLY_PRICE_ID');
+  if (plan === 'atelier') return env('STRIPE_ATELIER_MONTHLY_PRICE_ID');
   return '';
 }
 
 export function planForStripePriceId(priceId: string | null | undefined): QuotePlan | null {
   const value = String(priceId ?? '').trim();
   if (!value) return null;
-  for (const plan of ['founder', 'pro', 'workshop'] as const) {
+
+  for (const plan of PAID_PLANS) {
     if (stripePriceIdForPlan(plan) === value) return plan;
   }
+
+  // Transitional sandbox compatibility only. These IDs are never used to
+  // start a new checkout, but an already-existing old Pro/Founder subscription
+  // can still send webhook updates while Phase 4 is being configured.
+  if (env('STRIPE_PRO_MONTHLY_PRICE_ID') === value || env('STRIPE_FOUNDER_MONTHLY_PRICE_ID') === value) return 'starter';
   return null;
 }
 
 export function stripeCheckoutConfigured(plan?: QuotePlan) {
   if (!stripeSecretKey()) return false;
-  return plan ? Boolean(stripePriceIdForPlan(plan)) : ['founder', 'pro', 'workshop'].some((candidate) => Boolean(stripePriceIdForPlan(candidate as QuotePlan)));
+  return plan ? Boolean(stripePriceIdForPlan(plan)) : PAID_PLANS.some((candidate) => Boolean(stripePriceIdForPlan(candidate)));
 }
 
 export function stripeWebhookConfigured() {
@@ -70,10 +76,6 @@ export async function stripePost(path: string, params: URLSearchParams) {
     'Content-Type': 'application/x-www-form-urlencoded',
   };
 
-  // Managed Payments is a public-preview feature. Stripe requires a Preview
-  // API version specifically when creating a Checkout Session with
-  // managed_payments[enabled]=true. Keep portal and other API calls on the
-  // account/default API version.
   if (normalizedPath === 'checkout/sessions' && params.get('managed_payments[enabled]') === 'true') {
     headers['Stripe-Version'] = MANAGED_PAYMENTS_API_VERSION;
   }
