@@ -86,8 +86,9 @@ test('invalid basis-point inputs are rejected',()=>{
   assert.throws(()=>calculateQuote({costs:costs(),overheadBps:0,targetMarginBps:3500,taxBps:-1}));
 });
 
-test('negative total cost is rejected',()=>{
+test('every cost bucket must be non-negative',()=>{
   assert.throws(()=>calculateQuote({costs:costs({board:-1n}),overheadBps:0,targetMarginBps:3500,taxBps:0}));
+  assert.throws(()=>calculateQuote({costs:costs({board:10_000n,hardware:-1n}),overheadBps:0,targetMarginBps:3500,taxBps:0}),/hardware cost cannot be negative/);
 });
 
 test('currency formatting keeps minor-unit precision',()=>{
