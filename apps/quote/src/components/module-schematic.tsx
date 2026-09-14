@@ -1,6 +1,6 @@
 import styles from './module-schematic.module.css';
 
-type Props={moduleKey:string;name?:string;widthMm?:number|string;heightMm?:number|string;className?:string};
+type Props={moduleKey:string;name?:string;widthMm?:number|string;heightMm?:number|string;className?:string;tight?:boolean};
 
 function visualType(moduleKey:string,name=''){
   const haystack=`${moduleKey} ${name}`.toLowerCase();
@@ -15,7 +15,7 @@ function visualType(moduleKey:string,name=''){
   return 'door';
 }
 
-export function ModuleSchematic({moduleKey,name='',widthMm=600,heightMm=720,className=''}:Props){
+export function ModuleSchematic({moduleKey,name='',widthMm=600,heightMm=720,className='',tight=false}:Props){
   const type=visualType(moduleKey,name);
   const w=Math.max(1,Number(widthMm)||600); const h=Math.max(1,Number(heightMm)||720);
   const ratio=Math.max(.55,Math.min(1.45,w/h));
@@ -25,7 +25,9 @@ export function ModuleSchematic({moduleKey,name='',widthMm=600,heightMm=720,clas
   const bodyH=tall?92:wall?58:68; const y=tall?14:wall?23:38;
   const midY=y+bodyH/2;
   const stroke='#4a3327'; const fill='#fffaf5'; const front='#f0e0d2';
-  return <svg className={`${styles.root} ${className}`} viewBox="0 0 120 120" role="img" aria-label={name||moduleKey}>
+  const tightX=Math.max(0,x-1); const tightY=Math.max(0,y-7); const tightW=Math.min(120-tightX,bodyW+9); const tightH=Math.min(120-tightY,bodyH+(wall?10:15));
+  const viewBox=tight?`${tightX} ${tightY} ${tightW} ${tightH}`:'0 0 120 120';
+  return <svg className={`${styles.root} ${className}`} viewBox={viewBox} preserveAspectRatio={tight?'none':'xMidYMid meet'} role="img" aria-label={name||moduleKey}>
     <polygon points={`${x},${y} ${x+7},${y-6} ${x+bodyW+7},${y-6} ${x+bodyW},${y}`} fill="#f6eadf" stroke={stroke} strokeWidth="1.5"/>
     <polygon points={`${x+bodyW},${y} ${x+bodyW+7},${y-6} ${x+bodyW+7},${y+bodyH-6} ${x+bodyW},${y+bodyH}`} fill="#e7d3c1" stroke={stroke} strokeWidth="1.5"/>
     <rect x={x} y={y} width={bodyW} height={bodyH} rx="1.5" fill={fill} stroke={stroke} strokeWidth="1.7"/>
