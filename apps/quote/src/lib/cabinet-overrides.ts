@@ -42,7 +42,9 @@ function linearCost(item: PriceBookItem | undefined, lengthM: number) {
 function specialLabel(role: SpecialHardwareRole) {
   if (role === 'cargo') return 'Cargo / бутылочница';
   if (role === 'lift') return 'Lift-Up / Aventos';
-  return 'Угловой механизм / LeMans / Magic Corner';
+  if (role === 'corner') return 'Угловой механизм / LeMans / Magic Corner';
+  if (role === 'rail') return 'Гардеробная штанга / крепления';
+  return 'Раздвижная система фасадов';
 }
 
 function applySpecialHardware(base: CabinetCostPreview, input: QuoteCabinetInput, items: PriceBookItem[], options: { targetMarginBps:number; overheadBps?:number; taxBps?:number }) {
@@ -50,7 +52,7 @@ function applySpecialHardware(base: CabinetCostPreview, input: QuoteCabinetInput
   if (!role) return base;
   const quantity = Math.max(1, Math.round(Number(input.specialHardwareQty ?? 1) || 1));
   const item = input.specialHardwareItemId ? items.find((candidate) => candidate.id === input.specialHardwareItemId) : undefined;
-  const replacesStandardHinges = role === 'cargo' || role === 'lift';
+  const replacesStandardHinges = role === 'cargo' || role === 'lift' || role === 'sliding';
 
   let hardware = [...base.hardware];
   let operations = [...base.operations];
