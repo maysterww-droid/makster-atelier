@@ -1,3 +1,4 @@
+import '@/lib/special-hardware-presets';
 import type { QuoteModulePreset } from '@/lib/module-presets';
 
 type Props={preset:QuoteModulePreset};
