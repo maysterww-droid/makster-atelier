@@ -1,4 +1,5 @@
 import { buildQuotePdf } from '@/lib/quote-pdf';
+import { quoteReference } from '@/lib/quote-lifecycle';
 import { readQuoteSnapshot } from '@/lib/quote-snapshot';
 import { requireWorkspace } from '@/lib/workspace';
 
@@ -29,7 +30,7 @@ export async function GET(_request: Request, { params }: Context) {
 
   const snapshot = { ...parsed, quoteId:quote.id, quoteVersion:quote.quote_version, issuedAt:quote.issued_at, validUntil:quote.valid_until };
   const buffer = await buildQuotePdf(snapshot);
-  const filename = safeFilename(`Makster-Quote-v${quote.quote_version}-${snapshot.project.name}.pdf`);
+  const filename = safeFilename(`${quoteReference(snapshot.project.id, quote.quote_version)}-${snapshot.project.name}.pdf`);
 
   return new Response(new Uint8Array(buffer), {
     headers: {
