@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "calculation:qa": "node --experimental-strip-types scripts/calculation-qa.ts",
     "pdf:smoke": "node scripts/pdf-smoke.mjs"
   },
   "dependencies": {
