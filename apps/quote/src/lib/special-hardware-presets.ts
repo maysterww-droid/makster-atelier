@@ -1,4 +1,4 @@
-import type { QuoteModulePreset } from './module-presets';
+import { QUOTE_MODULE_PRESETS, type QuoteModulePreset } from './module-presets';
 
 export type SpecialHardwareRole = 'cargo' | 'lift' | 'corner';
 export type SpecialHardwarePreset = QuoteModulePreset & {
@@ -22,6 +22,8 @@ export const SPECIAL_HARDWARE_PRESETS:SpecialHardwarePreset[]=[
   cornerMechanism('corner-magic-900','Magic Corner 900',900,450),
   cornerMechanism('corner-magic-1000','Magic Corner 1000',1000,500),
 ];
+
+for(const preset of SPECIAL_HARDWARE_PRESETS){if(!QUOTE_MODULE_PRESETS.some((item)=>item.key===preset.key))QUOTE_MODULE_PRESETS.push(preset);}
 
 export function specialHardwarePreset(key:string){return SPECIAL_HARDWARE_PRESETS.find((preset)=>preset.key===key)??null;}
 export function isSpecialHardwarePreset(preset:QuoteModulePreset):preset is SpecialHardwarePreset{return 'specialHardwareRole' in preset && 'specialHardwareQty' in preset;}
