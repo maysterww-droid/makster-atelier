@@ -85,9 +85,14 @@ function integerString(value: unknown) {
   return typeof value === 'string' && /^-?\d+$/.test(value) ? value : null;
 }
 
+function nonNegativeIntegerString(value: unknown) {
+  return typeof value === 'string' && /^\d+$/.test(value) ? value : null;
+}
+
 function isoDate(value: unknown) {
   if (typeof value !== 'string' || !value.trim()) return null;
-  return Number.isFinite(Date.parse(value)) ? value : null;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : null;
 }
 
 function validModule(value: unknown) {
@@ -106,7 +111,7 @@ function validModule(value: unknown) {
 function validExtra(value: unknown) {
   const row = record(value);
   const category = text(row.category) as QuoteSnapshotExtra['category'] | null;
-  if (!category || !EXTRA_CATEGORIES.has(category) || !nonEmptyText(row.name) || !integerString(row.amountMinor)) return false;
+  if (!category || !EXTRA_CATEGORIES.has(category) || !nonEmptyText(row.name) || !nonNegativeIntegerString(row.amountMinor)) return false;
   if (row.quantity !== undefined && row.quantity !== null) {
     const quantity = Number(row.quantity);
     if (!Number.isFinite(quantity) || quantity < 0) return false;
@@ -129,7 +134,7 @@ function validCommercial(value: unknown) {
     && integer(row.targetMarginBps, 0, 9_999) !== null
     && adjustmentMode && ADJUSTMENT_MODES.has(adjustmentMode)
     && integer(row.adjustmentBps, 0, 10_000) !== null
-    && integerString(row.listNetMinor)
+    && nonNegativeIntegerString(row.listNetMinor)
     && integerString(row.adjustmentMinor)
     && integer(row.actualMarginBps, -100_000, 100_000) !== null,
   );
@@ -149,7 +154,9 @@ export function readQuoteSnapshot(value: unknown): QuoteSnapshot | null {
   if (!schemaVersion || !SCHEMA_VERSIONS.has(schemaVersion)) return null;
   if (!locale || !DOCUMENT_LOCALES.has(locale)) return null;
   if (!currency || !/^[A-Za-z]{3}$/.test(currency)) return null;
-  if (!isoDate(root.issuedAt) || !isoDate(root.validUntil)) return null;
+  const issuedAt = isoDate(root.issuedAt);
+  const validUntil = isoDate(root.validUntil);
+  if (issuedAt === null || validUntil === null || validUntil < issuedAt) return null;
 
   if (!nonEmptyText(project.id) || !nonEmptyText(project.name) || integer(project.revisionNumber, 1) === null) return null;
   if (!nonEmptyText(client.id) || !nonEmptyText(client.name)) return null;
@@ -164,9 +171,13 @@ export function readQuoteSnapshot(value: unknown): QuoteSnapshot | null {
     if (terms[key] !== undefined && typeof terms[key] !== 'string') return null;
   }
 
-  for (const key of ['netMinor', 'taxMinor', 'totalMinor', 'depositMinor']) {
-    if (!integerString(amounts[key])) return null;
-  }
+  const netMinor = nonNegativeIntegerString(amounts.netMinor);
+  const taxMinor = nonNegativeIntegerString(amounts.taxMinor);
+  const totalMinor = nonNegativeIntegerString(amounts.totalMinor);
+  const depositMinor = nonNegativeIntegerString(amounts.depositMinor);
+  if (!netMinor || !taxMinor || !totalMinor || !depositMinor) return null;
+  if (BigInt(totalMinor) !== BigInt(netMinor) + BigInt(taxMinor)) return null;
+  if (BigInt(depositMinor) > BigInt(totalMinor)) return null;
   if (integer(amounts.taxBps, 0, 100_000) === null) return null;
 
   return value as QuoteSnapshot;
