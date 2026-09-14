@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { LocaleSwitcher } from './locale-switcher';
+import { InteractionFeedback } from './interaction-feedback';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import { getMessages } from '@/lib/i18n';
 import { planDisplayLabel } from '@/lib/billing';
@@ -21,6 +22,7 @@ export async function AppShell({ organizationName, role, plan = 'free', children
 
   return (
     <main className="shell">
+      <InteractionFeedback locale={locale}/>
       <aside className="sidebar">
         <Link href="/dashboard" className="brand linkReset">
           <MaksterQuoteLogo variant="light" />
