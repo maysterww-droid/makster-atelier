@@ -71,6 +71,7 @@ export async function addPresetToProject(formData: FormData) {
   const { error } = await supabase.from('quote_cabinets').insert({
     organization_id:organization.id, project_id:projectId, project_revision_id:project.current_revision_id, module_key:preset.moduleKey, name:localizedPreset.name, sort_order:sortOrder,
     width_mm:preset.widthMm, height_mm:preset.heightMm, depth_mm:preset.depthMm, quantity,
+    dimension_source:'standard', measurement_reference:null,
     construction_json:{
       thicknessMm:preset.thicknessMm, gapMm:preset.gapMm, drawers:preset.drawers, doors:preset.doors, shelfCount:preset.shelfCount,
       stretcherDepthMm:preset.stretcherDepthMm, shelfSetbackMm:preset.shelfSetbackMm, applianceOpeningHeightMm:preset.applianceOpeningHeightMm ?? null,
