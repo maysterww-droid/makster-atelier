@@ -61,7 +61,10 @@ test('invalid or reversed validity dates are rejected',()=>{
   assert.equal(readQuoteSnapshot(reversed),null);
 });
 
-test('invalid module geometry and quantity are rejected',()=>{
+test('empty or invalid module geometry is rejected',()=>{
+  const empty=copy(fixture());
+  empty.modules=[];
+  assert.equal(readQuoteSnapshot(empty),null);
   const width=copy(fixture());
   width.modules[0].widthMm=0;
   assert.equal(readQuoteSnapshot(width),null);
@@ -79,7 +82,7 @@ test('negative extras and invalid units are rejected',()=>{
   assert.equal(readQuoteSnapshot(badUnit),null);
 });
 
-test('commercial adjustment accepts signed discount but rejects malformed commercial state',()=>{
+test('commercial adjustment structure and arithmetic are enforced',()=>{
   assert.ok(readQuoteSnapshot(fixture()));
   const badMode=copy(fixture()) as any;
   badMode.commercial.adjustmentMode='coupon';
@@ -87,27 +90,43 @@ test('commercial adjustment accepts signed discount but rejects malformed commer
   const negativeList=copy(fixture());
   negativeList.commercial.listNetMinor='-1';
   assert.equal(readQuoteSnapshot(negativeList),null);
+  const wrongAdjustment=copy(fixture());
+  wrongAdjustment.commercial.adjustmentMinor='-49999';
+  assert.equal(readQuoteSnapshot(wrongAdjustment),null);
+  const wrongNet=copy(fixture());
+  wrongNet.amounts.netMinor='949999';
+  wrongNet.amounts.taxMinor='199500';
+  wrongNet.amounts.totalMinor='1149499';
+  wrongNet.amounts.depositMinor='574750';
+  assert.equal(readQuoteSnapshot(wrongNet),null);
 });
 
-test('client-facing monetary invariants are enforced',()=>{
+test('tax, total and deposit arithmetic are enforced',()=>{
   const negative=copy(fixture());
   negative.amounts.netMinor='-1';
   assert.equal(readQuoteSnapshot(negative),null);
-  const mismatch=copy(fixture());
-  mismatch.amounts.totalMinor='1149499';
-  assert.equal(readQuoteSnapshot(mismatch),null);
+  const tax=copy(fixture());
+  tax.amounts.taxMinor='199499';
+  tax.amounts.totalMinor='1149499';
+  assert.equal(readQuoteSnapshot(tax),null);
+  const total=copy(fixture());
+  total.amounts.totalMinor='1149499';
+  assert.equal(readQuoteSnapshot(total),null);
   const deposit=copy(fixture());
-  deposit.amounts.depositMinor='2000000';
+  deposit.amounts.depositMinor='574749';
   assert.equal(readQuoteSnapshot(deposit),null);
 });
 
-test('required identity fields cannot be blank',()=>{
+test('required identity fields cannot be blank and optional contact fields stay typed',()=>{
   const client=copy(fixture());
   client.client.name='   ';
   assert.equal(readQuoteSnapshot(client),null);
   const supplier=copy(fixture());
   supplier.supplier.tradeName='';
   assert.equal(readQuoteSnapshot(supplier),null);
+  const contact=copy(fixture()) as any;
+  contact.client.email=123;
+  assert.equal(readQuoteSnapshot(contact),null);
 });
 
 console.log('Makster Quote snapshot QA passed.');
