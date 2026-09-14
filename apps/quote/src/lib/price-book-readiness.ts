@@ -47,6 +47,12 @@ function stateForItems(items: PriceBookItem[]) : PriceBookSetupState {
   return items.some((item) => !isDemoPriceBookItem(item)) ? 'ready' : 'demo';
 }
 
+function combinedDefaultState(states: PriceBookSetupState[]): PriceBookSetupState {
+  if (states.some((state) => state === 'missing')) return 'missing';
+  if (states.some((state) => state === 'demo')) return 'demo';
+  return 'ready';
+}
+
 export function priceBookSetupStatus(settings: unknown, items: PriceBookItem[]) {
   const defaults = validatedPriceBookDefaults(settings, items);
   const byId = new Map(items.map((item) => [item.id, item]));
@@ -77,9 +83,13 @@ export function priceBookSetupStatus(settings: unknown, items: PriceBookItem[]) 
       : 'ready';
 
   const extras = items.filter((item) => EXTRA_CATEGORIES.has(item.category));
+  const carcassAndBackState = combinedDefaultState([
+    defaultState(defaults.boardItemId),
+    defaultState(defaults.backItemId),
+  ]);
 
   const steps: PriceBookSetupStep[] = [
-    { key:'board', state:defaultState(defaults.boardItemId), required:true, count:items.filter((item)=>item.category==='board').length },
+    { key:'board', state:carcassAndBackState, required:true, count:items.filter((item)=>item.category==='board').length },
     { key:'front', state:defaultState(defaults.frontItemId), required:true, count:items.filter((item)=>item.category==='front').length },
     { key:'edge', state:defaultState(defaults.edgeItemId), required:true, count:items.filter((item)=>item.category==='edge').length },
     { key:'hinge', state:defaultState(defaults.hingeItemId), required:true, count:items.filter((item)=>item.category==='hardware' && !parameters(item).hardwareRole).length },
