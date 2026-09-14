@@ -4,10 +4,11 @@ import { getMeasurementMessages } from '@/lib/i18n-measurements';
 import { getPhase1Messages } from '@/lib/i18n-measurements-phase1';
 import styles from './project-flow.module.css';
 
+type StepKey = 'project' | 'measurements' | 'modules' | 'materials' | 'cost' | 'price' | 'proposal';
 type Props = {
   projectId: string;
   locale: Locale;
-  active: 'project' | 'measurements' | 'modules' | 'materials' | 'cost' | 'price' | 'proposal';
+  active: StepKey;
   measurementComplete: boolean;
   cabinetCount: number;
   completeCabinetCount: number;
@@ -15,44 +16,101 @@ type Props = {
   priceReady: boolean;
   proposalReady: boolean;
 };
+type Step = {
+  key: StepKey;
+  label: string;
+  href: string;
+  complete: boolean;
+  blocked: boolean;
+  meta: string;
+  repairHref?: string;
+};
 
 export function ProjectFlow({ projectId, locale, active, measurementComplete, cabinetCount, completeCabinetCount, costReady, priceReady, proposalReady }: Props) {
   const m = getMeasurementMessages(locale);
   const p1 = getPhase1Messages(locale);
-  const steps = [
-    { key:'project', label:m.projectStep, href:`/projects/${projectId}`, complete:true, meta:m.complete },
-    { key:'measurements', label:m.measurementsStep, href:`/projects/${projectId}/measurements`, complete:measurementComplete, meta:measurementComplete?m.complete:m.notStarted },
-    { key:'modules', label:m.modulesStep, href:`/library?project=${projectId}`, complete:cabinetCount>0, meta:cabinetCount>0?`${cabinetCount}`:m.notStarted },
-    { key:'materials', label:m.materialsStep, href:`/projects/${projectId}`, complete:cabinetCount>0&&completeCabinetCount===cabinetCount, meta:cabinetCount>0?`${completeCabinetCount}/${cabinetCount}`:m.notStarted },
-    { key:'cost', label:m.costStep, href:`/projects/${projectId}`, complete:costReady, meta:costReady?m.complete:m.inProgress },
-    { key:'price', label:m.priceStep, href:`/projects/${projectId}`, complete:priceReady, meta:priceReady?m.complete:m.inProgress },
-    { key:'proposal', label:m.proposalStep, href:`/projects/${projectId}/quote`, complete:proposalReady, meta:proposalReady?m.complete:m.notStarted },
+  const projectHref = `/projects/${projectId}`;
+  const measurementHref = `${projectHref}/measurements`;
+  const moduleHref = `/library?project=${projectId}`;
+  const proposalHref = `${projectHref}/quote`;
+  const materialsReady = cabinetCount > 0 && completeCabinetCount === cabinetCount;
+
+  const prerequisite = (target:StepKey) => {
+    if (target === 'project' || target === 'measurements') return null;
+    if (!measurementComplete) return { text:p1.blockedByMeasurements, href:measurementHref };
+    if (target === 'modules') return null;
+    if (cabinetCount === 0) return { text:p1.blockedByModules, href:moduleHref };
+    if (target === 'materials') return null;
+    if (!materialsReady) return { text:p1.blockedByMaterials, href:projectHref };
+    if (target === 'cost') return null;
+    if (!costReady) return { text:p1.blockedByCost, href:projectHref };
+    if (target === 'price') return null;
+    if (!priceReady) return { text:p1.blockedByPrice, href:projectHref };
+    return null;
+  };
+
+  const rawSteps = [
+    { key:'project', label:m.projectStep, href:projectHref, complete:true, meta:m.complete },
+    { key:'measurements', label:m.measurementsStep, href:measurementHref, complete:measurementComplete, meta:measurementComplete?m.complete:m.notStarted },
+    { key:'modules', label:m.modulesStep, href:moduleHref, complete:cabinetCount>0, meta:cabinetCount>0?`${cabinetCount}`:m.notStarted },
+    { key:'materials', label:m.materialsStep, href:projectHref, complete:materialsReady, meta:cabinetCount>0?`${completeCabinetCount}/${cabinetCount}`:m.notStarted },
+    { key:'cost', label:m.costStep, href:projectHref, complete:costReady, meta:costReady?m.complete:m.inProgress },
+    { key:'price', label:m.priceStep, href:projectHref, complete:priceReady, meta:priceReady?m.complete:m.inProgress },
+    { key:'proposal', label:m.proposalStep, href:proposalHref, complete:proposalReady, meta:proposalReady?m.complete:m.notStarted },
   ] as const;
 
+  const steps:Step[] = rawSteps.map((step) => {
+    const blocker = prerequisite(step.key);
+    return {
+      ...step,
+      blocked:Boolean(blocker),
+      meta:blocker?.text ?? step.meta,
+      repairHref:blocker?.href,
+    };
+  });
+
   let nextText = p1.ready;
-  let nextHref = `/projects/${projectId}`;
+  let nextHref = projectHref;
   if (!measurementComplete) {
     nextText = p1.nextMeasurements;
-    nextHref = `/projects/${projectId}/measurements`;
+    nextHref = measurementHref;
   } else if (cabinetCount === 0) {
     nextText = p1.nextModules;
-    nextHref = `/library?project=${projectId}`;
-  } else if (completeCabinetCount < cabinetCount) {
+    nextHref = moduleHref;
+  } else if (!materialsReady) {
     nextText = `${p1.nextMaterials} ${p1.modulesIncomplete}: ${cabinetCount-completeCabinetCount}.`;
+  } else if (!costReady) {
+    nextText = p1.nextCost;
   } else if (!priceReady) {
     nextText = p1.nextPrice;
   } else if (!proposalReady) {
     nextText = p1.nextProposal;
-    nextHref = `/projects/${projectId}/quote`;
+    nextHref = proposalHref;
   }
+
+  const remaining = steps.filter((step)=>step.key!=='project'&&!step.complete).length;
 
   return <div className={styles.wrap}>
     <nav className={styles.flow} aria-label="Project workflow">
-      {steps.map((step)=><Link key={step.key} href={step.href} className={`${styles.step} ${step.complete?styles.complete:''} ${active===step.key?styles.active:''}`}>
-        <span className={styles.top}><i className={styles.dot}/><span className={styles.label}>{step.label}</span></span>
-        <span className={styles.meta}>{step.meta}</span>
-      </Link>)}
+      {steps.map((step)=>{
+        const href = step.blocked && step.repairHref ? step.repairHref : step.href;
+        return <Link
+          key={step.key}
+          href={href}
+          title={step.blocked?`${p1.blocked}: ${step.meta}`:step.meta}
+          className={`${styles.step} ${step.complete?styles.complete:''} ${step.blocked?styles.blocked:''} ${active===step.key?styles.active:''}`}
+        >
+          <span className={styles.top}><i className={styles.dot}/><span className={styles.label}>{step.label}</span>{step.blocked?<span className={styles.lock} aria-hidden="true">×</span>:null}</span>
+          <span className={styles.meta}>{step.meta}</span>
+          {step.blocked?<span className={styles.fix}>{p1.fixHere} →</span>:null}
+        </Link>;
+      })}
     </nav>
-    <Link href={nextHref} className={styles.guidance}><strong>{p1.nextAction}</strong><span>{nextText}</span><b>→</b></Link>
+    <Link href={nextHref} className={styles.guidance}>
+      <strong>{p1.nextAction}</strong>
+      <span>{nextText}</span>
+      {remaining>0?<em>{p1.remaining}: {remaining}</em>:null}
+      <b>→</b>
+    </Link>
   </div>;
 }
