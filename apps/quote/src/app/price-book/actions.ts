@@ -12,6 +12,7 @@ const operationKeys = new Set([
   'drawer-drilling',
   'back-groove',
 ]);
+const hardwareRoles = new Set(['cargo','lift','corner']);
 const allowedCategories = new Set(['board', 'front', 'edge', 'hardware', 'operation', 'labour', 'delivery', 'installation', 'overhead', 'other', 'worktop', 'plinth', 'filler', 'decor']);
 const allowedUnits = new Set(['sheet', 'm2', 'm', 'pcs', 'set', 'hour', 'job']);
 const supportedCurrencies = new Set(['CZK', 'EUR', 'PLN', 'USD']);
@@ -58,6 +59,15 @@ function readPriceFields(formData: FormData, defaultCurrency: string) {
     const operationKey = String(formData.get('operationKey') ?? '').trim();
     if (!operationKeys.has(operationKey)) throw new Error('operation');
     parameters.operationKey = operationKey;
+  }
+
+  if (category === 'hardware') {
+    const hardwareRole = String(formData.get('hardwareRole') ?? '').trim();
+    if (hardwareRole) {
+      if (!hardwareRoles.has(hardwareRole)) throw new Error('hardware-role');
+      if (!['pcs','set'].includes(unit)) throw new Error('hardware-unit');
+      parameters.hardwareRole = hardwareRole;
+    }
   }
 
   return { category, name, unit, currency, manufacturer, sku, purchasePriceMinor, parameters };
@@ -224,6 +234,14 @@ export async function importPriceBookCsv(formData: FormData) {
       const operationKey = rowValue(row, headerIndex, 'operationkey', 'operation').toLowerCase();
       if (!operationKeys.has(operationKey)) redirect(`/price-book?error=import-operation&row=${line}`);
       parameters.operationKey = operationKey;
+    }
+
+    if (category === 'hardware') {
+      const hardwareRole = rowValue(row, headerIndex, 'hardwarerole', 'hardwaretype').toLowerCase();
+      if (hardwareRole) {
+        if (!hardwareRoles.has(hardwareRole) || !['pcs','set'].includes(unit)) redirect(`/price-book?error=import-row&row=${line}`);
+        parameters.hardwareRole = hardwareRole;
+      }
     }
 
     insertRows.push({
