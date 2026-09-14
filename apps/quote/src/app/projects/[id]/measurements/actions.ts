@@ -6,6 +6,12 @@ import { requireWorkspace } from '@/lib/workspace';
 
 const editorRoles = new Set(['owner','admin','sales','designer','technologist']);
 const shapes = new Set(['straight','l','u','island','other']);
+const PHOTO_BUCKET = 'quote-measurements';
+const PHOTO_MIME = new Set(['image/jpeg','image/png','image/webp','image/heic','image/heif']);
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+const MAX_PHOTOS = 40;
+
+type PhotoMeta = { path:string; name:string; mime:string; size:number; uploadedAt:string };
 
 function uuid(value: FormDataEntryValue | null) {
   const text = String(value ?? '').trim();
@@ -19,6 +25,34 @@ function positiveNumber(value: FormDataEntryValue | null) {
   if (!raw) return null;
   const number = Number(raw.replace(',', '.'));
   return Number.isFinite(number) && number > 0 ? Math.round(number * 100) / 100 : null;
+}
+function photoList(value: unknown): PhotoMeta[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item)=>{
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return [];
+    const row = item as Record<string,unknown>;
+    const path = typeof row.path === 'string' ? row.path : '';
+    if (!path) return [];
+    return [{
+      path,
+      name: typeof row.name === 'string' ? row.name.slice(0,300) : 'photo',
+      mime: typeof row.mime === 'string' ? row.mime : 'image/jpeg',
+      size: Number.isFinite(Number(row.size)) ? Number(row.size) : 0,
+      uploadedAt: typeof row.uploadedAt === 'string' ? row.uploadedAt : '',
+    }];
+  }).slice(0,MAX_PHOTOS);
+}
+
+async function requireProject(projectId:string) {
+  const workspace = await requireWorkspace();
+  const { data:project, error } = await workspace.supabase
+    .from('projects')
+    .select('id')
+    .eq('id',projectId)
+    .eq('organization_id',workspace.organization.id)
+    .is('archived_at',null)
+    .maybeSingle();
+  return { ...workspace, project: error ? null : project };
 }
 
 export async function saveProjectMeasurements(formData: FormData) {
@@ -92,4 +126,65 @@ export async function saveProjectMeasurements(formData: FormData) {
   revalidatePath(`/projects/${projectId}/measurements`);
   revalidatePath('/dashboard');
   redirect(`/projects/${projectId}/measurements?saved=${status}`);
+}
+
+export async function registerMeasurementPhoto(formData:FormData) {
+  const projectId = uuid(formData.get('projectId'));
+  if (!projectId) return { ok:false, error:'project' } as const;
+  const { supabase, organization, userId, role, project } = await requireProject(projectId);
+  if (!project || !editorRoles.has(role)) return { ok:false, error:'permission' } as const;
+
+  const path = String(formData.get('path')??'').trim();
+  const name = String(formData.get('name')??'photo').trim().slice(0,300) || 'photo';
+  const mime = String(formData.get('mime')??'').trim().toLowerCase();
+  const size = Number(formData.get('size')??0);
+  const expectedPrefix = `${organization.id}/${projectId}/`;
+  if (!path.startsWith(expectedPrefix) || !PHOTO_MIME.has(mime) || !Number.isFinite(size) || size <= 0 || size > MAX_PHOTO_BYTES) {
+    return { ok:false, error:'invalid-photo' } as const;
+  }
+
+  const { data:measurement, error:readError } = await supabase
+    .from('quote_project_measurements')
+    .select('id, photos_json')
+    .eq('organization_id',organization.id)
+    .eq('project_id',projectId)
+    .maybeSingle();
+  if (readError) return { ok:false, error:'save' } as const;
+
+  const current = photoList(measurement?.photos_json);
+  if (current.length >= MAX_PHOTOS) return { ok:false, error:'photo-limit' } as const;
+  if (current.some((photo)=>photo.path===path)) return { ok:true } as const;
+  const next = [...current,{path,name,mime,size,uploadedAt:new Date().toISOString()}];
+
+  const result = measurement
+    ? await supabase.from('quote_project_measurements').update({photos_json:next,updated_by:userId,updated_at:new Date().toISOString()}).eq('id',measurement.id).eq('organization_id',organization.id)
+    : await supabase.from('quote_project_measurements').insert({organization_id:organization.id,project_id:projectId,photos_json:next,status:'draft',created_by:userId,updated_by:userId});
+  if (result.error) return { ok:false, error:'save' } as const;
+
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/measurements`);
+  return { ok:true } as const;
+}
+
+export async function removeMeasurementPhoto(formData:FormData) {
+  const projectId = uuid(formData.get('projectId'));
+  if (!projectId) return;
+  const { supabase, organization, userId, role, project } = await requireProject(projectId);
+  if (!project || !editorRoles.has(role)) return;
+  const path = String(formData.get('path')??'').trim();
+  const expectedPrefix = `${organization.id}/${projectId}/`;
+  if (!path.startsWith(expectedPrefix)) return;
+
+  const { data:measurement } = await supabase
+    .from('quote_project_measurements')
+    .select('id, photos_json')
+    .eq('organization_id',organization.id)
+    .eq('project_id',projectId)
+    .maybeSingle();
+  if (!measurement) return;
+  const next = photoList(measurement.photos_json).filter((photo)=>photo.path!==path);
+  const { error:removeError } = await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+  if (removeError) return;
+  await supabase.from('quote_project_measurements').update({photos_json:next,updated_by:userId,updated_at:new Date().toISOString()}).eq('id',measurement.id).eq('organization_id',organization.id);
+  revalidatePath(`/projects/${projectId}/measurements`);
 }
