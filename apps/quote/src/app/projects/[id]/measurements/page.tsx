@@ -59,6 +59,12 @@ export default async function MeasurementsPage({ params, searchParams }: Props) 
   const priceReady = costReady && Boolean(projectSettings.quoteCommercial);
   const proposalReady = (quotesResult.data?.length ?? 0) > 0;
   const complete = measurement?.status === 'complete';
+  const missingRequired = [
+    measurement?.measured_at ? null : m.measuredAt,
+    measurement?.site_address ? null : m.siteAddress,
+    Number(measurement?.room_height_mm ?? 0) > 0 ? null : m.roomHeight,
+    Number(measurement?.wall_a_mm ?? 0) > 0 ? null : m.wallA,
+  ].filter((value): value is string => Boolean(value));
   const storedPhotos = photoRows(measurement?.photos_json);
   const photos = await Promise.all(storedPhotos.map(async (photo) => {
     const { data } = await supabase.storage.from('quote-measurements').createSignedUrl(photo.path, 3600);
@@ -77,6 +83,7 @@ export default async function MeasurementsPage({ params, searchParams }: Props) 
         {query.saved === 'complete' ? <div className="notice success">{m.savedComplete}</div> : null}
         {query.error === 'required' ? <div className="notice warning">{m.requiredError}</div> : null}
         {query.error && query.error !== 'required' ? <div className="notice error">{m.saveError} ({query.error})</div> : null}
+        {!complete && missingRequired.length ? <div className="notice warning"><strong>{p1.remaining}: {missingRequired.length}.</strong> {missingRequired.join(' · ')}</div> : null}
         <MeasurementForm projectId={project.id} measurement={measurement} complete={complete} m={m}/>
         <section className={styles.section}>
           <div className={styles.head}><span className="eyebrow">07</span><h2>{m.photos}</h2><p className="muted">{m.photosHelp}</p></div>
