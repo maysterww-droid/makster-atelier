@@ -23,10 +23,10 @@ const presetVisual:Record<string,{moduleKey:string;width:number;height:number}>=
 
 export function VisualWorkspace({projectId,currency,locale,cabinets}:Props){
   const copy=VISUAL_COPY[locale];
-  return <section className={styles.workspace}>
+  return <section className={styles.workspace} id="modules">
     <aside className={styles.catalog}>
       <div className={styles.catalogHeader}><span className="eyebrow">VISUAL MODULE LIBRARY</span><h2>{copy.catalog}</h2><p>{copy.catalogHelp}</p></div>
-      <div className={styles.catalogGrid}>{VISUAL_PRESETS.map((key)=>{const visual=presetVisual[key];return <form action={addPresetToProject} key={key} className={styles.presetForm}><input type="hidden" name="projectId" value={projectId}/><input type="hidden" name="presetKey" value={key}/><input type="hidden" name="quantity" value="1"/><button className={styles.presetButton} type="submit"><div className={styles.presetPreview}><ModuleSchematic moduleKey={visual.moduleKey} name={copy.presets[key]} widthMm={visual.width} heightMm={visual.height}/></div><strong>{copy.presets[key]}</strong><span>+ {copy.add}</span></button></form>;})}</div>
+      <div className={styles.catalogGrid}>{VISUAL_PRESETS.map((key)=>{const visual=presetVisual[key];return <form action={addPresetToProject} key={key} className={styles.presetForm} data-loading-label={copy.adding}><input type="hidden" name="projectId" value={projectId}/><input type="hidden" name="presetKey" value={key}/><input type="hidden" name="quantity" value="1"/><button className={styles.presetButton} type="submit" data-loading-label={copy.adding}><div className={styles.presetPreview}><ModuleSchematic moduleKey={visual.moduleKey} name={copy.presets[key]} widthMm={visual.width} heightMm={visual.height}/></div><strong>{copy.presets[key]}</strong><span>+ {copy.add}</span></button></form>;})}</div>
       <div className={styles.catalogFooter}><Link href={`/library?project=${projectId}`} className="textLink">{copy.allPresets}</Link></div>
     </aside>
     <ProjectVisualBuilder cabinets={cabinets} currency={currency} locale={locale}/>
