@@ -19,6 +19,34 @@ function parameter(item: PriceBookItem | undefined, key: string) {
   return Number.isFinite(value) ? value : 0;
 }
 
+function isDemo(item: PriceBookItem | undefined) {
+  return Boolean(item?.parameters_json && typeof item.parameters_json === 'object' && !Array.isArray(item.parameters_json) && item.parameters_json.demo);
+}
+
+function applyDemoGuard(preview: CabinetCostPreview, input: QuoteCabinetInput, items: PriceBookItem[]) {
+  const ids = new Set<string>([
+    input.boardItemId,
+    input.frontItemId,
+    input.backItemId,
+    input.edgeItemId,
+    input.hingeItemId,
+    input.drawerItemId,
+    input.labourItemId,
+    input.specialHardwareItemId,
+    ...preview.hardware.map((line) => line.priceBookItemId),
+    ...preview.operations.map((line) => line.priceBookItemId),
+  ].filter((id): id is string => Boolean(id)));
+  const demoNames = items.filter((item) => ids.has(item.id) && isDemo(item)).map((item) => item.name);
+  if (!demoNames.length) return preview;
+  const message = `DEMO Price Book: замените тестовые позиции реальными закупочными ценами (${demoNames.join(', ')}).`;
+  return {
+    ...preview,
+    warnings: preview.warnings.includes(message) ? preview.warnings : [...preview.warnings, message],
+    notes: [...preview.notes, 'DEMO-цены предназначены только для изучения Makster Quote и не разрешают считать коммерческий расчёт готовым.'],
+    complete: false,
+  };
+}
+
 function areaCost(item: PriceBookItem | undefined, areaM2: number) {
   if (!item || areaM2 <= 0) return 0n;
   const price = moneyMinor(item);
@@ -121,10 +149,10 @@ export function calculateQuoteCabinetPreview(
 ): CabinetCostPreview {
   const withSpecial = applySpecialHardware(calculateCabinetPreview(input, items, options), input, items, options);
   const requested = Number(input.frontWidthMm ?? 0);
-  if (!(requested > 0) || !['b-door', 'w-door'].includes(input.moduleKey)) return withSpecial;
+  if (!(requested > 0) || !['b-door', 'w-door'].includes(input.moduleKey)) return applyDemoGuard(withSpecial, input, items);
 
   const index = withSpecial.parts.findIndex((part) => part.key === 'door-front');
-  if (index < 0) return withSpecial;
+  if (index < 0) return applyDemoGuard(withSpecial, input, items);
   const oldPart = withSpecial.parts[index];
   const doors = Math.max(1, oldPart.quantity);
   const gap = Math.max(0, Number(input.gapMm) || 0);
@@ -172,7 +200,7 @@ export function calculateQuoteCabinetPreview(
     taxBps: options.taxBps ?? 0,
   });
 
-  return {
+  const adjusted: CabinetCostPreview = {
     ...withSpecial,
     parts,
     operations,
@@ -194,4 +222,5 @@ export function calculateQuoteCabinetPreview(
       `Угловой модуль: мебельный фасад рассчитан по видимой ширине ${visibleWidth.toFixed(0)} мм при ширине корпуса ${Number(input.widthMm).toFixed(0)} мм. Точная угловая геометрия и присадка относятся к Makster Pro.`,
     ],
   };
+  return applyDemoGuard(adjusted, input, items);
 }
