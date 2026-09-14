@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { effectiveQuoteStatus, quoteActionAllowed } from './quote-lifecycle';
 import { readQuoteSnapshot, type QuoteSnapshot } from './quote-snapshot';
 import { createClient } from './supabase/server';
 
@@ -13,7 +14,7 @@ export type PublicQuoteAccess = {
   snapshot: QuoteSnapshot;
 };
 
-const PUBLIC_STATUSES = new Set(['approved', 'sent', 'accepted', 'rejected', 'expired']);
+const PUBLIC_STATUSES = new Set(['approved', 'sent', 'accepted', 'rejected', 'expired', 'superseded']);
 
 export function hashClientQuoteToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
@@ -44,8 +45,8 @@ export async function loadPublicQuote(token: string): Promise<PublicQuoteAccess 
   const issuedAt = validIso(root.issuedAt, snapshot.issuedAt);
   const validUntil = validIso(root.validUntil, snapshot.validUntil);
   const linkExpiresAt = validIso(root.linkExpiresAt, validUntil);
-  const rawStatus = typeof root.status === 'string' ? root.status : 'approved';
-  const status = PUBLIC_STATUSES.has(rawStatus) ? rawStatus : 'approved';
+  const rawStatus = typeof root.status === 'string' && PUBLIC_STATUSES.has(root.status) ? root.status : 'approved';
+  const status = effectiveQuoteStatus(rawStatus, validUntil);
   if (!quoteId || !Number.isInteger(quoteVersion) || quoteVersion < 1) return null;
   return {
     quoteId,
@@ -54,7 +55,7 @@ export async function loadPublicQuote(token: string): Promise<PublicQuoteAccess 
     validUntil,
     linkExpiresAt,
     status,
-    actionAllowed: root.actionAllowed === true,
+    actionAllowed: root.actionAllowed === true && quoteActionAllowed(status, validUntil),
     snapshot:{ ...snapshot, quoteId, quoteVersion, issuedAt, validUntil },
   };
 }
