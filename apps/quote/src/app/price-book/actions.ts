@@ -29,6 +29,12 @@ function moneyToMinor(raw: string) {
   return Number(BigInt(whole) * 100n + BigInt((fraction + '00').slice(0, 2)));
 }
 
+function currentSettings(value: unknown) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+}
+
 function readPriceFields(formData: FormData, defaultCurrency: string) {
   const category = String(formData.get('category') ?? '').trim();
   const name = String(formData.get('name') ?? '').trim().slice(0, 300);
@@ -143,6 +149,99 @@ function positiveNumber(raw: string) {
 function nonNegativeNumber(raw: string) {
   const value = Number(raw.replace(',', '.'));
   return Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+export async function seedDemoPriceBook() {
+  const { supabase, organization, userId, role } = await requireWorkspace();
+  if (!['owner', 'admin'].includes(role)) redirect('/price-book?error=permission');
+
+  const currency = organization.currency;
+  const demoRows = [
+    {sku:'DEMO-MQ-BOARD',category:'board',name:'DEMO · Board 18 mm',unit:'sheet',purchase_price_minor:10000,parameters_json:{demo:true,demoSeedKey:'board',thicknessMm:18,sheetWidthMm:2800,sheetHeightMm:2070,wastePct:8}},
+    {sku:'DEMO-MQ-FRONT',category:'front',name:'DEMO · Front material',unit:'m2',purchase_price_minor:10000,parameters_json:{demo:true,demoSeedKey:'front',thicknessMm:18}},
+    {sku:'DEMO-MQ-EDGE',category:'edge',name:'DEMO · Edge band',unit:'m',purchase_price_minor:1000,parameters_json:{demo:true,demoSeedKey:'edge'}},
+    {sku:'DEMO-MQ-HINGE',category:'hardware',name:'DEMO · Hinge',unit:'pcs',purchase_price_minor:1000,parameters_json:{demo:true,demoSeedKey:'hinge'}},
+    {sku:'DEMO-MQ-DRAWER',category:'hardware',name:'DEMO · Drawer system',unit:'set',purchase_price_minor:10000,parameters_json:{demo:true,demoSeedKey:'drawer'}},
+    {sku:'DEMO-MQ-LABOUR',category:'labour',name:'DEMO · Labour hour',unit:'hour',purchase_price_minor:10000,parameters_json:{demo:true,demoSeedKey:'labour'}},
+    {sku:'DEMO-MQ-OP-CUT',category:'operation',name:'DEMO · Cutting',unit:'pcs',purchase_price_minor:100,parameters_json:{demo:true,demoSeedKey:'op-cut',operationKey:'cutting'}},
+    {sku:'DEMO-MQ-OP-EDGE',category:'operation',name:'DEMO · Edge banding',unit:'m',purchase_price_minor:100,parameters_json:{demo:true,demoSeedKey:'op-edge',operationKey:'edge-banding'}},
+    {sku:'DEMO-MQ-OP-CARCASS',category:'operation',name:'DEMO · Carcass drilling',unit:'pcs',purchase_price_minor:100,parameters_json:{demo:true,demoSeedKey:'op-carcass',operationKey:'carcass-drilling'}},
+    {sku:'DEMO-MQ-OP-HINGE',category:'operation',name:'DEMO · Hinge drilling',unit:'pcs',purchase_price_minor:100,parameters_json:{demo:true,demoSeedKey:'op-hinge',operationKey:'hinge-cup'}},
+    {sku:'DEMO-MQ-OP-DRAWER',category:'operation',name:'DEMO · Drawer drilling',unit:'pcs',purchase_price_minor:100,parameters_json:{demo:true,demoSeedKey:'op-drawer',operationKey:'drawer-drilling'}},
+    {sku:'DEMO-MQ-OP-BACK',category:'operation',name:'DEMO · Back groove',unit:'m',purchase_price_minor:100,parameters_json:{demo:true,demoSeedKey:'op-back',operationKey:'back-groove'}},
+    {sku:'DEMO-MQ-WORKTOP',category:'worktop',name:'DEMO · Worktop',unit:'m',purchase_price_minor:10000,parameters_json:{demo:true,demoSeedKey:'worktop'}},
+    {sku:'DEMO-MQ-PLINTH',category:'plinth',name:'DEMO · Plinth',unit:'m',purchase_price_minor:1000,parameters_json:{demo:true,demoSeedKey:'plinth'}},
+    {sku:'DEMO-MQ-DELIVERY',category:'delivery',name:'DEMO · Delivery',unit:'job',purchase_price_minor:10000,parameters_json:{demo:true,demoSeedKey:'delivery'}},
+    {sku:'DEMO-MQ-INSTALL',category:'installation',name:'DEMO · Installation',unit:'job',purchase_price_minor:10000,parameters_json:{demo:true,demoSeedKey:'installation'}},
+  ];
+
+  const { data: existing, error: existingError } = await supabase
+    .from('quote_price_book_items')
+    .select('id, sku')
+    .eq('organization_id', organization.id)
+    .eq('currency', currency)
+    .eq('active', true)
+    .like('sku', 'DEMO-MQ-%');
+  if (existingError) redirect('/price-book?error=demo-seed');
+
+  const existingSkus = new Set((existing ?? []).map((row) => row.sku));
+  const missing = demoRows.filter((row) => !existingSkus.has(row.sku)).map((row) => ({
+    organization_id: organization.id,
+    category: row.category,
+    name: row.name,
+    manufacturer: 'Makster Quote',
+    sku: row.sku,
+    unit: row.unit,
+    currency,
+    purchase_price_minor: row.purchase_price_minor,
+    parameters_json: row.parameters_json,
+    source: 'manual',
+    active: true,
+    created_by: userId,
+  }));
+  if (missing.length) {
+    const { error } = await supabase.from('quote_price_book_items').insert(missing);
+    if (error) redirect('/price-book?error=demo-seed');
+  }
+
+  const { data: seeded, error: seededError } = await supabase
+    .from('quote_price_book_items')
+    .select('id, sku')
+    .eq('organization_id', organization.id)
+    .eq('currency', currency)
+    .eq('active', true)
+    .like('sku', 'DEMO-MQ-%');
+  if (seededError) redirect('/price-book?error=demo-seed');
+
+  const ids = new Map((seeded ?? []).map((row) => [row.sku, row.id]));
+  const current = currentSettings(organization.settings);
+  const currentQuote = currentSettings(current.quote);
+  const currentDefaults = currentSettings(currentQuote.priceBookDefaults);
+  const settings = {
+    ...current,
+    quote: {
+      ...currentQuote,
+      priceBookDefaults: {
+        ...currentDefaults,
+        boardItemId: currentDefaults.boardItemId ?? ids.get('DEMO-MQ-BOARD'),
+        backItemId: currentDefaults.backItemId ?? ids.get('DEMO-MQ-BOARD'),
+        frontItemId: currentDefaults.frontItemId ?? ids.get('DEMO-MQ-FRONT'),
+        edgeItemId: currentDefaults.edgeItemId ?? ids.get('DEMO-MQ-EDGE'),
+        hingeItemId: currentDefaults.hingeItemId ?? ids.get('DEMO-MQ-HINGE'),
+        drawerItemId: currentDefaults.drawerItemId ?? ids.get('DEMO-MQ-DRAWER'),
+        labourItemId: currentDefaults.labourItemId ?? ids.get('DEMO-MQ-LABOUR'),
+      },
+    },
+  };
+  const { error: settingsError } = await supabase.from('organizations').update({settings,updated_at:new Date().toISOString()}).eq('id',organization.id);
+  if (settingsError) redirect('/price-book?error=demo-seed');
+
+  revalidatePath('/price-book');
+  revalidatePath('/settings/pricing');
+  revalidatePath('/library');
+  revalidatePath('/projects');
+  revalidatePath('/dashboard');
+  redirect('/price-book?setup=demo');
 }
 
 export async function addPriceBookItem(formData: FormData) {
