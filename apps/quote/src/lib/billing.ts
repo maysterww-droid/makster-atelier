@@ -19,8 +19,11 @@ export const PLAN_MONTHLY_EUR: Record<CanonicalQuotePlan, number> = {
 };
 
 export const CANONICAL_PAID_PLANS: CanonicalQuotePlan[] = ['starter', 'workshop', 'atelier'];
-// Compatibility export for old code that still narrows a legacy QuotePlan.
-export const PAID_PLANS: readonly string[] = CANONICAL_PAID_PLANS;
+// Old webhook code uses QuotePlan for narrowing. The cast widens only includes();
+// iteration remains canonical for all new Stripe code.
+export const PAID_PLANS = CANONICAL_PAID_PLANS as CanonicalQuotePlan[] & {
+  includes(searchElement: string, fromIndex?: number): boolean;
+};
 
 /** Normalize old Founder/Pro rows into the 0.2 canonical plan model. */
 export function normalizeQuotePlan(value: unknown): CanonicalQuotePlan {
