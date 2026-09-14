@@ -18,7 +18,9 @@ export const PLAN_MONTHLY_EUR: Record<CanonicalQuotePlan, number> = {
   atelier: 79,
 };
 
-export const PAID_PLANS: CanonicalQuotePlan[] = ['starter', 'workshop', 'atelier'];
+export const CANONICAL_PAID_PLANS: CanonicalQuotePlan[] = ['starter', 'workshop', 'atelier'];
+// Compatibility export for old code that still narrows a legacy QuotePlan.
+export const PAID_PLANS: readonly string[] = CANONICAL_PAID_PLANS;
 
 /** Normalize old Founder/Pro rows into the 0.2 canonical plan model. */
 export function normalizeQuotePlan(value: unknown): CanonicalQuotePlan {
@@ -91,7 +93,7 @@ export function planForVariantId(variantId: string | number | null | undefined):
 
 export function checkoutConfigured(plan?: CanonicalQuotePlan) {
   if (!lemonApiKey() || !lemonStoreId()) return false;
-  return plan ? Boolean(variantIdForPlan(plan)) : PAID_PLANS.some((candidate) => Boolean(variantIdForPlan(candidate)));
+  return plan ? Boolean(variantIdForPlan(plan)) : CANONICAL_PAID_PLANS.some((candidate) => Boolean(variantIdForPlan(candidate)));
 }
 
 export function webhookConfigured() {
