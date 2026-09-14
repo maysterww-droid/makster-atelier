@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
+import { planDisplayLabel } from '@/lib/billing';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import { getSettingsMessages } from '@/lib/i18n-settings';
 import { environmentReadiness, overallReadiness, type ReadinessState } from '@/lib/readiness';
@@ -30,13 +31,13 @@ export default async function ReadinessPage(){
     {key:'pricing-policy',label:m.pricingPolicy,state:pricingConfigured?'ready':'warning',detail:pricingConfigured?`${m.targetMargin} ${margin.toFixed(2)}%, ${m.overhead.toLowerCase()} ${overhead.toFixed(2)}%.`:m.pricingDefaults},
     {key:'document-brand',label:m.documentBrand,state:brandReady?'ready':'warning',detail:brandReady?m.brandReady:m.brandMissing},
   );
-  const overall=overallReadiness(checks); const subscription=subscriptionResult.data; const readyCount=checks.filter((check)=>check.state==='ready').length;
-  return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan??'free').toUpperCase()}>
+  const overall=overallReadiness(checks); const subscription=subscriptionResult.data; const readyCount=checks.filter((check)=>check.state==='ready').length; const visiblePlan=planDisplayLabel(subscription?.plan);
+  return <AppShell organizationName={organization.name} role={role} plan={String(subscription?.plan??'free')}>
     <header className="topbar"><div><span className="eyebrow">PRODUCTION READINESS · MAKSTER QUOTE</span><h1>{m.readinessTitle}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       <section className="metricGrid"><article className="metricCard"><span>{m.overallStatus}</span><strong>{stateLabel[overall]}</strong><small>{readyCount} / {checks.length} {m.checksReady}</small></article><article className="metricCard"><span>{m.workData}</span><strong>{projectResult.count??0}</strong><small>{m.projects} · {clientResult.count??0} {m.clients}</small></article><article className="metricCard"><span>{m.issued}</span><strong>{quoteResult.count??0}</strong><small>{m.quoteVersions}</small></article></section>
       <section className="panel" style={{marginBottom:18}}><div className="panelHeader"><div><span className="eyebrow">{m.checks}</span><h2>{m.beforeProduction}</h2><p className="muted">{m.secretsHidden}</p></div></div><div className="priceList">{checks.map((check)=><article className="priceRow" key={check.key}><div><span className="pill">{stateLabel[check.state]}</span><strong>{check.label}</strong><small>{check.detail}</small></div></article>)}</div></section>
-      <section className="panel"><div className="panelHeader"><div><span className="eyebrow">{m.liveState}</span><h2>{m.currentConfig}</h2></div></div><div className="tableWrap"><table><tbody><tr><th>{m.currentPlan}</th><td>{String(subscription?.plan??'free').toUpperCase()}</td></tr><tr><th>{m.subscriptionStatus}</th><td>{subscription?.status??'inactive'}</td></tr><tr><th>{m.billingProvider}</th><td>{subscription?.provider??m.notConnected}</td></tr><tr><th>{m.billingMode}</th><td>{subscription?.test_mode?'test':'live / not set'}</td></tr><tr><th>{m.priceBook}</th><td>{priceItems.length} {m.activeItems}</td></tr><tr><th>{m.targetMargin}</th><td>{margin.toFixed(2)}%</td></tr><tr><th>{m.overhead}</th><td>{overhead.toFixed(2)}%</td></tr></tbody></table></div></section>
+      <section className="panel"><div className="panelHeader"><div><span className="eyebrow">{m.liveState}</span><h2>{m.currentConfig}</h2></div></div><div className="tableWrap"><table><tbody><tr><th>{m.currentPlan}</th><td>{visiblePlan}</td></tr><tr><th>{m.subscriptionStatus}</th><td>{subscription?.status??'inactive'}</td></tr><tr><th>{m.billingProvider}</th><td>{subscription?.provider??m.notConnected}</td></tr><tr><th>{m.billingMode}</th><td>{subscription?.test_mode?'test':'live / not set'}</td></tr><tr><th>{m.priceBook}</th><td>{priceItems.length} {m.activeItems}</td></tr><tr><th>{m.targetMargin}</th><td>{margin.toFixed(2)}%</td></tr><tr><th>{m.overhead}</th><td>{overhead.toFixed(2)}%</td></tr></tbody></table></div></section>
     </div>
   </AppShell>;
 }
