@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
+import { ProjectFlow } from '@/components/project-flow';
 import { addPresetToProject } from '@/app/library/actions';
 import type { PriceBookItem } from '@/lib/engineering';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import type { Locale } from '@/lib/i18n';
+import { getMeasurementMessages } from '@/lib/i18n-measurements';
 import { getProjectMessages } from '@/lib/i18n-project';
 import { requireWorkspace } from '@/lib/workspace';
 import CabinetEditor from './cabinet-editor';
@@ -25,22 +27,25 @@ const presetKeys=['base-door-600','base-drawer-600-3','wall-door-600','sink-600'
 function safeBps(value:unknown,fallback:number,max=9_500){const parsed=Number(value);if(!Number.isFinite(parsed))return fallback;return Math.max(0,Math.min(max,Math.round(parsed)));}
 
 export default async function ProjectPage({params,searchParams}:Props){
-  const {id}=await params; const query=await searchParams; const {supabase,organization,role}=await requireWorkspace(); const locale=await getInterfaceLocale(); const t=texts[locale]; const commercialText=getProjectMessages(locale);
-  const [projectResult,cabinetsResult,priceResult,subscriptionResult,clientsResult,quotesResult]=await Promise.all([
+  const {id}=await params; const query=await searchParams; const {supabase,organization,role}=await requireWorkspace(); const locale=await getInterfaceLocale(); const t=texts[locale]; const commercialText=getProjectMessages(locale); const measurementText=getMeasurementMessages(locale);
+  const [projectResult,cabinetsResult,priceResult,subscriptionResult,clientsResult,quotesResult,measurementResult]=await Promise.all([
     supabase.from('projects').select('id, name, project_type, status, currency, client_id, settings, current_revision_id').eq('id',id).eq('organization_id',organization.id).maybeSingle(),
     supabase.from('quote_cabinets').select('id, module_key, name, width_mm, height_mm, depth_mm, quantity, construction_json, material_refs_json, hardware_refs_json, computed_cost_json').eq('project_id',id).eq('organization_id',organization.id).order('sort_order').order('created_at'),
     supabase.from('quote_price_book_items').select('id, category, name, unit, currency, purchase_price_minor, parameters_json').eq('organization_id',organization.id).eq('active',true).order('name'),
     supabase.from('quote_subscriptions').select('plan').eq('organization_id',organization.id).maybeSingle(),
     supabase.from('clients').select('id, display_name, email, phone').eq('organization_id',organization.id).is('archived_at',null).order('display_name'),
     supabase.from('client_commercial_quotes').select('id, quote_version, issued_at, valid_until, total_amount_minor, client_name').eq('project_id',id).eq('organization_id',organization.id).order('quote_version',{ascending:false}),
+    supabase.from('quote_project_measurements').select('status').eq('project_id',id).eq('organization_id',organization.id).maybeSingle(),
   ]);
   const project=projectResult.data; const cabinets=cabinetsResult.data; const priceBook=priceResult.data; const subscription=subscriptionResult.data;
-  if(projectResult.error||!project)notFound(); if(cabinetsResult.error)throw new Error(`Failed to load modules: ${cabinetsResult.error.message}`); if(priceResult.error)throw new Error(`Failed to load Price Book: ${priceResult.error.message}`); if(clientsResult.error)throw new Error(`Failed to load customers: ${clientsResult.error.message}`); if(quotesResult.error)throw new Error(`Failed to load quote history: ${quotesResult.error.message}`);
+  if(projectResult.error||!project)notFound(); if(cabinetsResult.error)throw new Error(`Failed to load modules: ${cabinetsResult.error.message}`); if(priceResult.error)throw new Error(`Failed to load Price Book: ${priceResult.error.message}`); if(clientsResult.error)throw new Error(`Failed to load customers: ${clientsResult.error.message}`); if(quotesResult.error)throw new Error(`Failed to load quote history: ${quotesResult.error.message}`); if(measurementResult.error)throw new Error(`Failed to load measurements: ${measurementResult.error.message}`);
   const projectPriceBook=(priceBook??[]).filter((item)=>item.currency===project.currency); const quoteHistory=quotesResult.data??[]; let statusEvents:{quote_id:string;status:string;created_at:string;note:string|null}[]=[];
   if(quoteHistory.length){const {data,error}=await supabase.from('client_quote_status_events').select('quote_id, status, created_at, note').eq('organization_id',organization.id).in('quote_id',quoteHistory.map((quote)=>quote.id)).order('created_at',{ascending:false});if(error)throw new Error(`Failed to load quote statuses: ${error.message}`);statusEvents=data??[];}
   const quoteSettings=(organization.settings?.quote??{}) as Record<string,unknown>; const targetMarginBps=safeBps(quoteSettings.targetMarginBps,3500); const minimumMarginBps=Math.min(targetMarginBps,safeBps(quoteSettings.minimumMarginBps,1500)); const overheadBps=safeBps(quoteSettings.overheadBps,0); const taxBps=safeBps((project.settings as Record<string,unknown>|null)?.taxBps,0,100_000);
+  const completeCabinetCount=(cabinets??[]).filter((row)=>Boolean((row.computed_cost_json as Record<string,unknown>|null)?.complete)).length; const costReady=(cabinets?.length??0)>0&&completeCabinetCount===(cabinets?.length??0); const priceReady=costReady&&Boolean(((project.settings as Record<string,unknown>|null)?.quoteCommercial)); const proposalReady=quoteHistory.length>0; const measurementComplete=measurementResult.data?.status==='complete';
   return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan??'free').toUpperCase()}>
-    <header className="topbar"><div><span className="eyebrow">{project.project_type.toUpperCase()} · {project.status.toUpperCase()}</span><h1>{project.name}</h1></div><div className="topActions"><Link href="/projects" className="textLink">{t.back}</Link><Link href={`/library?project=${project.id}`} className="secondary linkButton">{t.library}</Link><Link href="/price-book" className="secondary linkButton">{t.priceBook}</Link><Link href={`/projects/${project.id}/quote`} className="secondary linkButton" target="_blank">{t.livePreview}</Link></div></header>
+    <header className="topbar"><div><span className="eyebrow">{project.project_type.toUpperCase()} · {project.status.toUpperCase()}</span><h1>{project.name}</h1></div><div className="topActions"><Link href="/projects" className="textLink">{t.back}</Link><Link href={`/projects/${project.id}/measurements`} className="secondary linkButton">{measurementText.shortTitle}</Link><Link href={`/library?project=${project.id}`} className="secondary linkButton">{t.library}</Link><Link href="/price-book" className="secondary linkButton">{t.priceBook}</Link><Link href={`/projects/${project.id}/quote`} className="secondary linkButton" target="_blank">{t.livePreview}</Link></div></header>
+    <section className="pageContent compact"><ProjectFlow projectId={project.id} locale={locale} active="project" measurementComplete={measurementComplete} cabinetCount={cabinets?.length??0} completeCabinetCount={completeCabinetCount} costReady={costReady} priceReady={priceReady} proposalReady={proposalReady}/></section>
     {query.duplicated?<div className="pageContent compact"><div className="notice success">{t.duplicate}</div></div>:null}
     {query.error?<div className="pageContent compact"><div className="notice error">{t.errors[query.error]??`${t.genericError} (${query.error})`}</div></div>:null}
     {query.saved==='commercial'?<div className="pageContent compact"><div className="notice success">{t.commercialSaved}</div></div>:null}
