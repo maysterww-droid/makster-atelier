@@ -1,4 +1,4 @@
-import type { QuotePlan } from './billing';
+import type { CanonicalQuotePlan } from './billing';
 import type { Locale } from './i18n';
 
 type BillingMessages = {
@@ -17,7 +17,7 @@ const messages:Record<Locale,BillingMessages>={
   pl:{title:'Plan i subskrypcja',back:'← Pulpit',checkoutSuccess:'Płatność zakończona.',checkoutWebhook:'Subskrypcja zaktualizuje się po zweryfikowanym webhooku Stripe.',existingSubscription:'Warsztat ma już aktywną subskrypcję. Do zmiany planu użyj zarządzania subskrypcją, aby nie tworzyć duplikatu.',billingError:'Nie udało się wykonać operacji na subskrypcji.',currentPlan:'Aktualny plan',forWorkshop:'dla tego warsztatu',status:'Status',until:'do',noEndDate:'bez daty końcowej',billingBackend:'Billing backend',awaitsSetup:'czeka na konfigurację',currentSubscription:'AKTUALNA SUBSKRYPCJA',managePayment:'Zarządzaj płatnością',currentPaidUntil:'Bieżący opłacony okres trwa do',plans:'PLANY',changePlan:'Zmiana planu',choosePlan:'Wybierz plan',pricesFromProvider:'Makster Quote używa jednego spójnego cennika planów. Płatności i podatki obsługuje Stripe.',subscriptionActive:'Subskrypcja jest już aktywna',portalHelp:'Dane płatnicze, anulowanie i dostępne zmiany subskrypcji są obsługiwane w Stripe Customer Portal.',openPortal:'Otwórz zarządzanie subskrypcją',choose:'Wybierz',planPermission:'Plan może zmieniać tylko właściciel lub administrator',monthly:'miesięcznie',free:'bezpłatnie',configured:'Stripe gotowy',pending:'Cena Stripe nie jest jeszcze podłączona',pendingHelp:'Plan Makster Quote jest już ustalony, ale checkout będzie dostępny po utworzeniu ceny w Stripe.',vatNote:'Podatek/VAT jest obliczany przez Stripe na podstawie danych kupującego i reguł płatności.'},
 };
 
-const descriptions:Record<Locale,Record<QuotePlan,string>>={
+const descriptions:Record<Locale,Record<CanonicalQuotePlan,string>>={
   ru:{free:'Проверка продукта на реальном проекте без обязательной платной подписки.',starter:'Для одного мебельщика: проекты, клиенты, Price Book, полная библиотека, себестоимость, PDF и отправка предложения.',workshop:'Для мастерской: до 5 пользователей, общие цены, история изменений, расширенные шаблоны и командная работа.',atelier:'Для растущей команды: до 15 пользователей, роли, несколько рабочих пространств, Makster Pro integration и приоритетная поддержка.'},
   en:{free:'Try Makster Quote on a real project without a required paid subscription.',starter:'For one furniture maker: projects, clients, Price Book, full library, true cost, PDF and quote delivery.',workshop:'For a workshop: up to 5 users, shared prices, change history, advanced templates and collaboration.',atelier:'For a growing team: up to 15 users, roles, multiple workspaces, Makster Pro integration and priority support.'},
   cs:{free:'Vyzkoušejte Makster Quote na reálném projektu bez povinného placeného předplatného.',starter:'Pro jednoho truhláře: projekty, klienti, ceník, celá knihovna, skutečné náklady, PDF a odeslání nabídky.',workshop:'Pro dílnu: až 5 uživatelů, sdílené ceny, historie změn, pokročilé šablony a spolupráce.',atelier:'Pro rostoucí tým: až 15 uživatelů, role, více pracovních prostorů, integrace Makster Pro a prioritní podpora.'},
@@ -34,5 +34,5 @@ const statuses:Record<Locale,Record<string,string>>={
 };
 
 export function getBillingMessages(locale:Locale){return messages[locale];}
-export function billingPlanDescription(locale:Locale,plan:QuotePlan){return descriptions[locale][plan];}
+export function billingPlanDescription(locale:Locale,plan:CanonicalQuotePlan){return descriptions[locale][plan];}
 export function billingStatusLabel(locale:Locale,status:string){return statuses[locale][status]??status;}
