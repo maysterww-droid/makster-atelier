@@ -7,5 +7,5 @@ type Props={projectId:string;currency:string;cabinets:CabinetRow[];priceBook:Pri
 
 export default async function CabinetEditor(props:Props){
   const locale=await getInterfaceLocale();
-  return <CabinetEditorClient {...props} locale={locale}/>;
+  return <section id="materials"><CabinetEditorClient {...props} locale={locale}/></section>;
 }
