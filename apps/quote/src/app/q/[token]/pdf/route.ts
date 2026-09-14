@@ -1,5 +1,6 @@
 import { loadPublicQuote } from '@/lib/client-quote-access';
 import { buildQuotePdf } from '@/lib/quote-pdf';
+import { quoteReference } from '@/lib/quote-lifecycle';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,7 @@ export async function GET(_request: Request, { params }: Context) {
   const access = await loadPublicQuote(token);
   if (!access) return new Response('Quote link not found or expired', { status:404 });
   const buffer = await buildQuotePdf(access.snapshot);
-  const filename = safeFilename(`Makster-Quote-v${access.quoteVersion}-${access.snapshot.project.name}.pdf`);
+  const filename = safeFilename(`${quoteReference(access.snapshot.project.id, access.quoteVersion)}-${access.snapshot.project.name}.pdf`);
   return new Response(new Uint8Array(buffer), {
     headers:{
       'Content-Type':'application/pdf',
