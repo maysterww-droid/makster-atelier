@@ -28,6 +28,8 @@ jobs:
         run: npm run typecheck
       - name: Calculation QA
         run: npm run calculation:qa
+      - name: Snapshot QA
+        run: npm run snapshot:qa
       - name: PDF smoke
         run: npm run pdf:smoke
       - name: Build
