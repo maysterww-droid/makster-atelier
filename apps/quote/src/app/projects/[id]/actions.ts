@@ -16,7 +16,7 @@ function record(value:unknown):Record<string,unknown>{return value&&typeof value
 function safeBps(value:unknown,fallback:number,max=9_500){const parsed=Number(value);return Number.isFinite(parsed)?Math.max(0,Math.min(max,Math.round(parsed))):fallback;}
 function defaultShelfCount(moduleKey:ModuleKey){if(moduleKey==='b-door')return 1;if(moduleKey==='w-door'||moduleKey==='open')return 2;if(moduleKey==='t-door')return 4;if(moduleKey==='t-oven')return 2;if(moduleKey==='t-fridge')return 1;return 0;}
 function defaultModuleName(moduleKey:ModuleKey){const names:Record<ModuleKey,string>={'b-door':'Нижний шкаф с дверью','b-drawer':'Нижний шкаф с ящиками','b-oven':'Нижний модуль под духовку','w-door':'Верхний шкаф с дверью','t-door':'Высокий пенал','t-oven':'Пенал под духовку','t-fridge':'Пенал под холодильник',dishwasher:'ПММ · мебельный фасад',open:'Открытый модуль',generic:'Универсальный корпус'};return names[moduleKey];}
-function specialRole(value:unknown):SpecialHardwareRole|undefined{const role=String(value??'');return role==='cargo'||role==='lift'||role==='corner'?role:undefined;}
+function specialRole(value:unknown):SpecialHardwareRole|undefined{const role=String(value??'');return role==='cargo'||role==='lift'||role==='corner'||role==='rail'||role==='sliding'?role:undefined;}
 
 export async function saveCabinet(formData:FormData){
   const {supabase,organization,userId,role}=await requireWorkspace();
