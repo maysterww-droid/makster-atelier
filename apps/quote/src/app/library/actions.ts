@@ -84,6 +84,46 @@ export async function addPresetToProject(formData: FormData) {
     computed_cost_json:costPreviewToJson(preview), engine_version:'mq-0.1.11-engineering', created_by:userId, created_at:now, updated_at:now,
   });
   if (error) redirect(`/library?project=${projectId}&error=add`);
-  revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard');
+  const {data:pref}=await supabase.from('quote_library_prefs').select('is_favorite,use_count').eq('organization_id',organization.id).eq('user_id',userId).eq('preset_key',presetKey).maybeSingle();
+  await supabase.from('quote_library_prefs').upsert({organization_id:organization.id,user_id:userId,preset_key:presetKey,is_favorite:Boolean(pref?.is_favorite),use_count:Number(pref?.use_count??0)+1,last_used_at:now,updated_at:now},{onConflict:'organization_id,user_id,preset_key'});
+  revalidatePath('/library'); revalidatePath(`/projects/${projectId}`); revalidatePath('/dashboard');
   redirect(`/projects/${projectId}?saved=module-added`);
+}
+
+export async function togglePresetFavorite(formData:FormData){
+  const {supabase,organization,userId}=await requireWorkspace();
+  const presetKey=String(formData.get('presetKey')??'').trim();
+  if(!quoteModulePreset(presetKey))redirect('/library?error=preset');
+  const {data:pref}=await supabase.from('quote_library_prefs').select('is_favorite,use_count,last_used_at').eq('organization_id',organization.id).eq('user_id',userId).eq('preset_key',presetKey).maybeSingle();
+  const {error}=await supabase.from('quote_library_prefs').upsert({organization_id:organization.id,user_id:userId,preset_key:presetKey,is_favorite:!Boolean(pref?.is_favorite),use_count:Number(pref?.use_count??0),last_used_at:pref?.last_used_at??null,updated_at:new Date().toISOString()},{onConflict:'organization_id,user_id,preset_key'});
+  if(error)redirect('/library?error=favorite');revalidatePath('/library');redirect('/library');
+}
+
+export async function addTemplateToProject(formData:FormData){
+  const {supabase,organization,userId,role}=await requireWorkspace();
+  const projectId=uuid(formData.get('projectId'));const templateId=uuid(formData.get('templateId'));const quantity=quantityValue(formData.get('quantity'));
+  if(!projectId||!templateId||!libraryRoles.has(role))redirect('/library?error=permission');
+  const [{data:project},{data:template},{data:lastModule}]=await Promise.all([
+    supabase.from('projects').select('id,current_revision_id').eq('id',projectId).eq('organization_id',organization.id).is('archived_at',null).maybeSingle(),
+    supabase.from('quote_module_templates').select('*').eq('id',templateId).eq('organization_id',organization.id).maybeSingle(),
+    supabase.from('quote_cabinets').select('sort_order').eq('project_id',projectId).eq('organization_id',organization.id).order('sort_order',{ascending:false}).limit(1).maybeSingle(),
+  ]);
+  if(!project||!template)redirect('/library?error=template');const now=new Date().toISOString();
+  const {error}=await supabase.from('quote_cabinets').insert({organization_id:organization.id,project_id:projectId,project_revision_id:project.current_revision_id,module_key:template.module_key,name:template.name,sort_order:Number(lastModule?.sort_order??0)+100,width_mm:template.width_mm,height_mm:template.height_mm,depth_mm:template.depth_mm,quantity,dimension_source:'standard',measurement_reference:null,construction_json:template.construction_json??{},material_refs_json:template.material_refs_json??{},hardware_refs_json:template.hardware_refs_json??{},computed_parts_json:{notes:['Recalculate workshop standard for this project.']},computed_cost_json:{complete:false,warnings:['Recalculate workshop standard for this project.']},engine_version:'mq-0.2-template',created_by:userId,created_at:now,updated_at:now});
+  if(error)redirect(`/library?project=${projectId}&error=template-add`);
+  await supabase.from('quote_module_templates').update({use_count:Number(template.use_count??0)+1,last_used_at:now,updated_at:now}).eq('id',templateId).eq('organization_id',organization.id);
+  revalidatePath('/library');revalidatePath(`/projects/${projectId}`);redirect(`/projects/${projectId}?saved=module-added`);
+}
+
+export async function toggleTemplateFavorite(formData:FormData){
+  const {supabase,organization,role}=await requireWorkspace();const templateId=uuid(formData.get('templateId'));if(!templateId||!libraryRoles.has(role))redirect('/library?error=permission');
+  const {data}=await supabase.from('quote_module_templates').select('is_favorite').eq('id',templateId).eq('organization_id',organization.id).maybeSingle();if(!data)redirect('/library?error=template');
+  const {error}=await supabase.from('quote_module_templates').update({is_favorite:!Boolean(data.is_favorite),updated_at:new Date().toISOString()}).eq('id',templateId).eq('organization_id',organization.id);if(error)redirect('/library?error=template');
+  revalidatePath('/library');redirect('/library');
+}
+
+export async function deleteTemplate(formData:FormData){
+  const {supabase,organization,role}=await requireWorkspace();const templateId=uuid(formData.get('templateId'));if(!templateId||!libraryRoles.has(role))redirect('/library?error=permission');
+  const {error}=await supabase.from('quote_module_templates').delete().eq('id',templateId).eq('organization_id',organization.id);if(error)redirect('/library?error=template-delete');
+  revalidatePath('/library');redirect('/library');
 }
