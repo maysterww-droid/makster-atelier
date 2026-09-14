@@ -31,9 +31,22 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
   const p1 = getPhase1Messages(locale);
   const projectHref = `/projects/${projectId}`;
   const measurementHref = `${projectHref}/measurements`;
-  const moduleHref = `/library?project=${projectId}`;
+  const moduleHref = projectHref;
   const proposalHref = `${projectHref}/quote`;
   const materialsReady = cabinetCount > 0 && completeCabinetCount === cabinetCount;
+
+  const automaticActive:StepKey = !measurementComplete
+    ? 'measurements'
+    : cabinetCount===0
+      ? 'modules'
+      : !materialsReady
+        ? 'materials'
+        : !costReady
+          ? 'cost'
+          : !priceReady
+            ? 'price'
+            : 'proposal';
+  const resolvedActive = active==='project' ? automaticActive : active;
 
   const prerequisite = (target:StepKey) => {
     if (target === 'project' || target === 'measurements') return null;
@@ -94,11 +107,14 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
     <nav className={styles.flow} aria-label="Project workflow">
       {steps.map((step)=>{
         const href = step.blocked && step.repairHref ? step.repairHref : step.href;
+        const isActive=resolvedActive===step.key;
         return <Link
           key={step.key}
           href={href}
           title={step.blocked?`${p1.blocked}: ${step.meta}`:step.meta}
-          className={`${styles.step} ${step.complete?styles.complete:''} ${step.blocked?styles.blocked:''} ${active===step.key?styles.active:''}`}
+          aria-current={isActive?'step':undefined}
+          data-loading-label={locale==='ru'?'Переходим к этапу…':locale==='cs'?'Přecházíme na krok…':locale==='de'?'Schritt wird geöffnet…':locale==='pl'?'Przechodzimy do etapu…':'Opening step…'}
+          className={`${styles.step} ${step.complete?styles.complete:styles.incomplete} ${step.blocked?styles.blocked:''} ${isActive?styles.active:''}`}
         >
           <span className={styles.top}><i className={styles.dot}/><span className={styles.label}>{step.label}</span>{step.blocked?<span className={styles.lock} aria-hidden="true">×</span>:null}</span>
           <span className={styles.meta}>{step.meta}</span>
@@ -106,7 +122,7 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
         </Link>;
       })}
     </nav>
-    <Link href={nextHref} className={styles.guidance}>
+    <Link href={nextHref} className={styles.guidance} data-loading-label={locale==='ru'?'Переходим к следующему этапу…':locale==='cs'?'Přecházíme na další krok…':locale==='de'?'Nächster Schritt wird geöffnet…':locale==='pl'?'Przechodzimy do następnego etapu…':'Opening next step…'}>
       <strong>{p1.nextAction}</strong>
       <span>{nextText}</span>
       {remaining>0?<em>{p1.remaining}: {remaining}</em>:null}
