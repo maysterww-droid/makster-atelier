@@ -25,5 +25,5 @@ export async function saveCabinetAsTemplate(formData:FormData){
   });
   if(insertError)redirect(`/projects/${projectId}?error=template-save`);
   revalidatePath('/library');revalidatePath(`/projects/${projectId}`);
-  redirect(`/projects/${projectId}?saved=template-saved`);
+  redirect(`/library?project=${projectId}`);
 }
