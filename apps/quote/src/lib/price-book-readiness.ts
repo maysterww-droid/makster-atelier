@@ -44,7 +44,7 @@ export function isDemoPriceBookItem(item: PriceBookItem | undefined) {
 
 function stateForItems(items: PriceBookItem[]) : PriceBookSetupState {
   if (!items.length) return 'missing';
-  return items.every(isDemoPriceBookItem) ? 'demo' : 'ready';
+  return items.some((item) => !isDemoPriceBookItem(item)) ? 'ready' : 'demo';
 }
 
 export function priceBookSetupStatus(settings: unknown, items: PriceBookItem[]) {
@@ -65,10 +65,16 @@ export function priceBookSetupStatus(settings: unknown, items: PriceBookItem[]) 
     operationsByKey.set(key, [...(operationsByKey.get(key) ?? []), item]);
   }
   const missingOperationKeys = REQUIRED_OPERATION_KEYS.filter((key) => !(operationsByKey.get(key)?.length));
+  const demoOnlyOperationKeys = REQUIRED_OPERATION_KEYS.filter((key) => {
+    const rows = operationsByKey.get(key) ?? [];
+    return rows.length > 0 && !rows.some((item) => !isDemoPriceBookItem(item));
+  });
   const operationItems = REQUIRED_OPERATION_KEYS.flatMap((key) => operationsByKey.get(key) ?? []);
   const operationState: PriceBookSetupState = missingOperationKeys.length
     ? 'missing'
-    : stateForItems(operationItems);
+    : demoOnlyOperationKeys.length
+      ? 'demo'
+      : 'ready';
 
   const extras = items.filter((item) => EXTRA_CATEGORIES.has(item.category));
 
@@ -78,7 +84,7 @@ export function priceBookSetupStatus(settings: unknown, items: PriceBookItem[]) 
     { key:'edge', state:defaultState(defaults.edgeItemId), required:true, count:items.filter((item)=>item.category==='edge').length },
     { key:'hinge', state:defaultState(defaults.hingeItemId), required:true, count:items.filter((item)=>item.category==='hardware' && !parameters(item).hardwareRole).length },
     { key:'drawer', state:defaultState(defaults.drawerItemId), required:true, count:items.filter((item)=>item.category==='hardware' && !parameters(item).hardwareRole).length },
-    { key:'operations', state:operationState, required:true, count:operationItems.length, missingKeys:missingOperationKeys },
+    { key:'operations', state:operationState, required:true, count:operationItems.length, missingKeys:operationState==='missing'?missingOperationKeys:operationState==='demo'?demoOnlyOperationKeys:[] },
     { key:'labour', state:defaultState(defaults.labourItemId), required:true, count:items.filter((item)=>item.category==='labour').length },
     { key:'extras', state:stateForItems(extras), required:false, count:extras.length },
   ];
