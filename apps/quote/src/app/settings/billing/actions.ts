@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { appBaseUrl, PAID_PLANS, type QuotePlan } from '@/lib/billing';
+import { appBaseUrl, PAID_PLANS, type CanonicalQuotePlan } from '@/lib/billing';
 import {
   stripeCheckoutConfigured,
   stripeGet,
@@ -12,8 +12,8 @@ import { requireWorkspace } from '@/lib/workspace';
 
 const billingRoles = new Set(['owner', 'admin']);
 
-function cleanPlan(value: FormDataEntryValue | null): QuotePlan | null {
-  const plan = String(value ?? '').trim() as QuotePlan;
+function cleanPlan(value: FormDataEntryValue | null): CanonicalQuotePlan | null {
+  const plan = String(value ?? '').trim() as CanonicalQuotePlan;
   return PAID_PLANS.includes(plan) ? plan : null;
 }
 
