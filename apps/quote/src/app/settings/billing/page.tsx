@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
-import { PAID_PLANS, PLAN_LABELS, PLAN_MONTHLY_EUR, normalizeQuotePlan, type QuotePlan } from '@/lib/billing';
+import { PLAN_LABELS, PLAN_MONTHLY_EUR, normalizeQuotePlan, type CanonicalQuotePlan } from '@/lib/billing';
 import { getBillingMessages, billingPlanDescription, billingStatusLabel } from '@/lib/i18n-billing';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import { INTL_LOCALES } from '@/lib/i18n';
@@ -11,7 +11,7 @@ import { openCustomerPortal, startCheckout } from './actions';
 export const dynamic = 'force-dynamic';
 type Props = { searchParams: Promise<{ checkout?: string; error?: string }> };
 const BILLING_TIME_ZONE = 'Europe/Prague';
-const ALL_PLANS:QuotePlan[]=['free','starter','workshop','atelier'];
+const ALL_PLANS:CanonicalQuotePlan[]=['free','starter','workshop','atelier'];
 
 export default async function BillingPage({ searchParams }: Props) {
   const query=await searchParams;
@@ -22,7 +22,7 @@ export default async function BillingPage({ searchParams }: Props) {
   const currentPlan=normalizeQuotePlan(subscription?.plan); const currentStatus=subscription?.status??'inactive'; const canManage=['owner','admin'].includes(role);
   const hasManagedSubscription=subscription?.provider==='stripe'&&Boolean(subscription.provider_subscription_id)&&currentStatus!=='expired'&&currentStatus!=='inactive';
   const periodEnd=subscription?.current_period_end?new Intl.DateTimeFormat(INTL_LOCALES[locale],{dateStyle:'medium',timeZone:BILLING_TIME_ZONE}).format(new Date(subscription.current_period_end)):null;
-  const description=(plan:QuotePlan)=>billingPlanDescription(locale,plan); const status=billingStatusLabel(locale,currentStatus);
+  const description=(plan:CanonicalQuotePlan)=>billingPlanDescription(locale,plan); const status=billingStatusLabel(locale,currentStatus);
 
   return <AppShell organizationName={organization.name} role={role} plan={PLAN_LABELS[currentPlan]}>
     <header className="topbar"><div><span className="eyebrow">BILLING · MAKSTER QUOTE</span><h1>{m.title}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
