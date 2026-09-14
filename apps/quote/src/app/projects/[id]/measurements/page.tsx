@@ -17,20 +17,16 @@ type Props = {
   searchParams: Promise<{ saved?: string; error?: string }>;
 };
 type JsonRecord = Record<string, unknown>;
+type StoredPhoto = { path: string; name: string };
 
-type PhotoRow = { path: string; name: string; url: string };
-function photoRows(value: unknown): PhotoRow[] {
+function photoRows(value: unknown): StoredPhoto[] {
   if (!Array.isArray(value)) return [];
-  const result: PhotoRow[] = [];
+  const result: StoredPhoto[] = [];
   for (const item of value) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
     const row = item as JsonRecord;
     if (typeof row.path !== 'string' || !row.path) continue;
-    result.push({
-      path: row.path,
-      name: typeof row.name === 'string' ? row.name : 'photo',
-      url: '',
-    });
+    result.push({ path: row.path, name: typeof row.name === 'string' ? row.name : 'photo' });
   }
   return result;
 }
@@ -53,9 +49,7 @@ export default async function MeasurementsPage({ params, searchParams }: Props) 
 
   const project = projectResult.data;
   if (projectResult.error || !project) notFound();
-  if (measurementResult.error || cabinetsResult.error || quotesResult.error) {
-    throw new Error('Failed to load measurement workspace.');
-  }
+  if (measurementResult.error || cabinetsResult.error || quotesResult.error) throw new Error('Failed to load measurement workspace.');
 
   const measurement = measurementResult.data;
   const cabinets = cabinetsResult.data ?? [];
@@ -65,20 +59,17 @@ export default async function MeasurementsPage({ params, searchParams }: Props) 
   const priceReady = costReady && Boolean(projectSettings.quoteCommercial);
   const proposalReady = (quotesResult.data?.length ?? 0) > 0;
   const complete = measurement?.status === 'complete';
-  const photos = photoRows(measurement?.photos_json);
+  const storedPhotos = photoRows(measurement?.photos_json);
+  const photos = await Promise.all(storedPhotos.map(async (photo) => {
+    const { data } = await supabase.storage.from('quote-measurements').createSignedUrl(photo.path, 3600);
+    return { ...photo, url:data?.signedUrl ?? '' };
+  }));
 
   return (
     <AppShell organizationName={organization.name} role={role} plan={(subscriptionResult.data?.plan ?? 'free').toUpperCase()}>
       <header className="topbar">
-        <div>
-          <span className="eyebrow">PHASE 1 · MEASUREMENTS</span>
-          <h1>{m.title} · {project.name}</h1>
-          <p className="muted">{m.subtitle}</p>
-        </div>
-        <div className="topActions">
-          <Link href={`/projects/${project.id}`} className="textLink">{m.backToProject}</Link>
-          <Link href={`/library?project=${project.id}`} className="secondary linkButton">{m.modulesStep}</Link>
-        </div>
+        <div><span className="eyebrow">PHASE 1 · MEASUREMENTS</span><h1>{m.title} · {project.name}</h1><p className="muted">{m.subtitle}</p></div>
+        <div className="topActions"><Link href={`/projects/${project.id}`} className="textLink">{m.backToProject}</Link><Link href={`/library?project=${project.id}`} className="secondary linkButton">{m.modulesStep}</Link></div>
       </header>
       <div className={styles.page}>
         <ProjectFlow projectId={project.id} locale={locale} active="measurements" measurementComplete={complete} cabinetCount={cabinets.length} completeCabinetCount={completeCabinetCount} costReady={costReady} priceReady={priceReady} proposalReady={proposalReady}/>
@@ -88,27 +79,9 @@ export default async function MeasurementsPage({ params, searchParams }: Props) 
         {query.error && query.error !== 'required' ? <div className="notice error">{m.saveError} ({query.error})</div> : null}
         <MeasurementForm projectId={project.id} measurement={measurement} complete={complete} m={m}/>
         <section className={styles.section}>
-          <div className={styles.head}>
-            <span className="eyebrow">07</span>
-            <h2>{m.photos}</h2>
-            <p className="muted">{m.photosHelp}</p>
-          </div>
+          <div className={styles.head}><span className="eyebrow">07</span><h2>{m.photos}</h2><p className="muted">{m.photosHelp}</p></div>
           <div className={styles.body}>
-            <MeasurementPhotoUploader
-              organizationId={organization.id}
-              projectId={project.id}
-              photos={photos}
-              copy={{
-                upload: p1.upload,
-                uploadHint: p1.uploadHint,
-                uploading: p1.uploading,
-                uploadFailed: p1.uploadFailed,
-                invalidPhoto: p1.invalidPhoto,
-                remove: p1.remove,
-                noPhotos: p1.noPhotos,
-                photos: p1.photos,
-              }}
-            />
+            <MeasurementPhotoUploader organizationId={organization.id} projectId={project.id} photos={photos} copy={{upload:p1.upload,uploadHint:p1.uploadHint,uploading:p1.uploading,uploadFailed:p1.uploadFailed,invalidPhoto:p1.invalidPhoto,remove:p1.remove,noPhotos:p1.noPhotos,photos:p1.photos}}/>
           </div>
         </section>
       </div>
