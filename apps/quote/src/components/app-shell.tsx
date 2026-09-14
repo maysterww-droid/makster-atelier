@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { LocaleSwitcher } from './locale-switcher';
 import { getInterfaceLocale } from '@/lib/interface-locale';
 import { getMessages } from '@/lib/i18n';
+import { planDisplayLabel } from '@/lib/billing';
 import { MaksterQuoteLogo } from './brand-logo';
 
 type Props = {
@@ -12,10 +13,11 @@ type Props = {
   children: ReactNode;
 };
 
-export async function AppShell({ organizationName, role, plan = 'FREE', children }: Props) {
+export async function AppShell({ organizationName, role, plan = 'free', children }: Props) {
   const canManageSystem = role === 'owner' || role === 'admin';
   const locale = await getInterfaceLocale();
   const m = getMessages(locale);
+  const visiblePlan=planDisplayLabel(plan);
 
   return (
     <main className="shell">
@@ -40,7 +42,7 @@ export async function AppShell({ organizationName, role, plan = 'FREE', children
           {canManageSystem ? <Link className="navItem" href="/settings/readiness">{m.readiness}</Link> : null}
         </nav>
         <LocaleSwitcher locale={locale} label={m.interfaceLanguage}/>
-        <div className="planCard"><span>{m.plan}</span><strong>{plan}</strong><small>{role}</small></div>
+        <div className="planCard"><span>{m.plan}</span><strong>{visiblePlan}</strong><small>{role}</small></div>
         <form action="/auth/signout" method="post"><button className="navItem signOut" type="submit">{m.signOut}</button></form>
       </aside>
       <section className="workspace">{children}</section>
