@@ -1,3 +1,4 @@
+import { PAID_PLANS, PLAN_LABELS } from '@/lib/billing';
 import { stripeCheckoutConfigured, stripeWebhookConfigured } from '@/lib/stripe-billing';
 
 export type ReadinessState = 'ready' | 'warning' | 'blocked';
@@ -19,7 +20,9 @@ export function environmentReadiness(): ReadinessCheck[] {
   const supabasePublic = has('NEXT_PUBLIC_SUPABASE_URL') && has('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
   const emailReady = has('RESEND_API_KEY') && has('QUOTE_EMAIL_FROM');
   const billingWebhookReady = stripeWebhookConfigured();
-  const billingCheckoutReady = stripeCheckoutConfigured('pro');
+  const configuredPlans = PAID_PLANS.filter((plan)=>stripeCheckoutConfigured(plan));
+  const missingPlans = PAID_PLANS.filter((plan)=>!stripeCheckoutConfigured(plan));
+  const billingCheckoutReady = missingPlans.length===0;
 
   return [
     {
@@ -54,9 +57,11 @@ export function environmentReadiness(): ReadinessCheck[] {
     },
     {
       key: 'stripe-checkout',
-      label: 'Makster Quote Pro checkout',
+      label: 'Stripe plan prices',
       state: billingCheckoutReady ? 'ready' : 'warning',
-      detail: billingCheckoutReady ? 'Makster Quote Pro Stripe price is configured.' : 'STRIPE_PRO_MONTHLY_PRICE_ID is missing.',
+      detail: billingCheckoutReady
+        ? `All paid plans configured: ${configuredPlans.map((plan)=>PLAN_LABELS[plan]).join(', ')}.`
+        : `Missing Stripe prices: ${missingPlans.map((plan)=>PLAN_LABELS[plan]).join(', ')}. Expected envs: STRIPE_STARTER_MONTHLY_PRICE_ID, STRIPE_WORKSHOP_MONTHLY_PRICE_ID, STRIPE_ATELIER_MONTHLY_PRICE_ID.`,
     },
   ];
 }
