@@ -37,7 +37,9 @@ export async function saveCabinet(formData:FormData){
   const explicitFrontWidth=formData.has('frontWidthMm')?numberField(formData,'frontWidthMm',0):Number(existingConstruction.frontWidthMm??0);
   const preservedSpecialRole=specialRole(existingConstruction.specialHardwareRole);
   const preservedSpecialQty=preservedSpecialRole?Math.max(1,Math.round(Number(existingConstruction.specialHardwareQty??1)||1)):undefined;
-  const preservedSpecialItemId=preservedSpecialRole?(String(existingHardware.specialHardwareItemId??'')||undefined):undefined;
+  const storedSpecialItemId=String(existingHardware.specialHardwareItemId??'')||undefined;
+  const submittedSpecialItemId=idField(formData,'specialHardwareItemId')||undefined;
+  const preservedSpecialItemId=preservedSpecialRole?(formData.has('specialHardwareItemId')?submittedSpecialItemId:storedSpecialItemId):undefined;
 
   const input={
     moduleKey,widthMm:numberField(formData,'widthMm',800),heightMm:numberField(formData,'heightMm',720),depthMm:numberField(formData,'depthMm',560),thicknessMm:numberField(formData,'thicknessMm',18),gapMm:numberField(formData,'gapMm',2),
