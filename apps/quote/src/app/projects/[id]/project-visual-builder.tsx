@@ -89,8 +89,9 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale}:Props)
     return{all,lineWidth,canvasHeight,baseHeight,backsplashMm,centers};
   },[sceneItems,orderedCabinets]);
 
-  const naturalCanvasWidth=Math.max(expanded?1100:760,Math.min(3200,layout.lineWidth*(expanded ? .19 : .145)));
-  const canvasHeightPx=expanded?'calc(100vh - 205px)':'480px';
+  const sceneRatio=Math.max(.1,layout.lineWidth/layout.canvasHeight);
+  const naturalCanvasWidth=Math.max(760,Math.min(3200,layout.lineWidth*.145));
+  const canvasWidth=expanded?`min(100%, calc((100dvh - 210px) * ${sceneRatio}))`:`max(100%, ${naturalCanvasWidth}px)`;
 
   const updatePan=()=>{const viewport=viewportRef.current;if(!viewport)return;const max=Math.max(0,viewport.scrollWidth-viewport.clientWidth);setPanMax(max);setPanValue(Math.min(viewport.scrollLeft,max));};
   useEffect(()=>{const viewport=viewportRef.current;if(!viewport)return;const observer=new ResizeObserver(()=>updatePan());observer.observe(viewport);if(canvasRef.current)observer.observe(canvasRef.current);const frame=requestAnimationFrame(updatePan);return()=>{cancelAnimationFrame(frame);observer.disconnect();};},[naturalCanvasWidth,expanded,sceneItems.length]);
@@ -129,7 +130,7 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale}:Props)
       </div>
 
       <div ref={viewportRef} className={styles.sceneViewport} onScroll={updatePan}>
-        {sceneItems.length?<div ref={canvasRef} className={styles.sceneCanvas} style={{width:`max(100%, ${naturalCanvasWidth}px)`,height:canvasHeightPx}}>
+        {sceneItems.length?<div ref={canvasRef} className={styles.sceneCanvas} style={{width:canvasWidth,aspectRatio:String(sceneRatio)}}>
           <div className={styles.backsplash} style={{bottom:`${layout.baseHeight/layout.canvasHeight*100}%`,height:`${layout.backsplashMm/layout.canvasHeight*100}%`}}><span>600 mm</span></div>
           <div className={styles.floorLine}/>
           {layout.all.map((item)=>{const active=item.row.id===selected?.id;const dragging=item.row.id===draggingId;const handlers=pointerHandlers(item);return <button key={item.sceneId} type="button" onClick={()=>setSelectedId(item.row.id)} onPointerDown={handlers.onPointerDown} onPointerMove={handlers.onPointerMove} onPointerUp={handlers.onPointerUp} onPointerCancel={handlers.onPointerCancel} aria-grabbed={dragging} className={`${styles.elevationUnit} ${active?styles.elevationSelected:''} ${dragging?styles.elevationDragging:''} ${item.level==='wall'?styles.elevationWall:item.level==='tall'?styles.elevationTall:styles.elevationBase}`} style={{left:`${item.xMm/layout.lineWidth*100}%`,width:`${item.widthMm/layout.lineWidth*100}%`,bottom:`${item.bottomMm/layout.canvasHeight*100}%`,height:`${item.heightMm/layout.canvasHeight*100}%`}} aria-label={`${item.row.name} ${item.index+1}`}><ElevationUnit row={item.row}/></button>;})}
