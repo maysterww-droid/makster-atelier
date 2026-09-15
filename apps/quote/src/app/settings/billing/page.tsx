@@ -46,6 +46,37 @@ const PLAN_FEATURES:Record<Locale,Record<CanonicalQuotePlan,string[]>>={
   },
 };
 
+const billingStyles=`
+.billingPlanGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:16px;align-items:stretch}
+.billingPlanCard{min-width:0;display:flex;flex-direction:column;min-height:510px;padding:20px 18px 17px;border:1px solid #ded5cf;border-radius:18px;background:linear-gradient(180deg,#fff 0%,#fffdfa 100%);box-shadow:0 8px 24px rgba(71,47,35,.055);transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.billingPlanCard:hover{transform:translateY(-2px);border-color:#b79b89;box-shadow:0 14px 34px rgba(71,47,35,.09)}
+.billingPlanCardCurrent{border:2px solid #4f3022;background:linear-gradient(180deg,#fffaf6 0%,#fff 68%);box-shadow:0 0 0 3px rgba(79,48,34,.08),0 14px 34px rgba(71,47,35,.10)}
+.billingPlanEyebrow{min-height:20px;color:#8b6d5c;font-size:10px;font-weight:800;letter-spacing:.10em;text-transform:uppercase}
+.billingPlanTop h3{font-size:24px;line-height:1.1;margin:8px 0 0;color:#2f241f}
+.billingPlanPrice{display:flex;align-items:baseline;gap:7px;margin:14px 0 13px;white-space:nowrap}
+.billingPlanPrice strong{font-size:30px;line-height:1;color:#2f241f;letter-spacing:-.035em}
+.billingPlanPrice span{font-size:13px;color:#786b64;font-weight:650}
+.billingPlanLead{min-height:64px;color:#625751;font-size:13px;line-height:1.55}
+.billingFeatureList{list-style:none;margin:18px 0 20px;padding:17px 0 0;border-top:1px solid #eee5df;display:grid;gap:11px}
+.billingFeatureList li{display:grid;grid-template-columns:19px 1fr;gap:8px;align-items:start;color:#342b26;font-size:13.5px;line-height:1.38;font-weight:560}
+.billingFeatureCheck{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#f1e7df;color:#593928;font-size:11px;font-weight:900;margin-top:1px}
+.billingPlanBottom{margin-top:auto;padding-top:4px}
+.billingTechNote{min-height:52px;padding:9px 10px;border-radius:11px;display:grid;grid-template-columns:8px 1fr;column-gap:7px;align-items:start;font-size:11px;line-height:1.35}
+.billingTechNote small{grid-column:2;color:inherit;opacity:.78;font-size:10px;line-height:1.35;margin-top:2px}
+.billingTechDot{width:7px;height:7px;border-radius:50%;margin-top:4px;background:currentColor;opacity:.7}
+.billingTechNotePending{background:#fbf4e8;color:#89602a;border:1px solid #ead8bb}
+.billingTechNoteReady{background:#edf6f1;color:#28634d;border:1px solid #d0e5da}
+.billingTechNoteFree{background:#f4f1ef;color:#725f54;border:1px solid #e2d9d4}
+.billingPlanAction{margin-top:12px;min-height:42px;display:flex;align-items:center}
+.billingPlanAction form{width:100%}
+.billingCurrentBadge{width:100%;display:flex;justify-content:center;align-items:center;gap:6px;padding:10px 12px;border-radius:11px;background:#4f3022;color:#fff;font-size:12px;font-weight:800}
+.billingFreeLabel{font-size:12px;color:#776a62;font-weight:700}
+.billingPlansPanel .primary{background:#4f3022}
+.billingPlansPanel .secondary{background:#f1e7df;color:#4f3022}
+@media(max-width:900px){.billingPlanGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.billingPlanCard{min-height:470px}}
+@media(max-width:640px){.billingPlanGrid{grid-template-columns:1fr;padding:12px}.billingPlanCard{min-height:0}.billingPlanLead{min-height:0}}
+`;
+
 export default async function BillingPage({ searchParams }: Props) {
   const query=await searchParams;
   const {supabase,organization,role}=await requireWorkspace();
@@ -58,6 +89,7 @@ export default async function BillingPage({ searchParams }: Props) {
   const description=(plan:CanonicalQuotePlan)=>billingPlanDescription(locale,plan); const status=billingStatusLabel(locale,currentStatus);
 
   return <AppShell organizationName={organization.name} role={role} plan={PLAN_LABELS[currentPlan]}>
+    <style>{billingStyles}</style>
     <header className="topbar"><div><span className="eyebrow">BILLING · MAKSTER QUOTE</span><h1>{m.title}</h1></div><Link href="/dashboard" className="textLink">{m.back}</Link></header>
     <div className="pageContent">
       {query.checkout==='success'?<div className="notice success"><strong>{m.checkoutSuccess}</strong> {m.checkoutWebhook}</div>:null}
