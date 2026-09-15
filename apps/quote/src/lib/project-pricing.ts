@@ -65,7 +65,9 @@ export function readProjectCommercialSettings(settings: unknown): ProjectCommerc
   const root = record(settings);
   const quote = record(root.quoteCommercial);
   const requestedLocale = typeof quote.documentLocale === 'string' ? quote.documentLocale : 'ru';
-  const taxBps = Math.max(0, Math.min(100_000, safeInteger(quote.taxBps, safeInteger(root.taxBps, 0))));
+  // Project-level taxBps is canonical because module pricing and commercial pricing must use the same VAT rate.
+  // quoteCommercial.taxBps remains a legacy fallback for older saved projects.
+  const taxBps = Math.max(0, Math.min(100_000, safeInteger(root.taxBps, safeInteger(quote.taxBps, 0))));
   const validityDays = Math.max(1, Math.min(365, safeInteger(quote.validityDays, 14)));
   const depositBps = Math.max(0, Math.min(10_000, safeInteger(quote.depositBps, 0)));
 
