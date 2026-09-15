@@ -53,7 +53,7 @@ export function InteractionFeedback({locale}:{locale:Locale}){
       try{url=new URL(anchor.href,window.location.href);}catch{return;}
       if(url.origin!==window.location.origin)return;
       const sameDocument=url.pathname===window.location.pathname&&url.search===window.location.search;
-      if(sameDocument&&url.hash)return;
+      if(sameDocument)return;
       show(anchor.dataset.loadingLabel);
     };
 
