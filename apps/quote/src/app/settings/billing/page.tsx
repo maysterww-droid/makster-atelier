@@ -43,7 +43,7 @@ export default async function BillingPage({ searchParams }: Props) {
 
       <section className="panel">
         <div className="panelHeader"><div><span className="eyebrow">{m.plans}</span><h2>{hasManagedSubscription?m.changePlan:m.choosePlan}</h2><p className="muted">{m.pricesFromProvider}</p></div></div>
-        <div className="metricGrid billingPlanGrid" style={{padding:16,marginBottom:0}}>
+        <div className="metricGrid billingPlanGrid" style={{padding:16,marginBottom:0,gridTemplateColumns:'repeat(4,minmax(0,1fr))'}}>
           {ALL_PLANS.map((plan)=>{
             const isCurrent=plan===currentPlan;
             const configured=plan==='free'||stripeCheckoutConfigured(plan);
