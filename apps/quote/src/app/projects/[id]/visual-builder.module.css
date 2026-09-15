@@ -76,8 +76,9 @@
 .schematicBadge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 8px;background:#f3e5da;color:#7b4d31;font-size:9px;font-weight:900;letter-spacing:.08em}
 
 .scenePanelExpanded{position:fixed;inset:14px;z-index:1200;width:auto;height:auto;border-radius:18px;box-shadow:0 26px 90px rgba(37,22,13,.28);background:#fff}
-.scenePanelExpanded .sceneViewport{flex:1;min-height:0;padding:20px 22px}
-.scenePanelExpanded .sceneCanvas{min-height:520px}
+.scenePanelExpanded .sceneViewport{flex:1;min-height:0;padding:20px 22px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.scenePanelExpanded .sceneCanvas{width:100%!important;min-width:0;height:100%!important;min-height:0;max-height:none;margin:0}
+.scenePanelExpanded .panBar{display:none}
 .scenePanelExpanded .sceneHeader{padding:14px 18px}
 .scenePanelExpanded .sceneFooter{padding:9px 18px}
 
