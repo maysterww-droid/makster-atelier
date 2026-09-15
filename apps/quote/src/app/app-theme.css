@@ -1,0 +1,136 @@
+:root {
+  --mq-bg: #F7F1E8;
+  --mq-bg-secondary: #EEE2D5;
+
+  --mq-surface: #FFFDFA;
+  --mq-surface-soft: #FFF7F0;
+  --mq-surface-selected: #F3DFD0;
+
+  --mq-text: #211914;
+  --mq-text-secondary: #75685E;
+  --mq-text-on-dark: #FFF6EF;
+
+  --mq-border: #DFD0C0;
+  --mq-border-strong: #CDB8A6;
+
+  --mq-brand: #8A5837;
+  --mq-copper: #B86E3E;
+  --mq-brass: #D79A66;
+  --mq-accent-soft: #EAD0B7;
+
+  --mq-sidebar: #24170F;
+  --mq-sidebar-deep: #1D1410;
+
+  --mq-button: #2B1D16;
+  --mq-button-hover: #352319;
+  --mq-focus-ring: rgba(184, 110, 62, 0.24);
+
+  --mq-shadow: 0 18px 48px rgba(62, 36, 22, 0.14);
+}
+
+/* Makster Quote application theme. Scoped to authenticated/auth surfaces so the marketing site at / keeps its own styling. */
+.shell,
+.authPage {
+  --bg: var(--mq-bg);
+  --panel: var(--mq-surface);
+  --ink: var(--mq-text);
+  --muted: var(--mq-text-secondary);
+  --line: var(--mq-border);
+  --accent: var(--mq-copper);
+  --accentSoft: var(--mq-surface-selected);
+  --sidebar: var(--mq-sidebar);
+  color: var(--mq-text);
+}
+
+.shell { background: var(--mq-bg); }
+.shell .workspace { background: radial-gradient(circle at 100% 0%, rgba(215, 154, 102, 0.08), transparent 28%), var(--mq-bg); }
+.shell .sidebar { background: linear-gradient(180deg, var(--mq-sidebar) 0%, var(--mq-sidebar-deep) 100%); color: var(--mq-text-on-dark); box-shadow: 12px 0 36px rgba(29, 20, 16, 0.08); }
+.shell .workspaceName { border-color: rgba(255, 246, 239, 0.12); background: rgba(255, 246, 239, 0.035); }
+.shell .workspaceName span,
+.shell .planCard span,
+.shell .planCard small { color: rgba(255, 246, 239, 0.56); }
+.shell .navItem { color: rgba(255, 246, 239, 0.76); }
+.shell .navItem:hover { background: rgba(184, 110, 62, 0.16); color: var(--mq-text-on-dark); }
+.shell .planCard { border-color: rgba(255, 246, 239, 0.12); background: rgba(255, 246, 239, 0.045); }
+.shell .topbar { border-bottom-color: var(--mq-border); background: rgba(255, 253, 250, 0.88); color: var(--mq-text); box-shadow: 0 1px 0 rgba(62, 36, 22, 0.03); }
+.shell .panel,
+.shell .metricCard,
+.shell .cabinetRow,
+.shell .iconButton { background: var(--mq-surface); border-color: var(--mq-border); }
+.shell .panel { box-shadow: 0 10px 28px rgba(62, 36, 22, 0.055); }
+.shell .panelHeader { border-bottom-color: var(--mq-border); }
+.shell .metricCard { box-shadow: 0 8px 24px rgba(62, 36, 22, 0.04); }
+.shell .primary,
+.authPage .primary { background: var(--mq-button); color: var(--mq-text-on-dark); transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
+.shell .primary:hover,
+.authPage .primary:hover { background: var(--mq-button-hover); }
+.shell .primary:focus-visible,
+.shell .secondary:focus-visible,
+.shell .navItem:focus-visible,
+.shell a:focus-visible,
+.authPage .primary:focus-visible,
+.authPage a:focus-visible { outline: 3px solid var(--mq-focus-ring); outline-offset: 2px; }
+.shell .secondary,
+.authPage .secondary { background: var(--mq-surface-selected); color: var(--mq-brand); border: 1px solid var(--mq-accent-soft); }
+.shell .secondary:hover,
+.authPage .secondary:hover { background: var(--mq-accent-soft); }
+.shell .textLink,
+.authPage .textLink { color: var(--mq-brand); }
+.shell .eyebrow { color: var(--mq-brand); }
+.shell .muted,
+.shell .finePrint,
+.shell label,
+.shell .priceRow small,
+.shell .cabinetRow > span,
+.shell .cabinetRow small,
+.shell .costRows span,
+.shell .miniEmpty,
+.authPage .muted,
+.authPage label,
+.authPage .authBrand small { color: var(--mq-text-secondary); }
+.shell input,
+.shell select,
+.authPage input,
+.authPage select { background: var(--mq-surface-soft); color: var(--mq-text); border-color: var(--mq-border); }
+.shell input:focus,
+.shell select:focus,
+.authPage input:focus,
+.authPage select:focus { border-color: var(--mq-copper); box-shadow: 0 0 0 3px var(--mq-focus-ring); }
+.shell .cabinetRow.selected { background: var(--mq-surface-selected); box-shadow: inset 3px 0 0 var(--mq-copper); }
+.shell .liveDot { color: var(--mq-copper); }
+.shell .engineNote { border-color: var(--mq-border-strong); background: var(--mq-surface-soft); }
+.shell .priceHero { background: linear-gradient(145deg, var(--mq-sidebar) 0%, var(--mq-sidebar-deep) 100%); color: var(--mq-text-on-dark); box-shadow: var(--mq-shadow); }
+.shell .priceHero span,
+.shell .priceHero small { color: rgba(255, 246, 239, 0.62); }
+.shell th { background: var(--mq-surface-soft); color: var(--mq-text-secondary); }
+.shell th,
+.shell td,
+.shell .priceRow,
+.shell .cabinetRow { border-bottom-color: var(--mq-border); }
+.shell .pill { background: var(--mq-surface-selected); color: var(--mq-brand); }
+.shell .metricCard .costRows strong { font-size: 13px; line-height: 1.3; margin: 0; max-width: 64%; overflow-wrap: anywhere; }
+.shell .metricCard .costRows span { font-size: 12px; line-height: 1.35; }
+.shell .metricCard .costRows div { align-items: flex-start; }
+.shell .variantQuickSelect { cursor: pointer; transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease, outline-color 150ms ease; }
+.shell .variantQuickSelect:hover { transform: translateY(-1px); border-color: var(--mq-border-strong); box-shadow: 0 12px 26px rgba(62,36,22,.08); }
+.shell .variantQuickSelect:focus-visible { outline: 3px solid var(--mq-focus-ring) !important; outline-offset: 2px; }
+.shell .variantQuickSelected { outline: 2px solid var(--mq-copper) !important; outline-offset: 0; background: #fffaf5; }
+.authPage { background: radial-gradient(circle at 15% 10%, rgba(215, 154, 102, 0.20), transparent 32%), radial-gradient(circle at 88% 82%, rgba(138, 88, 55, 0.10), transparent 30%), var(--mq-bg); }
+.authPage .authCard { background: var(--mq-surface); border-color: var(--mq-border); box-shadow: var(--mq-shadow); }
+
+@media (max-width: 780px) {
+  .shell .workspace { background: var(--mq-bg); }
+  .shell .topbar { min-height: auto; padding: 14px 16px; align-items: flex-start; flex-direction: column; gap: 12px; }
+  .shell .topbar > div:first-child { width: 100%; }
+  .shell .topbar h1 { font-size: 24px; line-height: 1.08; }
+  .shell .topbar .topActions { width: 100%; display: flex; flex-wrap: nowrap; gap: 7px; overflow-x: auto; overscroll-behavior-x: contain; padding: 1px 0 4px; scrollbar-width: none; }
+  .shell .topbar .topActions::-webkit-scrollbar { display: none; }
+  .shell .topbar .topActions .secondary,
+  .shell .topbar .topActions .textLink { flex: 0 0 auto; white-space: nowrap; font-size: 11px; line-height: 1; padding: 9px 11px; border-radius: 999px; }
+  .shell .topbar .topActions .textLink { border: 1px solid var(--mq-border); background: var(--mq-surface); }
+  .shell .metricCard .costRows { padding-top: 6px; }
+  .shell .metricCard .costRows strong { font-size: 12px; max-width: 62%; }
+  .shell .pageContent > .panel > .formActions.padded { display: flex; flex-wrap: nowrap !important; gap: 7px; overflow-x: auto; overscroll-behavior-x: contain; padding: 11px 12px !important; scrollbar-width: none; }
+  .shell .pageContent > .panel > .formActions.padded::-webkit-scrollbar { display: none; }
+  .shell .pageContent > .panel > .formActions.padded .linkButton { flex: 0 0 auto; white-space: nowrap; font-size: 11px; line-height: 1; padding: 9px 11px; border-radius: 999px; }
+}

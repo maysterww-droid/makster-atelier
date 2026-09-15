@@ -1,68 +1,47 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/app-shell';
+import { ModuleSchematic } from '@/components/module-schematic';
 import { getInterfaceLocale } from '@/lib/interface-locale';
-import { getMessages } from '@/lib/i18n';
+import { getMessages, type Locale } from '@/lib/i18n';
 import { requireWorkspace } from '@/lib/workspace';
+import styles from './dashboard.module.css';
 
-export const dynamic = 'force-dynamic';
+export const dynamic='force-dynamic';
 
-export default async function DashboardPage() {
-  const { supabase, organization, role } = await requireWorkspace();
-  const locale = await getInterfaceLocale();
-  const m = getMessages(locale);
-  const statusLabel: Record<string, string> = {
-    draft:m.statusDraft, active:m.statusActive, quoted:m.statusQuoted, approved:m.statusApproved,
-    engineering:m.statusEngineering, production:m.statusProduction, installed:m.statusInstalled,
-    completed:m.statusCompleted, archived:m.statusArchived,
-  };
-  const typeLabel: Record<string, string> = {
-    kitchen:m.furnitureKitchen, wardrobe:m.furnitureWardrobe, built_in:m.furnitureBuiltIn,
-    cabinet:m.furnitureCabinet, sideboard:m.furnitureSideboard, mixed:m.furnitureMixed,
-  };
+type Copy={workspace:string;subtitle:string;continue:string;continueHelp:string;openProject:string;measurements:string;quick:string;priceBook:string;priceBookHelp:string;newClient:string;newClientHelp:string;quotes:string;quotesHelp:string;recent:string;recentHelp:string;updated:string};
+const copy:Record<Locale,Copy>={
+  ru:{workspace:'Рабочий стол мастерской',subtitle:'Проекты, расчёты и следующие действия — на одном экране.',continue:'Продолжить работу',continueHelp:'Откройте последний проект и продолжайте с того места, где остановились.',openProject:'Открыть проект',measurements:'Замеры',quick:'Быстрые действия',priceBook:'Price Book',priceBookHelp:'Проверьте реальные цены материалов и фурнитуры.',newClient:'Клиенты',newClientHelp:'База клиентов для коммерческих предложений.',quotes:'Предложения',quotesHelp:'Статусы отправленных клиентам предложений.',recent:'Последние проекты',recentHelp:'Нажмите на проект, чтобы сразу вернуться к расчёту.',updated:'обновлён'},
+  en:{workspace:'Workshop dashboard',subtitle:'Projects, costing and next actions on one screen.',continue:'Continue working',continueHelp:'Open the latest project and continue exactly where you stopped.',openProject:'Open project',measurements:'Measurements',quick:'Quick actions',priceBook:'Price Book',priceBookHelp:'Check real material and hardware prices.',newClient:'Customers',newClientHelp:'Customer base for commercial quotes.',quotes:'Quotes',quotesHelp:'Track commercial quote status.',recent:'Recent projects',recentHelp:'Choose a project to return directly to the working calculation.',updated:'updated'},
+  cs:{workspace:'Přehled dílny',subtitle:'Projekty, kalkulace a další kroky na jedné obrazovce.',continue:'Pokračovat v práci',continueHelp:'Otevřete poslední projekt a pokračujte tam, kde jste skončili.',openProject:'Otevřít projekt',measurements:'Zaměření',quick:'Rychlé akce',priceBook:'Ceník',priceBookHelp:'Zkontrolujte skutečné ceny materiálu a kování.',newClient:'Klienti',newClientHelp:'Databáze klientů pro nabídky.',quotes:'Nabídky',quotesHelp:'Stavy odeslaných nabídek.',recent:'Poslední projekty',recentHelp:'Kliknutím se vraťte přímo do kalkulace.',updated:'aktualizováno'},
+  de:{workspace:'Werkstatt-Dashboard',subtitle:'Projekte, Kalkulationen und nächste Schritte auf einem Bildschirm.',continue:'Weiterarbeiten',continueHelp:'Letztes Projekt öffnen und dort weitermachen, wo Sie aufgehört haben.',openProject:'Projekt öffnen',measurements:'Aufmaß',quick:'Schnellzugriff',priceBook:'Preisliste',priceBookHelp:'Reale Material- und Beschlagpreise prüfen.',newClient:'Kunden',newClientHelp:'Kundenbasis für Angebote.',quotes:'Angebote',quotesHelp:'Status versendeter Angebote verfolgen.',recent:'Letzte Projekte',recentHelp:'Projekt anklicken und direkt zur Kalkulation zurückkehren.',updated:'aktualisiert'},
+  pl:{workspace:'Pulpit warsztatu',subtitle:'Projekty, kalkulacje i kolejne działania na jednym ekranie.',continue:'Kontynuuj pracę',continueHelp:'Otwórz ostatni projekt i wróć dokładnie do miejsca, w którym skończyłeś.',openProject:'Otwórz projekt',measurements:'Pomiary',quick:'Szybkie działania',priceBook:'Cennik',priceBookHelp:'Sprawdź rzeczywiste ceny materiałów i okuć.',newClient:'Klienci',newClientHelp:'Baza klientów do ofert handlowych.',quotes:'Oferty',quotesHelp:'Statusy wysłanych ofert.',recent:'Ostatnie projekty',recentHelp:'Kliknij projekt, aby wrócić bezpośrednio do kalkulacji.',updated:'zaktualizowano'}
+};
 
-  const [projectsResult, subscriptionResult, priceBookResult, quotesResult, clientsResult] = await Promise.all([
-    supabase.from('projects').select('id, name, project_type, status, currency, updated_at', { count: 'exact' }).eq('organization_id', organization.id).is('archived_at', null).order('updated_at', { ascending: false }).limit(12),
-    supabase.from('quote_subscriptions').select('plan, status').eq('organization_id', organization.id).maybeSingle(),
-    supabase.from('quote_price_book_items').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).eq('active', true),
-    supabase.from('client_commercial_quotes').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id),
-    supabase.from('clients').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).is('archived_at', null),
+function visualFor(type:string){if(type==='wardrobe'||type==='built_in')return 't-door';if(type==='kitchen')return 'b-drawer';if(type==='sideboard')return 'b-door';return 'generic';}
+
+export default async function DashboardPage(){
+  const {supabase,organization,role}=await requireWorkspace(); const locale=await getInterfaceLocale(); const m=getMessages(locale); const t=copy[locale];
+  const statusLabel:Record<string,string>={draft:m.statusDraft,active:m.statusActive,quoted:m.statusQuoted,approved:m.statusApproved,engineering:m.statusEngineering,production:m.statusProduction,installed:m.statusInstalled,completed:m.statusCompleted,archived:m.statusArchived};
+  const typeLabel:Record<string,string>={kitchen:m.furnitureKitchen,wardrobe:m.furnitureWardrobe,built_in:m.furnitureBuiltIn,cabinet:m.furnitureCabinet,sideboard:m.furnitureSideboard,mixed:m.furnitureMixed};
+  const [projectsResult,subscriptionResult,priceBookResult,quotesResult,clientsResult]=await Promise.all([
+    supabase.from('projects').select('id, name, project_type, status, currency, updated_at',{count:'exact'}).eq('organization_id',organization.id).is('archived_at',null).order('updated_at',{ascending:false}).limit(9),
+    supabase.from('quote_subscriptions').select('plan, status').eq('organization_id',organization.id).maybeSingle(),
+    supabase.from('quote_price_book_items').select('id',{count:'exact',head:true}).eq('organization_id',organization.id).eq('active',true),
+    supabase.from('client_commercial_quotes').select('id',{count:'exact',head:true}).eq('organization_id',organization.id),
+    supabase.from('clients').select('id',{count:'exact',head:true}).eq('organization_id',organization.id).is('archived_at',null),
   ]);
-
-  if (projectsResult.error) throw new Error(`Failed to load projects: ${projectsResult.error.message}`);
-  if (priceBookResult.error) throw new Error(`Failed to load Price Book: ${priceBookResult.error.message}`);
-  if (quotesResult.error) throw new Error(`Failed to load quotes: ${quotesResult.error.message}`);
-  if (clientsResult.error) throw new Error(`Failed to load customers: ${clientsResult.error.message}`);
-
-  const rows = projectsResult.data ?? [];
-  const subscription = subscriptionResult.data;
-  const projectCount = projectsResult.count ?? rows.length;
-  const priceCount = priceBookResult.count ?? 0;
-  const quoteCount = quotesResult.count ?? 0;
-  const clientCount = clientsResult.count ?? 0;
-
-  return (
-    <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan ?? 'free').toUpperCase()}>
-      <header className="topbar">
-        <div><span className="eyebrow">MAKSTER QUOTE · WORKSPACE</span><h1>{m.dashboard}</h1></div>
-        <Link href="/projects/new" className="primary linkButton">+ {m.newQuote}</Link>
-      </header>
-      <div className="pageContent">
-        {priceCount === 0 ? <div className="notice warning"><strong>{m.priceBookEmptyTitle}</strong> {m.priceBookEmptyText} <Link href="/price-book">{m.fillPriceBook}</Link></div> : null}
-        <section className="metricGrid">
-          <article className="metricCard"><span>{m.metricProjects}</span><strong>{projectCount}</strong><small><Link href="/projects" className="textLink">{m.allProjects}</Link></small></article>
-          <article className="metricCard"><span>{m.metricQuotes}</span><strong>{quoteCount}</strong><small><Link href="/quotes" className="textLink">{m.quotePipeline}</Link></small></article>
-          <article className="metricCard"><span>{m.metricCustomers}</span><strong>{clientCount}</strong><small><Link href="/clients" className="textLink">{m.customerBase}</Link></small></article>
-          <article className="metricCard"><span>{m.metricPriceBook}</span><strong>{priceCount}</strong><small><Link href="/price-book" className="textLink">{m.activePrices}</Link></small></article>
-        </section>
-        <section className="panel">
-          <div className="panelHeader"><div><span className="eyebrow">{m.projects.toUpperCase()}</span><h2>{m.recentCalculations}</h2></div><Link href="/projects" className="textLink">{m.allProjects}</Link></div>
-          {rows.length === 0 ? (
-            <div className="emptyState"><h3>{m.noCalculationsTitle}</h3><p>{m.noCalculationsText}</p><Link href="/projects/new" className="primary linkButton">{m.createFirstQuote}</Link></div>
-          ) : (
-            <div className="tableWrap"><table><thead><tr><th>{m.project}</th><th>{m.type}</th><th>{m.status}</th><th>{m.currency}</th><th></th></tr></thead><tbody>{rows.map((project) => <tr key={project.id}><td><strong>{project.name}</strong></td><td>{typeLabel[project.project_type] ?? project.project_type}</td><td><span className="pill">{statusLabel[project.status] ?? project.status}</span></td><td>{project.currency}</td><td><Link className="textLink" href={`/projects/${project.id}`}>{m.open}</Link></td></tr>)}</tbody></table></div>
-          )}
-        </section>
-      </div>
-    </AppShell>
-  );
+  if(projectsResult.error)throw new Error(`Failed to load projects: ${projectsResult.error.message}`); if(priceBookResult.error)throw new Error(`Failed to load Price Book: ${priceBookResult.error.message}`); if(quotesResult.error)throw new Error(`Failed to load quotes: ${quotesResult.error.message}`); if(clientsResult.error)throw new Error(`Failed to load customers: ${clientsResult.error.message}`);
+  const rows=projectsResult.data??[]; const latest=rows[0]; const subscription=subscriptionResult.data; const projectCount=projectsResult.count??rows.length; const priceCount=priceBookResult.count??0; const quoteCount=quotesResult.count??0; const clientCount=clientsResult.count??0;
+  return <AppShell organizationName={organization.name} role={role} plan={(subscription?.plan??'free').toUpperCase()}>
+    <div className={styles.page}>
+      <div className={styles.hero}><div className={styles.heroText}><span>MAKSTER QUOTE · WORKSPACE</span><h1>{t.workspace}</h1><p>{t.subtitle}</p></div><Link href="/projects/new" className="primary linkButton">+ {m.newQuote}</Link></div>
+      {priceCount===0?<div className="notice warning"><strong>{m.priceBookEmptyTitle}</strong> {m.priceBookEmptyText} <Link href="/price-book">{m.fillPriceBook}</Link></div>:null}
+      <section className={styles.metrics}><article className={styles.metric}><span>{m.metricProjects}</span><strong>{projectCount}</strong><small>{m.allProjects}</small></article><article className={styles.metric}><span>{m.metricQuotes}</span><strong>{quoteCount}</strong><small>{m.quotePipeline}</small></article><article className={styles.metric}><span>{m.metricCustomers}</span><strong>{clientCount}</strong><small>{m.customerBase}</small></article><article className={styles.metric}><span>{m.metricPriceBook}</span><strong>{priceCount}</strong><small>{m.activePrices}</small></article></section>
+      <section className={styles.mainGrid}>
+        {latest?<article className={styles.continueCard}><div className={styles.continueText}><span>{t.continue.toUpperCase()}</span><h2>{latest.name}</h2><p>{t.continueHelp}</p><div className={styles.continueMeta}><b>{typeLabel[latest.project_type]??latest.project_type}</b><b>{statusLabel[latest.status]??latest.status}</b><b>{latest.currency}</b></div><div className={styles.continueActions}><Link className={styles.continuePrimary} href={`/projects/${latest.id}`}>{t.openProject}</Link><Link className={styles.continueSecondary} href={`/projects/${latest.id}/measurements`}>{t.measurements}</Link></div></div><div className={styles.continueVisual}><ModuleSchematic moduleKey={visualFor(latest.project_type)} name={latest.name} widthMm={700} heightMm={latest.project_type==='wardrobe'?2100:720}/></div></article>:<article className={styles.continueCard}><div className={styles.continueText}><span>{t.continue.toUpperCase()}</span><h2>{m.noCalculationsTitle}</h2><p>{m.noCalculationsText}</p><div className={styles.continueActions}><Link className={styles.continuePrimary} href="/projects/new">{m.createFirstQuote}</Link></div></div></article>}
+        <aside className={styles.sideStack}><div className={styles.quickHeader}>{t.quick}</div><Link className={styles.actionCard} href="/price-book"><span>01</span><strong>{t.priceBook}</strong><p>{t.priceBookHelp}</p></Link><Link className={styles.actionCard} href="/clients"><span>02</span><strong>{t.newClient}</strong><p>{t.newClientHelp}</p></Link><Link className={styles.actionCard} href="/quotes"><span>03</span><strong>{t.quotes}</strong><p>{t.quotesHelp}</p></Link></aside>
+      </section>
+      <section className={styles.projectsSection}><div className={styles.sectionHeader}><div><span>{m.projects.toUpperCase()}</span><h2>{t.recent}</h2><p className="muted">{t.recentHelp}</p></div><Link href="/projects" className="textLink">{m.allProjects}</Link></div>{rows.length?<div className={styles.projectGrid}>{rows.map((project)=><Link href={`/projects/${project.id}`} className={styles.projectCard} key={project.id}><div className={styles.projectVisual}><ModuleSchematic moduleKey={visualFor(project.project_type)} name={project.name}/></div><div className={styles.projectInfo}><strong>{project.name}</strong><span>{typeLabel[project.project_type]??project.project_type}</span><div className={styles.projectPills}><b>{statusLabel[project.status]??project.status}</b><b>{project.currency}</b></div></div></Link>)}</div>:<div className={styles.empty}><h3>{m.noCalculationsTitle}</h3><p>{m.noCalculationsText}</p><Link href="/projects/new" className="primary linkButton">{m.createFirstQuote}</Link></div>}</section>
+    </div>
+  </AppShell>;
 }

@@ -7,14 +7,15 @@ pdfMake.addVirtualFileSystem(pdfFonts);
 type LocaleLabels = {
   title:string; quote:string; client:string; project:string; revision:string; issued:string; valid:string; scope:string; module:string; dimensions:string; quantity:string; included:string;
   net:string; tax:string; total:string; deposit:string; lead:string; payment:string; warranty:string; note:string; supplier:string; variant:string; discount:string; surcharge:string; beforeAdjustment:string;
+  registrationId:string; vatId:string; bankAccount:string; iban:string; variantBase:string; variantStandard:string; variantPremium:string;
 };
 
 const labels: Record<string, LocaleLabels> = {
-  ru: { title:'Коммерческое предложение',quote:'Предложение',client:'Клиент',project:'Проект',revision:'Редакция',issued:'Дата',valid:'Действительно до',scope:'Состав проекта',module:'Модуль',dimensions:'Размеры',quantity:'Кол-во',included:'Включено',net:'Итого без НДС',tax:'НДС / налог',total:'Итого к оплате',deposit:'Аванс',lead:'Срок изготовления',payment:'Условия оплаты',warranty:'Гарантия / условия',note:'Примечание',supplier:'Исполнитель',variant:'Вариант',discount:'Скидка',surcharge:'Надбавка',beforeAdjustment:'до корректировки' },
-  en: { title:'Quotation',quote:'Quote',client:'Client',project:'Project',revision:'Revision',issued:'Issued',valid:'Valid until',scope:'Project scope',module:'Module',dimensions:'Dimensions',quantity:'Qty',included:'Included',net:'Total excl. tax',tax:'Tax',total:'Total payable',deposit:'Deposit',lead:'Production lead time',payment:'Payment terms',warranty:'Warranty / terms',note:'Note',supplier:'Supplier',variant:'Variant',discount:'Discount',surcharge:'Surcharge',beforeAdjustment:'before adjustment' },
-  cs: { title:'Cenová nabídka',quote:'Nabídka',client:'Klient',project:'Projekt',revision:'Revize',issued:'Datum',valid:'Platnost do',scope:'Rozsah projektu',module:'Modul',dimensions:'Rozměry',quantity:'Počet',included:'Zahrnuto',net:'Celkem bez DPH',tax:'DPH / daň',total:'Celkem k úhradě',deposit:'Záloha',lead:'Doba výroby',payment:'Platební podmínky',warranty:'Záruka / podmínky',note:'Poznámka',supplier:'Dodavatel',variant:'Varianta',discount:'Sleva',surcharge:'Příplatek',beforeAdjustment:'před úpravou' },
-  de: { title:'Angebot',quote:'Angebot',client:'Kunde',project:'Projekt',revision:'Revision',issued:'Datum',valid:'Gültig bis',scope:'Projektumfang',module:'Modul',dimensions:'Maße',quantity:'Anzahl',included:'Enthalten',net:'Summe netto',tax:'MwSt. / Steuer',total:'Gesamtbetrag',deposit:'Anzahlung',lead:'Fertigungszeit',payment:'Zahlungsbedingungen',warranty:'Garantie / Bedingungen',note:'Hinweis',supplier:'Auftragnehmer',variant:'Variante',discount:'Rabatt',surcharge:'Aufschlag',beforeAdjustment:'vor Anpassung' },
-  pl: { title:'Oferta',quote:'Oferta',client:'Klient',project:'Projekt',revision:'Rewizja',issued:'Data',valid:'Ważna do',scope:'Zakres projektu',module:'Moduł',dimensions:'Wymiary',quantity:'Ilość',included:'Uwzględniono',net:'Razem netto',tax:'VAT / podatek',total:'Razem do zapłaty',deposit:'Zaliczka',lead:'Termin wykonania',payment:'Warunki płatności',warranty:'Gwarancja / warunki',note:'Uwagi',supplier:'Wykonawca',variant:'Wariant',discount:'Rabat',surcharge:'Dopłata',beforeAdjustment:'przed korektą' },
+  ru: { title:'Коммерческое предложение',quote:'Предложение',client:'Клиент',project:'Проект',revision:'Редакция',issued:'Дата',valid:'Действительно до',scope:'Состав проекта',module:'Модуль',dimensions:'Размеры',quantity:'Кол-во',included:'Включено',net:'Итого без НДС',tax:'НДС / налог',total:'Итого к оплате',deposit:'Аванс',lead:'Срок изготовления',payment:'Условия оплаты',warranty:'Гарантия / условия',note:'Примечание',supplier:'Исполнитель',variant:'Вариант',discount:'Скидка',surcharge:'Надбавка',beforeAdjustment:'до корректировки',registrationId:'Регистрационный номер',vatId:'VAT ID',bankAccount:'Банковский счёт',iban:'IBAN',variantBase:'Базовый',variantStandard:'Стандарт',variantPremium:'Премиум' },
+  en: { title:'Quotation',quote:'Quote',client:'Client',project:'Project',revision:'Revision',issued:'Issued',valid:'Valid until',scope:'Project scope',module:'Module',dimensions:'Dimensions',quantity:'Qty',included:'Included',net:'Total excl. tax',tax:'Tax',total:'Total payable',deposit:'Deposit',lead:'Production lead time',payment:'Payment terms',warranty:'Warranty / terms',note:'Note',supplier:'Supplier',variant:'Variant',discount:'Discount',surcharge:'Surcharge',beforeAdjustment:'before adjustment',registrationId:'Registration no.',vatId:'VAT ID',bankAccount:'Bank account',iban:'IBAN',variantBase:'Base',variantStandard:'Standard',variantPremium:'Premium' },
+  cs: { title:'Cenová nabídka',quote:'Nabídka',client:'Klient',project:'Projekt',revision:'Revize',issued:'Datum',valid:'Platnost do',scope:'Rozsah projektu',module:'Modul',dimensions:'Rozměry',quantity:'Počet',included:'Zahrnuto',net:'Celkem bez DPH',tax:'DPH / daň',total:'Celkem k úhradě',deposit:'Záloha',lead:'Doba výroby',payment:'Platební podmínky',warranty:'Záruka / podmínky',note:'Poznámka',supplier:'Dodavatel',variant:'Varianta',discount:'Sleva',surcharge:'Příplatek',beforeAdjustment:'před úpravou',registrationId:'IČO',vatId:'DIČ / VAT ID',bankAccount:'Bankovní účet',iban:'IBAN',variantBase:'Základní',variantStandard:'Standard',variantPremium:'Premium' },
+  de: { title:'Angebot',quote:'Angebot',client:'Kunde',project:'Projekt',revision:'Revision',issued:'Datum',valid:'Gültig bis',scope:'Projektumfang',module:'Modul',dimensions:'Maße',quantity:'Anzahl',included:'Enthalten',net:'Summe netto',tax:'MwSt. / Steuer',total:'Gesamtbetrag',deposit:'Anzahlung',lead:'Fertigungszeit',payment:'Zahlungsbedingungen',warranty:'Garantie / Bedingungen',note:'Hinweis',supplier:'Auftragnehmer',variant:'Variante',discount:'Rabatt',surcharge:'Aufschlag',beforeAdjustment:'vor Anpassung',registrationId:'Reg.-Nr.',vatId:'USt-IdNr. / VAT ID',bankAccount:'Bankverbindung',iban:'IBAN',variantBase:'Basis',variantStandard:'Standard',variantPremium:'Premium' },
+  pl: { title:'Oferta',quote:'Oferta',client:'Klient',project:'Projekt',revision:'Rewizja',issued:'Data',valid:'Ważna do',scope:'Zakres projektu',module:'Moduł',dimensions:'Wymiary',quantity:'Ilość',included:'Uwzględniono',net:'Razem netto',tax:'VAT / podatek',total:'Razem do zapłaty',deposit:'Zaliczka',lead:'Termin wykonania',payment:'Warunki płatności',warranty:'Gwarancja / warunki',note:'Uwagi',supplier:'Wykonawca',variant:'Wariant',discount:'Rabat',surcharge:'Dopłata',beforeAdjustment:'przed korektą',registrationId:'Numer rejestracyjny',vatId:'NIP / VAT ID',bankAccount:'Rachunek bankowy',iban:'IBAN',variantBase:'Bazowy',variantStandard:'Standard',variantPremium:'Premium' },
 };
 
 const intlLocale: Record<string,string> = { ru:'ru-RU', en:'en-GB', cs:'cs-CZ', de:'de-DE', pl:'pl-PL' };
@@ -33,9 +34,19 @@ function money(minor:string, currency:string, locale:string) {
 function date(iso:string, locale:string) {
   return new Intl.DateTimeFormat(intlLocale[locale] ?? 'ru-RU', { year:'numeric', month:'long', day:'numeric' }).format(new Date(iso));
 }
-function contactLines(snapshot:QuoteSnapshot) {
+function contactLines(snapshot:QuoteSnapshot, t:LocaleLabels) {
   const s = snapshot.supplier;
-  return [s.legalName && s.legalName !== s.tradeName ? s.legalName : '', s.registrationId ? `IČO: ${s.registrationId}` : '', s.vatId ? `DIČ: ${s.vatId}` : '', s.address, s.email, s.phone, s.website, s.bankAccount ? `Účet / Account: ${s.bankAccount}` : '', s.iban ? `IBAN: ${s.iban}` : ''].filter(Boolean);
+  return [
+    s.legalName && s.legalName !== s.tradeName ? s.legalName : '',
+    s.registrationId ? `${t.registrationId}: ${s.registrationId}` : '',
+    s.vatId ? `${t.vatId}: ${s.vatId}` : '',
+    s.address,
+    s.email,
+    s.phone,
+    s.website,
+    s.bankAccount ? `${t.bankAccount}: ${s.bankAccount}` : '',
+    s.iban ? `${t.iban}: ${s.iban}` : '',
+  ].filter(Boolean);
 }
 function extraText(snapshot:QuoteSnapshot, locale:string) {
   const names = extraNames[locale] ?? extraNames.ru;
@@ -43,6 +54,13 @@ function extraText(snapshot:QuoteSnapshot, locale:string) {
     const quantity = extra.quantity && extra.unit ? ` · ${extra.quantity.toFixed(2)} ${extra.unit === 'm2' ? 'm²' : extra.unit === 'm' ? 'm' : ''}` : '';
     return `${names[extra.category] ?? extra.category}: ${extra.name}${quantity}`;
   }).join(' · ');
+}
+function localizedVariantLabel(snapshot:QuoteSnapshot, t:LocaleLabels) {
+  const key = snapshot.commercial?.variantKey;
+  if (key === 'base') return t.variantBase;
+  if (key === 'premium') return t.variantPremium;
+  if (key === 'standard') return t.variantStandard;
+  return snapshot.commercial?.variantLabel ?? '';
 }
 
 export async function buildQuotePdf(snapshot:QuoteSnapshot): Promise<Buffer> {
@@ -57,9 +75,10 @@ export async function buildQuotePdf(snapshot:QuoteSnapshot): Promise<Buffer> {
 
   const moduleRows = snapshot.modules.map((module) => [module.name, `${module.widthMm} × ${module.heightMm} × ${module.depthMm} mm`, String(module.quantity)]);
   const included = extraText(snapshot, locale);
-  const supplier = contactLines(snapshot);
+  const supplier = contactLines(snapshot, t);
+  const variantLabel = localizedVariantLabel(snapshot, t);
   const commercialSummary = snapshot.commercial ? [
-    `${t.variant}: ${snapshot.commercial.variantLabel}`,
+    `${t.variant}: ${variantLabel}`,
     snapshot.commercial.adjustmentMode === 'discount' && snapshot.commercial.adjustmentBps > 0 ? `${t.discount}: ${(snapshot.commercial.adjustmentBps/100).toFixed(2)}%` : '',
     snapshot.commercial.adjustmentMode === 'surcharge' && snapshot.commercial.adjustmentBps > 0 ? `${t.surcharge}: ${(snapshot.commercial.adjustmentBps/100).toFixed(2)}%` : '',
   ].filter(Boolean).join(' · ') : '';
@@ -78,7 +97,7 @@ export async function buildQuotePdf(snapshot:QuoteSnapshot): Promise<Buffer> {
       { table:{headerRows:1,widths:['*',190,45],body:[[{text:t.module,bold:true},{text:t.dimensions,bold:true},{text:t.quantity,bold:true,alignment:'right'}],...moduleRows.map((row) => [row[0],row[1],{text:row[2],alignment:'right'}])]},layout:'lightHorizontalLines' },
       included ? { text:[{text:`${t.included}: `,bold:true},included],margin:[0,10,0,0],color:'#647169' } : {},
       { margin:[0,22,0,0],columns:[{width:'*',text:''},{width:260,stack:[
-        ...(snapshot.commercial && snapshot.commercial.adjustmentMode !== 'none' && snapshot.commercial.adjustmentBps > 0 ? [{columns:[{text:`${snapshot.commercial.variantLabel} · ${t.beforeAdjustment}`,color:'#647169'},{text:money(snapshot.commercial.listNetMinor,snapshot.currency,locale),alignment:'right'}],margin:[0,4,0,4]}] : []),
+        ...(snapshot.commercial && snapshot.commercial.adjustmentMode !== 'none' && snapshot.commercial.adjustmentBps > 0 ? [{columns:[{text:`${variantLabel} · ${t.beforeAdjustment}`,color:'#647169'},{text:money(snapshot.commercial.listNetMinor,snapshot.currency,locale),alignment:'right'}],margin:[0,4,0,4]}] : []),
         {columns:[{text:t.net,color:'#647169'},{text:money(snapshot.amounts.netMinor,snapshot.currency,locale),bold:true,alignment:'right'}],margin:[0,4,0,4]},
         ...(snapshot.amounts.taxBps > 0 ? [{columns:[{text:`${t.tax} ${(snapshot.amounts.taxBps/100).toFixed(2)}%`,color:'#647169'},{text:money(snapshot.amounts.taxMinor,snapshot.currency,locale),bold:true,alignment:'right'}],margin:[0,4,0,8]}] : []),
         {canvas:[{type:'line',x1:0,y1:0,x2:260,y2:0,lineWidth:1.2,lineColor:'#18211d'}]},
@@ -88,7 +107,7 @@ export async function buildQuotePdf(snapshot:QuoteSnapshot): Promise<Buffer> {
       ...(snapshot.terms.clientNote ? [{text:t.note,style:'section'},{text:snapshot.terms.clientNote,fillColor:'#f3f6f4',margin:[10,9,10,9]}] : []),
       {text:t.supplier,style:'section'}, {text:supplier.length ? supplier.join('\n') : snapshot.supplier.tradeName},
       ...(snapshot.supplier.footerText ? [{text:snapshot.supplier.footerText,style:'small',margin:[0,18,0,0]}] : []),
-      {text:'Makster Quote · MQ 0.1.15',style:'small',margin:[0,22,0,0]},
+      {text:`Makster Quote · ${quoteRef}`,style:'small',margin:[0,22,0,0]},
     ],
   };
   const output = await pdfMake.createPdf(docDefinition).getBuffer();

@@ -59,21 +59,23 @@ export function calculateQuote(input: QuotePricingInput): QuotePricingResult {
   }
 
   const costs = input.costs;
-  const directCostMinor = sumMinor([
-    costs.board,
-    costs.fronts,
-    costs.edges,
-    costs.hardware,
-    costs.production,
-    costs.labour,
-    costs.delivery,
-    costs.installation,
-    costs.other ?? 0n,
-  ]);
-
-  if (directCostMinor < 0n) {
-    throw new Error('Costs cannot be negative');
+  const costEntries: Array<[keyof CostBreakdown, Minor]> = [
+    ['board', costs.board],
+    ['fronts', costs.fronts],
+    ['edges', costs.edges],
+    ['hardware', costs.hardware],
+    ['production', costs.production],
+    ['labour', costs.labour],
+    ['delivery', costs.delivery],
+    ['installation', costs.installation],
+    ['other', costs.other ?? 0n],
+  ];
+  const negativeCost = costEntries.find(([, value]) => value < 0n);
+  if (negativeCost) {
+    throw new Error(`${negativeCost[0]} cost cannot be negative`);
   }
+
+  const directCostMinor = sumMinor(costEntries.map(([, value]) => value));
 
   const overheadMinor = roundDiv(
     directCostMinor * BigInt(input.overheadBps),

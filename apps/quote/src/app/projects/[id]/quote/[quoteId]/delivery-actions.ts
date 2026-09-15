@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { buildQuotePdf } from '@/lib/quote-pdf';
 import { getDeliveryMessages } from '@/lib/i18n-delivery';
 import { getInterfaceLocale } from '@/lib/interface-locale';
+import { effectiveQuoteStatus, quoteActionAllowed, quoteReference } from '@/lib/quote-lifecycle';
 import { readQuoteSnapshot } from '@/lib/quote-snapshot';
 import { requireWorkspace } from '@/lib/workspace';
 
@@ -25,8 +26,28 @@ const emailCopy:Record<string,{subject:string;hello:string;intro:string;button:s
   pl:{subject:'Oferta',hello:'Dzień dobry',intro:'Przygotowaliśmy ofertę dla projektu',button:'Otwórz ofertę',valid:'Oferta jest ważna do',attachment:'Wiadomość zawiera również załącznik PDF.',fallback:'Jeśli przycisk nie działa, skopiuj ten link do przeglądarki:'},
 };
 
-async function loadQuote(projectId:string,quoteId:string){const workspace=await requireWorkspace();if(!deliveryRoles.has(workspace.role))throw new Error('permission');const {data:quote,error}=await workspace.supabase.from('client_commercial_quotes').select('id, project_id, quote_version, valid_until, quote_json').eq('id',quoteId).eq('project_id',projectId).eq('organization_id',workspace.organization.id).maybeSingle();if(error||!quote)throw new Error('quote-not-found');const snapshot=readQuoteSnapshot(quote.quote_json);if(!snapshot)throw new Error('unsupported-snapshot');return{...workspace,quote,snapshot:{...snapshot,quoteId:quote.id,quoteVersion:quote.quote_version,validUntil:quote.valid_until}};}
-async function createAccessLink(projectId:string,quoteId:string,purpose:'share'|'email',recipientEmail?:string){const loaded=await loadQuote(projectId,quoteId);const token=randomBytes(32).toString('base64url');const hash=tokenHash(token);const {data:linkId,error}=await loaded.supabase.rpc('quote_create_client_access_link',{p_quote_id:quoteId,p_token_hash:hash,p_purpose:purpose,p_recipient_email:recipientEmail||null,p_expires_at:null});if(error||!linkId)throw new Error('link-create');const baseUrl=await publicBaseUrl();return{...loaded,token,linkId:String(linkId),publicUrl:`${baseUrl}/q/${token}`};}
+async function loadQuote(projectId:string,quoteId:string){
+  const workspace=await requireWorkspace();
+  if(!deliveryRoles.has(workspace.role))throw new Error('permission');
+  const {data:quote,error}=await workspace.supabase.from('client_commercial_quotes').select('id, project_id, quote_version, valid_until, quote_json').eq('id',quoteId).eq('project_id',projectId).eq('organization_id',workspace.organization.id).maybeSingle();
+  if(error||!quote)throw new Error('quote-not-found');
+  const snapshot=readQuoteSnapshot(quote.quote_json);
+  if(!snapshot)throw new Error('unsupported-snapshot');
+  const {data:event,error:eventError}=await workspace.supabase.from('client_quote_status_events').select('status').eq('quote_id',quoteId).eq('organization_id',workspace.organization.id).order('created_at',{ascending:false}).order('id',{ascending:false}).limit(1).maybeSingle();
+  if(eventError)throw new Error('quote-status');
+  const status=effectiveQuoteStatus(event?.status??'approved',quote.valid_until);
+  return{...workspace,quote,status,snapshot:{...snapshot,quoteId:quote.id,quoteVersion:quote.quote_version,validUntil:quote.valid_until}};
+}
+async function createAccessLink(projectId:string,quoteId:string,purpose:'share'|'email',recipientEmail?:string){
+  const loaded=await loadQuote(projectId,quoteId);
+  if(!quoteActionAllowed(loaded.status,loaded.quote.valid_until))throw new Error('quote-not-deliverable');
+  const token=randomBytes(32).toString('base64url');
+  const hash=tokenHash(token);
+  const {data:linkId,error}=await loaded.supabase.rpc('quote_create_client_access_link',{p_quote_id:quoteId,p_token_hash:hash,p_purpose:purpose,p_recipient_email:recipientEmail||null,p_expires_at:null});
+  if(error||!linkId)throw new Error('link-create');
+  const baseUrl=await publicBaseUrl();
+  return{...loaded,token,linkId:String(linkId),publicUrl:`${baseUrl}/q/${token}`};
+}
 
 export async function generateClientLink(_previous:DeliveryActionState,formData:FormData):Promise<DeliveryActionState>{const locale=await getInterfaceLocale();const m=getDeliveryMessages(locale);const projectId=text(formData,'projectId',80);const quoteId=text(formData,'quoteId',80);try{const created=await createAccessLink(projectId,quoteId,'share');revalidatePath(`/projects/${projectId}/quote/${quoteId}`);return{status:'success',message:m.linkCreated,publicUrl:created.publicUrl,linkId:created.linkId};}catch(error){const code=error instanceof Error?error.message:'unknown';return{status:'error',message:`${m.linkCreateError} (${code}).`};}}
 
@@ -35,8 +56,8 @@ export async function sendQuoteEmail(_previous:DeliveryActionState,formData:Form
   if(!apiKey||!from)return{status:'error',message:m.emailProviderMissing}; if(!emailLooksValid(recipient))return{status:'error',message:m.invalidEmail};
   let created:Awaited<ReturnType<typeof createAccessLink>>|null=null;
   try{
-    created=await createAccessLink(projectId,quoteId,'email',recipient);const snapshot=created.snapshot;const copy=emailCopy[snapshot.locale]??emailCopy.ru;const pdf=await buildQuotePdf(snapshot);const locale=snapshot.locale==='en'?'en-GB':snapshot.locale==='cs'?'cs-CZ':snapshot.locale==='de'?'de-DE':snapshot.locale==='pl'?'pl-PL':'ru-RU';const valid=new Intl.DateTimeFormat(locale,{year:'numeric',month:'long',day:'numeric'}).format(new Date(snapshot.validUntil));const subject=`${copy.subject} · ${snapshot.project.name} · MQ-v${created.quote.quote_version}`;const html=`<!doctype html><html><body style="font-family:Arial,sans-serif;color:#18211d;line-height:1.5"><p>${copy.hello}, ${escapeHtml(snapshot.client.name)}.</p><p>${copy.intro} <strong>${escapeHtml(snapshot.project.name)}</strong>.</p><p><a href="${escapeHtml(created.publicUrl)}" style="display:inline-block;background:#1f7a5a;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:700">${copy.button}</a></p><p>${copy.valid}: <strong>${escapeHtml(valid)}</strong>.</p><p>${copy.attachment}</p><p style="font-size:12px;color:#68746d">${copy.fallback}<br><span style="word-break:break-all">${escapeHtml(created.publicUrl)}</span></p><p>${escapeHtml(snapshot.supplier.tradeName)}</p></body></html>`;
-    const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({from,to:[recipient],subject,html,attachments:[{filename:`Makster-Quote-v${created.quote.quote_version}.pdf`,content:pdf.toString('base64')}]}),cache:'no-store'});const raw=await response.text();let payload:Record<string,unknown>={};try{payload=raw?JSON.parse(raw) as Record<string,unknown>:{};}catch{payload={};}const providerMessageId=typeof payload.id==='string'?payload.id:'';
+    created=await createAccessLink(projectId,quoteId,'email',recipient);const snapshot=created.snapshot;const copy=emailCopy[snapshot.locale]??emailCopy.ru;const pdf=await buildQuotePdf(snapshot);const locale=snapshot.locale==='en'?'en-GB':snapshot.locale==='cs'?'cs-CZ':snapshot.locale==='de'?'de-DE':snapshot.locale==='pl'?'pl-PL':'ru-RU';const valid=new Intl.DateTimeFormat(locale,{year:'numeric',month:'long',day:'numeric'}).format(new Date(snapshot.validUntil));const ref=quoteReference(snapshot.project.id,created.quote.quote_version);const subject=`${copy.subject} · ${snapshot.project.name} · ${ref}`;const html=`<!doctype html><html><body style="font-family:Arial,sans-serif;color:#18211d;line-height:1.5"><p>${copy.hello}, ${escapeHtml(snapshot.client.name)}.</p><p>${copy.intro} <strong>${escapeHtml(snapshot.project.name)}</strong>.</p><p><a href="${escapeHtml(created.publicUrl)}" style="display:inline-block;background:#1f7a5a;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:700">${copy.button}</a></p><p>${copy.valid}: <strong>${escapeHtml(valid)}</strong>.</p><p>${copy.attachment}</p><p style="font-size:12px;color:#68746d">${copy.fallback}<br><span style="word-break:break-all">${escapeHtml(created.publicUrl)}</span></p><p>${escapeHtml(snapshot.supplier.tradeName)}</p></body></html>`;
+    const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({from,to:[recipient],subject,html,attachments:[{filename:`${ref}.pdf`,content:pdf.toString('base64')}]}),cache:'no-store'});const raw=await response.text();let payload:Record<string,unknown>={};try{payload=raw?JSON.parse(raw) as Record<string,unknown>:{};}catch{payload={};}const providerMessageId=typeof payload.id==='string'?payload.id:'';
     if(!response.ok){await created.supabase.rpc('quote_record_email_delivery',{p_quote_id:quoteId,p_access_link_id:created.linkId,p_recipient_email:recipient,p_status:'failed',p_provider_message_id:providerMessageId||null,p_error_message:raw.slice(0,1000)||`HTTP ${response.status}`});await created.supabase.rpc('quote_revoke_client_access_link',{p_link_id:created.linkId});revalidatePath(`/projects/${projectId}/quote/${quoteId}`);return{status:'error',message:`${m.emailHttpError} HTTP ${response.status}.`};}
     const {error:logError}=await created.supabase.rpc('quote_record_email_delivery',{p_quote_id:quoteId,p_access_link_id:created.linkId,p_recipient_email:recipient,p_status:'sent',p_provider_message_id:providerMessageId||null,p_error_message:null});revalidatePath(`/projects/${projectId}`);revalidatePath(`/projects/${projectId}/quote/${quoteId}`);return{status:'success',message:m.emailSent,publicUrl:created.publicUrl,linkId:created.linkId,recipient,warning:logError?m.emailLogWarning:undefined};
   }catch(error){const code=error instanceof Error?error.message:'unknown';if(created)await created.supabase.rpc('quote_revoke_client_access_link',{p_link_id:created.linkId});return{status:'error',message:`${m.sendFailed} (${code}).`};}
