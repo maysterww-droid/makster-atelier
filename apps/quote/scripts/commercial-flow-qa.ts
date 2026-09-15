@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { effectiveQuoteStatus, quoteActionAllowed, quoteReference } from '../src/lib/quote-lifecycle.ts';
+import { readProjectCommercialSettings } from '../src/lib/project-pricing.ts';
 
 function test(name:string,run:()=>void){
   try{run();console.log(`✓ ${name}`);}catch(error){console.error(`✗ ${name}`);throw error;}
@@ -29,6 +30,11 @@ test('published quote reference is stable and client-friendly',()=>{
   assert.equal(quoteReference('12345678-abcd-4abc-8abc-123456789abc',3),'MQ-003-12345678');
   assert.equal(quoteReference('abcd-1234',12),'MQ-012-ABCD1234');
   assert.equal(quoteReference('',1),'MQ-001-PROJECT');
+});
+
+test('project VAT is canonical and legacy quote VAT is only a fallback',()=>{
+  assert.equal(readProjectCommercialSettings({taxBps:2100,quoteCommercial:{taxBps:0}}).taxBps,2100);
+  assert.equal(readProjectCommercialSettings({quoteCommercial:{taxBps:2100}}).taxBps,2100);
 });
 
 console.log('Makster Quote commercial flow QA passed.');
