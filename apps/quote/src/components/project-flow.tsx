@@ -111,6 +111,13 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
   const loadingLabel=locale==='ru'?'Переходим к этапу…':locale==='cs'?'Přecházíme na krok…':locale==='de'?'Schritt wird geöffnet…':locale==='pl'?'Przechodzimy do etapu…':'Opening step…';
   const nextLoadingLabel=locale==='ru'?'Переходим к следующему этапу…':locale==='cs'?'Přecházíme na další krok…':locale==='de'?'Nächster Schritt wird geöffnet…':locale==='pl'?'Przechodzimy do następnego etapu…':'Opening next step…';
 
+  const guidanceContent = <>
+    <strong>{remaining>0?p1.nextAction:p1.ready}</strong>
+    <span>{nextText}</span>
+    {remaining>0?<em>{p1.remaining}: {remaining}</em>:null}
+    {remaining>0?<b>→</b>:null}
+  </>;
+
   return <div className={styles.wrap}>
     <nav className={styles.flow} aria-label="Project workflow">
       {steps.map((step)=>{
@@ -130,11 +137,8 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
         </Link>;
       })}
     </nav>
-    <Link href={nextHref} className={styles.guidance} data-loading-label={nextLoadingLabel}>
-      <strong>{p1.nextAction}</strong>
-      <span>{nextText}</span>
-      {remaining>0?<em>{p1.remaining}: {remaining}</em>:null}
-      <b>→</b>
-    </Link>
+    {remaining>0
+      ? <Link href={nextHref} className={styles.guidance} data-loading-label={nextLoadingLabel}>{guidanceContent}</Link>
+      : <div className={`${styles.guidance} ${styles.guidanceReady}`} role="status">{guidanceContent}</div>}
   </div>;
 }
