@@ -37,6 +37,11 @@ function textValue(value: unknown) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function previewIsApproved(metadata: Record<string, unknown>) {
+  const style = textValue(metadata.preview_style || metadata.previewStyle).toLowerCase();
+  return metadata.preview_approved === true || metadata.previewApproved === true || style === 'studio_v1' || style === 'studio';
+}
+
 function inferredQuoteKey(moduleCode: string) {
   const code = moduleCode.toUpperCase();
   if (code.includes('DRAWER')) return 'b-drawer';
@@ -57,6 +62,7 @@ function publicUrl(supabase: SupabaseClient, bucket: string, path: string) {
  * Consumer contract for Makster Asset Bridge 0.1.
  * ready_module_library is the only discovery surface: it already resolves
  * one active READY version per module and hides Draft/failed/older versions.
+ * Legacy previews are intentionally hidden until Bridge marks them studio-ready.
  */
 export async function loadPublishedModule3DAssets(supabase: SupabaseClient): Promise<Module3DAsset[]> {
   const { data, error } = await supabase
@@ -81,6 +87,7 @@ export async function loadPublishedModule3DAssets(supabase: SupabaseClient): Pro
       inferredQuoteKey(row.module_code),
       ...metadataKeys,
     ].map((value) => value.trim()).filter(Boolean))];
+    const approvedPreview = previewIsApproved(metadata);
 
     result.push({
       moduleCode: row.module_code,
@@ -88,7 +95,7 @@ export async function loadPublishedModule3DAssets(supabase: SupabaseClient): Pro
       matchKeys,
       version: Number(row.version) || 1,
       glbUrl: publicUrl(supabase, row.glb_bucket, row.glb_path),
-      previewUrl: row.preview_bucket && row.preview_path ? publicUrl(supabase, row.preview_bucket, row.preview_path) : null,
+      previewUrl: approvedPreview && row.preview_bucket && row.preview_path ? publicUrl(supabase, row.preview_bucket, row.preview_path) : null,
       widthMm: numberValue(row.width_mm, 600),
       heightMm: numberValue(row.body_height_mm, 720) + Math.max(0, Number(row.leg_height_mm) || 0),
       depthMm: numberValue(row.depth_mm, 560),
