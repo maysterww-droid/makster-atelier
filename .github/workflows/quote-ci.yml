@@ -32,6 +32,8 @@ jobs:
         run: npm run commercial:qa
       - name: Snapshot QA
         run: npm run snapshot:qa
+      - name: Asset Bridge QA
+        run: npm run asset-bridge:qa
       - name: PDF smoke
         run: npm run pdf:smoke
       - name: Build
