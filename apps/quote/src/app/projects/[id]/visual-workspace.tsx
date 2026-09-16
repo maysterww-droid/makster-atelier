@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { addPresetToProject } from '@/app/library/actions';
 import { ModuleSchematic } from '@/components/module-schematic';
 import type { Locale } from '@/lib/i18n';
+import { loadPublishedModule3DAssets } from '@/lib/module-3d-assets';
+import { requireWorkspace } from '@/lib/workspace';
 import { ProjectVisualBuilder } from './project-visual-builder';
 import { VISUAL_COPY, VISUAL_PRESETS } from './visual-copy';
 import styles from './visual-builder.module.css';
@@ -21,14 +23,16 @@ const presetVisual:Record<string,{moduleKey:string;width:number;height:number}>=
   'tall-fridge-600':{moduleKey:'t-fridge',width:600,height:2100},
 };
 
-export function VisualWorkspace({projectId,currency,locale,cabinets}:Props){
+export async function VisualWorkspace({projectId,currency,locale,cabinets}:Props){
   const copy=VISUAL_COPY[locale];
+  const {supabase}=await requireWorkspace();
+  const module3dAssets=await loadPublishedModule3DAssets(supabase);
   return <section className={styles.workspace} id="modules">
     <aside className={styles.catalog}>
       <div className={styles.catalogHeader}><span className="eyebrow">VISUAL MODULE LIBRARY</span><h2>{copy.catalog}</h2><p>{copy.catalogHelp}</p></div>
       <div className={styles.catalogGrid}>{VISUAL_PRESETS.map((key)=>{const visual=presetVisual[key];return <form action={addPresetToProject} key={key} className={styles.presetForm} data-loading-label={copy.adding}><input type="hidden" name="projectId" value={projectId}/><input type="hidden" name="presetKey" value={key}/><input type="hidden" name="quantity" value="1"/><button className={styles.presetButton} type="submit" data-loading-label={copy.adding}><div className={styles.presetPreview}><ModuleSchematic moduleKey={visual.moduleKey} name={copy.presets[key]} widthMm={visual.width} heightMm={visual.height}/></div><strong>{copy.presets[key]}</strong><span>+ {copy.add}</span></button></form>;})}</div>
       <div className={styles.catalogFooter}><Link href={`/library?project=${projectId}`} className="textLink">{copy.allPresets}</Link></div>
     </aside>
-    <ProjectVisualBuilder projectId={projectId} cabinets={cabinets} currency={currency} locale={locale}/>
+    <ProjectVisualBuilder projectId={projectId} cabinets={cabinets} currency={currency} locale={locale} module3dAssets={module3dAssets}/>
   </section>;
 }
