@@ -1,9 +1,16 @@
 import '@/lib/special-hardware-presets';
 import type { QuoteModulePreset } from '@/lib/module-presets';
 
-type Props={preset:QuoteModulePreset};
+type Props={preset:QuoteModulePreset;previewUrl?:string|null;bridgeVersion?:number|null};
 
-export function ModuleThumbnail({preset}:Props){
+export function ModuleThumbnail({preset,previewUrl,bridgeVersion}:Props){
+  if(previewUrl){
+    return <div aria-hidden="true" title={`Makster Asset Bridge · READY${bridgeVersion?` · V${bridgeVersion}`:''}`} style={{height:124,position:'relative',display:'grid',placeItems:'center',borderRadius:14,background:'var(--mq-surface-soft,#fff7f0)',border:'1px solid var(--mq-border,#dfd0c0)',overflow:'hidden'}}>
+      <img src={previewUrl} alt="" style={{width:'100%',height:'100%',objectFit:'contain',display:'block'}}/>
+      <span style={{position:'absolute',right:7,bottom:7,padding:'3px 6px',borderRadius:999,background:'rgba(43,29,22,.78)',color:'#fff',fontSize:9,fontWeight:700,letterSpacing:'.06em'}}>BLENDER{bridgeVersion?` · V${bridgeVersion}`:''}</span>
+    </div>;
+  }
+
   const isTall=preset.heightMm>=1400;
   const isLow=preset.heightMm<=500;
   const ratio=Math.max(.48,Math.min(1.35,preset.widthMm/Math.max(1,preset.heightMm)));
