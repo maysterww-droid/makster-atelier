@@ -35,6 +35,7 @@ function zone(row:CabinetRow){return level(row)==='wall'?'wall':'ground';}
 function safeMinor(value:unknown){const parsed=Number(value);return Number.isFinite(parsed)?parsed:0;}
 function sameOrder(a:CabinetRow[],b:CabinetRow[]){return a.length===b.length&&a.every((row,index)=>row.id===b[index]?.id);}
 function visualType(row:CabinetRow){const haystack=`${row.module_key} ${row.name}`.toLowerCase();if(haystack.includes('drawer')||haystack.includes('ящик')||haystack.includes('zásuv')||haystack.includes('schublad')||haystack.includes('szuflad'))return 'drawer';if(haystack.includes('oven')||haystack.includes('духов')||haystack.includes('troub')||haystack.includes('backofen')||haystack.includes('piekarnik'))return 'oven';if(haystack.includes('dishwasher')||haystack.includes('пмм')||haystack.includes('myčk')||haystack.includes('geschirr')||haystack.includes('zmyw'))return 'dishwasher';if(haystack.includes('fridge')||haystack.includes('холод')||haystack.includes('lednic')||haystack.includes('kühl')||haystack.includes('lodów'))return 'fridge';if(haystack.includes('sink')||haystack.includes('мой')||haystack.includes('dřez')||haystack.includes('spül')||haystack.includes('zlew'))return 'sink';return 'door';}
+function assetKey(row:CabinetRow){const key=row.module_key.toLowerCase();const rowLevel=level(row);const type=visualType(row);if(rowLevel==='wall')return key.startsWith('w-')?row.module_key:'w-door';if(rowLevel==='tall'){if(key.startsWith('t-'))return row.module_key;if(type==='fridge')return 't-fridge';if(type==='oven')return 't-oven';return 't-door';}if(key.startsWith('b-')||key==='dishwasher')return row.module_key;if(type==='drawer')return 'b-drawer';if(type==='oven')return 'b-oven';if(type==='dishwasher')return 'dishwasher';return 'b-door';}
 
 function reorderWithinZone(rows:CabinetRow[],dragId:string,targetId:string,after:boolean){
   if(dragId===targetId)return rows;
@@ -77,7 +78,7 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale,module3
   const copy=VISUAL_COPY[locale];const intl=INTL_LOCALES[locale];const c=controls[locale];
   const [orderedCabinets,setOrderedCabinets]=useState(cabinets);const orderRef=useRef(cabinets);const canvasRef=useRef<HTMLDivElement|null>(null);const viewportRef=useRef<HTMLDivElement|null>(null);const dragRef=useRef<DragState|null>(null);
   const [selectedId,setSelectedId]=useState(cabinets[0]?.id??'');const [draggingId,setDraggingId]=useState('');const [saveState,setSaveState]=useState<SaveState>('idle');const [isPending,startTransition]=useTransition();
-  const [expanded,setExpanded]=useState(false);const [panMax,setPanMax]=useState(0);const [panValue,setPanValue]=useState(0);const [viewMode,setViewMode]=useState<ViewMode>('3d');
+  const [expanded,setExpanded]=useState(false);const [panMax,setPanMax]=useState(0);const [panValue,setPanValue]=useState(0);const [viewMode,setViewMode]=useState<ViewMode>('2d');
 
   useEffect(()=>{setOrderedCabinets(cabinets);orderRef.current=cabinets;setSelectedId((current)=>current&&cabinets.some((row)=>row.id===current)?current:(cabinets[0]?.id??''));},[cabinets]);
   useEffect(()=>{if(!expanded)return;const old=document.body.style.overflow;document.body.style.overflow='hidden';const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape')setExpanded(false);};window.addEventListener('keydown',onKey);return()=>{document.body.style.overflow=old;window.removeEventListener('keydown',onKey);};},[expanded]);
@@ -92,7 +93,8 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale,module3
     const centers=new Map<string,{center:number;zone:string}>();for(const row of orderedCabinets){const pieces=all.filter((item)=>item.row.id===row.id);if(pieces.length){const start=Math.min(...pieces.map((item)=>item.xMm));const end=Math.max(...pieces.map((item)=>item.xMm+item.widthMm));centers.set(row.id,{center:(start+end)/2,zone:zone(row)});}}
     return{all,lineWidth,canvasHeight,baseHeight,backsplashMm,centers};
   },[sceneItems,orderedCabinets]);
-  const threeItems=useMemo<Project3DSceneItem[]>(()=>layout.all.map((item)=>({sceneId:item.sceneId,cabinetId:item.row.id,moduleKey:item.row.module_key,name:item.row.name,xMm:item.xMm,widthMm:item.widthMm,heightMm:item.heightMm,depthMm:dimension(item.row.depth_mm,560),bottomMm:item.bottomMm,level:item.level})),[layout.all]);
+  const threeItems=useMemo<Project3DSceneItem[]>(()=>layout.all.map((item)=>({sceneId:item.sceneId,cabinetId:item.row.id,moduleKey:assetKey(item.row),name:item.row.name,xMm:item.xMm,widthMm:item.widthMm,heightMm:item.heightMm,depthMm:dimension(item.row.depth_mm,560),bottomMm:item.bottomMm,level:item.level})),[layout.all]);
+  const selectedThreeItems=useMemo<Project3DSceneItem[]>(()=>selected?[{sceneId:`selected-${selected.id}`,cabinetId:selected.id,moduleKey:assetKey(selected),name:selected.name,xMm:0,widthMm:dimension(selected.width_mm,600),heightMm:dimension(selected.height_mm,720),depthMm:dimension(selected.depth_mm,560),bottomMm:0,level:level(selected)}]:[],[selected]);
 
   const sceneRatio=Math.max(.1,layout.lineWidth/layout.canvasHeight);
   const naturalCanvasWidth=Math.max(760,Math.min(3200,layout.lineWidth*.145));
@@ -115,7 +117,7 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale,module3
 
   const money=(minor:unknown)=>new Intl.NumberFormat(intl,{style:'currency',currency,maximumFractionDigits:2}).format(safeMinor(minor)/100);
   const statusText=isPending||saveState==='saving'?c.saving:saveState==='saved'?c.saved:saveState==='error'?c.error:c.hint;
-  const selectedAsset=selected?module3dAssets.find((asset)=>asset.matchKeys.includes(selected.module_key)):undefined;
+  const selectedAsset=selected?module3dAssets.find((asset)=>asset.matchKeys.includes(assetKey(selected))):undefined;
   const threeFooter=module3dAssets.length?`${module3dAssets.length} ${c.threeReady}`:c.threeWaiting;
 
   return <>
@@ -152,7 +154,7 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale,module3
     <aside className={styles.detailsPanel}>
       <div className={styles.detailsHeader}><div><span className="eyebrow">{copy.selected.toUpperCase()}</span><h3>{selected?.name??'—'}</h3></div>{selected?<span className={styles.schematicBadge}>{selectedAsset?'3D':copy.schematic}</span>:null}</div>
       {selected?<div className={styles.detailsBody}>
-        <div className={styles.detailPreview}>{selectedAsset?.previewUrl?<img className={styles.detailAssetPreview} src={selectedAsset.previewUrl} alt={selected.name}/>:<ModuleSchematic moduleKey={selected.module_key} name={selected.name} widthMm={selected.width_mm} heightMm={selected.height_mm}/>}</div>
+        <div className={styles.detailPreview}>{selectedAsset?<Project3DViewer items={selectedThreeItems} assets={[selectedAsset]} locale={locale} compact/>:<ModuleSchematic moduleKey={selected.module_key} name={selected.name} widthMm={selected.width_mm} heightMm={selected.height_mm}/>}</div>
         <div><div className={styles.detailName}>{selected.name}</div><div className={styles.detailKey}>{selected.module_key}</div><div className={styles.detailRows}>
           <div className={styles.detailRow}><span>{copy.dimensions}</span><strong>{dimension(selected.width_mm,0)} × {dimension(selected.height_mm,0)} × {dimension(selected.depth_mm,0)} mm</strong></div>
           <div className={styles.detailRow}><span>{copy.cost}</span><strong>{money(selected.computed_cost_json?.trueCostMinor)}</strong></div>
