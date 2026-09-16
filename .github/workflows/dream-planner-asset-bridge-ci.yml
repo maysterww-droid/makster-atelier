@@ -1,0 +1,45 @@
+name: Dream Planner Asset Bridge CI
+
+on:
+  push:
+    branches:
+      - makster-dream-planner-asset-bridge-0.1
+  workflow_dispatch:
+
+jobs:
+  live-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_MAKSTER_SUPABASE_URL: https://gkqntgfrbngspvrsqvmx.supabase.co
+      NEXT_PUBLIC_MAKSTER_SUPABASE_PUBLISHABLE_KEY: sb_publishable_EFtcR-56E5AdizaU-VC9EQ_nyVVUBGw
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Extract Dream Planner QA package
+        run: |
+          rm -rf qa/dream-planner/extracted
+          mkdir -p qa/dream-planner/extracted
+          unzip -q qa/dream-planner/Makster_Dream_Planner_v3_ASSET_BRIDGE_0_1_1_LIVE_QA.zip -d qa/dream-planner/extracted
+
+      - name: Install dependencies
+        working-directory: qa/dream-planner/extracted/makster-dream-planner-v3
+        run: npm install --no-audit --no-fund
+
+      - name: Live Registry / GLB / motion smoke
+        working-directory: qa/dream-planner/extracted/makster-dream-planner-v3
+        run: npm run bridge:smoke
+
+      - name: Typecheck
+        working-directory: qa/dream-planner/extracted/makster-dream-planner-v3
+        run: npm run typecheck
+
+      - name: Next.js production build
+        working-directory: qa/dream-planner/extracted/makster-dream-planner-v3
+        run: npm run build
