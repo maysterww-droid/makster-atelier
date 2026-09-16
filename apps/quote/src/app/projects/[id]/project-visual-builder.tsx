@@ -3,25 +3,29 @@
 import { useEffect, useMemo, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from 'react';
 import { ModuleSchematic } from '@/components/module-schematic';
 import { INTL_LOCALES, type Locale } from '@/lib/i18n';
+import type { Module3DAsset } from '@/lib/module-3d-assets';
+import { Project3DViewer, type Project3DSceneItem } from './project-3d-viewer';
 import { reorderVisualCabinets } from './visual-actions';
 import { VISUAL_COPY } from './visual-copy';
 import styles from './visual-builder.module.css';
 
 type CabinetRow={id:string;module_key:string;name:string;width_mm:number|string;height_mm:number|string;depth_mm:number|string;quantity:number|string;construction_json:Record<string,unknown>;computed_cost_json:Record<string,unknown>};
-type Props={projectId:string;cabinets:CabinetRow[];currency:string;locale:Locale};
+type Props={projectId:string;cabinets:CabinetRow[];currency:string;locale:Locale;module3dAssets:Module3DAsset[]};
 type SceneItem={sceneId:string;row:CabinetRow;index:number};
 type Level='base'|'wall'|'tall';
 type PositionedItem=SceneItem&{level:Level;xMm:number;widthMm:number;heightMm:number;bottomMm:number};
 type Interval={start:number;end:number};
 type SaveState='idle'|'saving'|'saved'|'error';
+type ViewMode='2d'|'3d';
 type DragState={cabinetId:string;pointerId:number;startX:number;startY:number;active:boolean;changed:boolean};
 
-const controls:Record<Locale,{hint:string;saving:string;saved:string;error:string;left:string;right:string;expand:string;collapse:string;pan:string}>={
-  ru:{hint:'Потяните секцию влево или вправо. Стрелки двигают выбранную секцию.',saving:'Сохраняю порядок…',saved:'Порядок сохранён',error:'Не удалось сохранить порядок',left:'Левее',right:'Правее',expand:'Развернуть',collapse:'Свернуть',pan:'Положение по ширине'},
-  en:{hint:'Drag a section left or right. Arrows move the selected section.',saving:'Saving order…',saved:'Order saved',error:'Could not save order',left:'Left',right:'Right',expand:'Expand',collapse:'Close',pan:'Horizontal position'},
-  cs:{hint:'Přetáhněte sekci vlevo nebo vpravo. Šipky posouvají vybranou sekci.',saving:'Ukládám pořadí…',saved:'Pořadí uloženo',error:'Pořadí se nepodařilo uložit',left:'Vlevo',right:'Vpravo',expand:'Rozbalit',collapse:'Zavřít',pan:'Poloha po šířce'},
-  de:{hint:'Sektion nach links oder rechts ziehen. Pfeile verschieben die gewählte Sektion.',saving:'Reihenfolge wird gespeichert…',saved:'Reihenfolge gespeichert',error:'Reihenfolge konnte nicht gespeichert werden',left:'Links',right:'Rechts',expand:'Vergrößern',collapse:'Schließen',pan:'Horizontale Position'},
-  pl:{hint:'Przeciągnij sekcję w lewo lub w prawo. Strzałki przesuwają wybraną sekcję.',saving:'Zapisywanie kolejności…',saved:'Kolejność zapisana',error:'Nie udało się zapisać kolejności',left:'W lewo',right:'W prawo',expand:'Powiększ',collapse:'Zamknij',pan:'Pozycja pozioma'},
+type Controls={hint:string;saving:string;saved:string;error:string;left:string;right:string;expand:string;collapse:string;pan:string;view2d:string;view3d:string;threeReady:string;threeWaiting:string;threeSelected:string};
+const controls:Record<Locale,Controls>={
+  ru:{hint:'Потяните секцию влево или вправо. Стрелки двигают выбранную секцию.',saving:'Сохраняю порядок…',saved:'Порядок сохранён',error:'Не удалось сохранить порядок',left:'Левее',right:'Правее',expand:'Развернуть',collapse:'Свернуть',pan:'Положение по ширине',view2d:'Схема 2D',view3d:'3D',threeReady:'Blender-моделей подключено',threeWaiting:'3D работает. Blender-модели подставятся автоматически после публикации.',threeSelected:'3D-ассет подключён'},
+  en:{hint:'Drag a section left or right. Arrows move the selected section.',saving:'Saving order…',saved:'Order saved',error:'Could not save order',left:'Left',right:'Right',expand:'Expand',collapse:'Close',pan:'Horizontal position',view2d:'2D schematic',view3d:'3D',threeReady:'Blender models connected',threeWaiting:'3D is ready. Blender models will appear automatically after publishing.',threeSelected:'3D asset connected'},
+  cs:{hint:'Přetáhněte sekci vlevo nebo vpravo. Šipky posouvají vybranou sekci.',saving:'Ukládám pořadí…',saved:'Pořadí uloženo',error:'Pořadí se nepodařilo uložit',left:'Vlevo',right:'Vpravo',expand:'Rozbalit',collapse:'Zavřít',pan:'Poloha po šířce',view2d:'2D schéma',view3d:'3D',threeReady:'Blender modelů připojeno',threeWaiting:'3D je připravené. Blender modely se po publikaci doplní automaticky.',threeSelected:'3D asset připojen'},
+  de:{hint:'Sektion nach links oder rechts ziehen. Pfeile verschieben die gewählte Sektion.',saving:'Reihenfolge wird gespeichert…',saved:'Reihenfolge gespeichert',error:'Reihenfolge konnte nicht gespeichert werden',left:'Links',right:'Rechts',expand:'Vergrößern',collapse:'Schließen',pan:'Horizontale Position',view2d:'2D-Schema',view3d:'3D',threeReady:'Blender-Modelle verbunden',threeWaiting:'3D ist bereit. Blender-Modelle erscheinen nach der Veröffentlichung automatisch.',threeSelected:'3D-Asset verbunden'},
+  pl:{hint:'Przeciągnij sekcję w lewo lub w prawo. Strzałki przesuwają wybraną sekcję.',saving:'Zapisywanie kolejności…',saved:'Kolejność zapisana',error:'Nie udało się zapisać kolejności',left:'W lewo',right:'W prawo',expand:'Powiększ',collapse:'Zamknij',pan:'Pozycja pozioma',view2d:'Schemat 2D',view3d:'3D',threeReady:'Podłączone modele Blender',threeWaiting:'3D jest gotowe. Modele Blender pojawią się automatycznie po publikacji.',threeSelected:'Podłączono asset 3D'},
 };
 
 function qty(value:unknown){const parsed=Number(value);return Number.isFinite(parsed)?Math.max(1,Math.min(99,Math.round(parsed))):1;}
@@ -69,11 +73,11 @@ function ElevationUnit({row}:{row:CabinetRow}){
   </svg>;
 }
 
-export function ProjectVisualBuilder({projectId,cabinets,currency,locale}:Props){
+export function ProjectVisualBuilder({projectId,cabinets,currency,locale,module3dAssets}:Props){
   const copy=VISUAL_COPY[locale];const intl=INTL_LOCALES[locale];const c=controls[locale];
   const [orderedCabinets,setOrderedCabinets]=useState(cabinets);const orderRef=useRef(cabinets);const canvasRef=useRef<HTMLDivElement|null>(null);const viewportRef=useRef<HTMLDivElement|null>(null);const dragRef=useRef<DragState|null>(null);
   const [selectedId,setSelectedId]=useState(cabinets[0]?.id??'');const [draggingId,setDraggingId]=useState('');const [saveState,setSaveState]=useState<SaveState>('idle');const [isPending,startTransition]=useTransition();
-  const [expanded,setExpanded]=useState(false);const [panMax,setPanMax]=useState(0);const [panValue,setPanValue]=useState(0);
+  const [expanded,setExpanded]=useState(false);const [panMax,setPanMax]=useState(0);const [panValue,setPanValue]=useState(0);const [viewMode,setViewMode]=useState<ViewMode>('3d');
 
   useEffect(()=>{setOrderedCabinets(cabinets);orderRef.current=cabinets;setSelectedId((current)=>current&&cabinets.some((row)=>row.id===current)?current:(cabinets[0]?.id??''));},[cabinets]);
   useEffect(()=>{if(!expanded)return;const old=document.body.style.overflow;document.body.style.overflow='hidden';const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape')setExpanded(false);};window.addEventListener('keydown',onKey);return()=>{document.body.style.overflow=old;window.removeEventListener('keydown',onKey);};},[expanded]);
@@ -88,13 +92,14 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale}:Props)
     const centers=new Map<string,{center:number;zone:string}>();for(const row of orderedCabinets){const pieces=all.filter((item)=>item.row.id===row.id);if(pieces.length){const start=Math.min(...pieces.map((item)=>item.xMm));const end=Math.max(...pieces.map((item)=>item.xMm+item.widthMm));centers.set(row.id,{center:(start+end)/2,zone:zone(row)});}}
     return{all,lineWidth,canvasHeight,baseHeight,backsplashMm,centers};
   },[sceneItems,orderedCabinets]);
+  const threeItems=useMemo<Project3DSceneItem[]>(()=>layout.all.map((item)=>({sceneId:item.sceneId,cabinetId:item.row.id,moduleKey:item.row.module_key,name:item.row.name,xMm:item.xMm,widthMm:item.widthMm,heightMm:item.heightMm,depthMm:dimension(item.row.depth_mm,560),bottomMm:item.bottomMm,level:item.level})),[layout.all]);
 
   const sceneRatio=Math.max(.1,layout.lineWidth/layout.canvasHeight);
   const naturalCanvasWidth=Math.max(760,Math.min(3200,layout.lineWidth*.145));
   const canvasWidth=expanded?`min(100%, calc((100dvh - 210px) * ${sceneRatio}))`:`max(100%, ${naturalCanvasWidth}px)`;
 
-  const updatePan=()=>{const viewport=viewportRef.current;if(!viewport)return;const max=Math.max(0,viewport.scrollWidth-viewport.clientWidth);setPanMax(max);setPanValue(Math.min(viewport.scrollLeft,max));};
-  useEffect(()=>{const viewport=viewportRef.current;if(!viewport)return;const observer=new ResizeObserver(()=>updatePan());observer.observe(viewport);if(canvasRef.current)observer.observe(canvasRef.current);const frame=requestAnimationFrame(updatePan);return()=>{cancelAnimationFrame(frame);observer.disconnect();};},[naturalCanvasWidth,expanded,sceneItems.length]);
+  const updatePan=()=>{if(viewMode!=='2d')return;const viewport=viewportRef.current;if(!viewport)return;const max=Math.max(0,viewport.scrollWidth-viewport.clientWidth);setPanMax(max);setPanValue(Math.min(viewport.scrollLeft,max));};
+  useEffect(()=>{const viewport=viewportRef.current;if(!viewport||viewMode!=='2d'){setPanMax(0);return;}const observer=new ResizeObserver(()=>updatePan());observer.observe(viewport);if(canvasRef.current)observer.observe(canvasRef.current);const frame=requestAnimationFrame(updatePan);return()=>{cancelAnimationFrame(frame);observer.disconnect();};},[naturalCanvasWidth,expanded,sceneItems.length,viewMode]);
 
   const persistOrder=(next:CabinetRow[])=>{orderRef.current=next;setOrderedCabinets(next);setSaveState('saving');startTransition(async()=>{try{await reorderVisualCabinets(projectId,next.map((row)=>row.id));setSaveState('saved');}catch{orderRef.current=cabinets;setOrderedCabinets(cabinets);setSaveState('error');}});};
   const currentZoneRows=selected?orderedCabinets.filter((row)=>zone(row)===zone(selected)):[];
@@ -110,12 +115,15 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale}:Props)
 
   const money=(minor:unknown)=>new Intl.NumberFormat(intl,{style:'currency',currency,maximumFractionDigits:2}).format(safeMinor(minor)/100);
   const statusText=isPending||saveState==='saving'?c.saving:saveState==='saved'?c.saved:saveState==='error'?c.error:c.hint;
+  const selectedAsset=selected?module3dAssets.find((asset)=>asset.matchKeys.includes(selected.module_key)):undefined;
+  const threeFooter=module3dAssets.length?`${module3dAssets.length} ${c.threeReady}`:c.threeWaiting;
 
   return <>
     <section className={`${styles.scenePanel} ${expanded?styles.scenePanelExpanded:''}`}>
       <div className={styles.sceneHeader}>
-        <div><span className="eyebrow">MAKSTER QUOTE · VISUAL 0.3</span><h2>{copy.visualTitle}</h2><p>{copy.visualHelp}</p></div>
+        <div><span className="eyebrow">MAKSTER QUOTE · VISUAL 0.4</span><h2>{copy.visualTitle}</h2><p>{copy.visualHelp}</p></div>
         <div className={styles.sceneHeaderActions}>
+          <div className={styles.viewToggle} role="group" aria-label="Visual mode"><button type="button" data-active={viewMode==='2d'} onClick={()=>setViewMode('2d')}>{c.view2d}</button><button type="button" data-active={viewMode==='3d'} onClick={()=>setViewMode('3d')}>{c.view3d}</button></div>
           <div className={styles.sceneStats}><span>{copy.lineLength}</span><strong>{layout.lineWidth.toLocaleString(intl)} mm</strong><span>{sceneItems.length} {copy.modules}</span></div>
           <button type="button" className={styles.expandButton} onClick={()=>setExpanded((value)=>!value)} aria-pressed={expanded}>{expanded?'×':'⛶'} <span>{expanded?c.collapse:c.expand}</span></button>
         </div>
@@ -129,28 +137,28 @@ export function ProjectVisualBuilder({projectId,cabinets,currency,locale}:Props)
         </div>
       </div>
 
-      <div ref={viewportRef} className={styles.sceneViewport} onScroll={updatePan}>
-        {sceneItems.length?<div ref={canvasRef} className={styles.sceneCanvas} style={{width:canvasWidth,aspectRatio:String(sceneRatio)}}>
+      <div ref={viewportRef} className={`${styles.sceneViewport} ${viewMode==='3d'?styles.sceneViewport3d:''}`} onScroll={updatePan}>
+        {viewMode==='3d'&&sceneItems.length?<Project3DViewer items={threeItems} assets={module3dAssets} locale={locale}/>:sceneItems.length?<div ref={canvasRef} className={styles.sceneCanvas} style={{width:canvasWidth,aspectRatio:String(sceneRatio)}}>
           <div className={styles.backsplash} style={{bottom:`${layout.baseHeight/layout.canvasHeight*100}%`,height:`${layout.backsplashMm/layout.canvasHeight*100}%`}}><span>600 mm</span></div>
           <div className={styles.floorLine}/>
           {layout.all.map((item)=>{const active=item.row.id===selected?.id;const dragging=item.row.id===draggingId;const handlers=pointerHandlers(item);return <button key={item.sceneId} type="button" onClick={()=>setSelectedId(item.row.id)} onPointerDown={handlers.onPointerDown} onPointerMove={handlers.onPointerMove} onPointerUp={handlers.onPointerUp} onPointerCancel={handlers.onPointerCancel} aria-grabbed={dragging} className={`${styles.elevationUnit} ${active?styles.elevationSelected:''} ${dragging?styles.elevationDragging:''} ${item.level==='wall'?styles.elevationWall:item.level==='tall'?styles.elevationTall:styles.elevationBase}`} style={{left:`${item.xMm/layout.lineWidth*100}%`,width:`${item.widthMm/layout.lineWidth*100}%`,bottom:`${item.bottomMm/layout.canvasHeight*100}%`,height:`${item.heightMm/layout.canvasHeight*100}%`}} aria-label={`${item.row.name} ${item.index+1}`}><ElevationUnit row={item.row}/></button>;})}
         </div>:<div className={styles.empty}><div className={styles.emptyIllustration}><ModuleSchematic moduleKey="b-door" name="Base cabinet"/></div><h3>{copy.emptyTitle}</h3><p>{copy.emptyText}</p></div>}
       </div>
 
-      {panMax>2?<div className={styles.panBar}><span>↔ {c.pan}</span><input type="range" min="0" max={Math.max(1,Math.round(panMax))} value={Math.min(Math.round(panValue),Math.max(1,Math.round(panMax)))} onChange={(event)=>{const value=Number(event.target.value);setPanValue(value);if(viewportRef.current)viewportRef.current.scrollLeft=value;}}/></div>:null}
-      <div className={styles.sceneFooter}><span className={styles.schematicBadge}>{copy.schematic}</span><span>{copy.future3d}</span></div>
+      {viewMode==='2d'&&panMax>2?<div className={styles.panBar}><span>↔ {c.pan}</span><input type="range" min="0" max={Math.max(1,Math.round(panMax))} value={Math.min(Math.round(panValue),Math.max(1,Math.round(panMax)))} onChange={(event)=>{const value=Number(event.target.value);setPanValue(value);if(viewportRef.current)viewportRef.current.scrollLeft=value;}}/></div>:null}
+      <div className={styles.sceneFooter}><span className={styles.schematicBadge}>{viewMode==='3d'?'3D':copy.schematic}</span><span>{viewMode==='3d'?threeFooter:copy.future3d}</span></div>
     </section>
 
     <aside className={styles.detailsPanel}>
-      <div className={styles.detailsHeader}><div><span className="eyebrow">{copy.selected.toUpperCase()}</span><h3>{selected?.name??'—'}</h3></div>{selected?<span className={styles.schematicBadge}>{copy.schematic}</span>:null}</div>
+      <div className={styles.detailsHeader}><div><span className="eyebrow">{copy.selected.toUpperCase()}</span><h3>{selected?.name??'—'}</h3></div>{selected?<span className={styles.schematicBadge}>{selectedAsset?'3D':copy.schematic}</span>:null}</div>
       {selected?<div className={styles.detailsBody}>
-        <div className={styles.detailPreview}><ModuleSchematic moduleKey={selected.module_key} name={selected.name} widthMm={selected.width_mm} heightMm={selected.height_mm}/></div>
+        <div className={styles.detailPreview}>{selectedAsset?.previewUrl?<img className={styles.detailAssetPreview} src={selectedAsset.previewUrl} alt={selected.name}/>:<ModuleSchematic moduleKey={selected.module_key} name={selected.name} widthMm={selected.width_mm} heightMm={selected.height_mm}/>}</div>
         <div><div className={styles.detailName}>{selected.name}</div><div className={styles.detailKey}>{selected.module_key}</div><div className={styles.detailRows}>
           <div className={styles.detailRow}><span>{copy.dimensions}</span><strong>{dimension(selected.width_mm,0)} × {dimension(selected.height_mm,0)} × {dimension(selected.depth_mm,0)} mm</strong></div>
           <div className={styles.detailRow}><span>{copy.cost}</span><strong>{money(selected.computed_cost_json?.trueCostMinor)}</strong></div>
           <div className={styles.detailRow}><span>{copy.price}</span><strong>{money(selected.computed_cost_json?.netSalesMinor)}</strong></div>
           <div className={styles.detailRow}><span>Status</span><strong className={selected.computed_cost_json?.complete?styles.ready:styles.needs}>{selected.computed_cost_json?.complete?copy.complete:copy.needsCost}</strong></div>
-        </div><div className={styles.future}>{copy.future3d}</div></div>
+        </div><div className={styles.future}>{selectedAsset?`${c.threeSelected} · v${selectedAsset.version}`:c.threeWaiting}</div></div>
       </div>:<div className={styles.emptyDetails}>{copy.emptyText}</div>}
     </aside>
   </>;
