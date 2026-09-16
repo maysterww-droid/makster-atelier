@@ -20,9 +20,13 @@ export type ReadyModulePreview = {
   path: string;
 };
 
-const TEMPLATE_CODE_BY_GROUP: Partial<Record<QuoteModulePreset['group'], string>> = {
-  'base-door': 'M_BASE_DOOR',
-  'base-drawer': 'M_BASE_DRAWER',
+const TEMPLATE_CODES_BY_GROUP: Partial<Record<QuoteModulePreset['group'], string[]>> = {
+  'base-door': ['M_BASE_DOOR'],
+  'base-drawer': [
+    'M_BASE_DRAWER',
+    'M_BASE_DRAWER_TANDEMBOX',
+    'M_BASE_DRAWER_WOOD_UNDERMOUNT',
+  ],
 };
 
 function sameMm(value: number | string, expected: number) {
@@ -33,13 +37,13 @@ export function findReadyModulePreview(
   preset: QuoteModulePreset,
   rows: ReadyModuleLibraryRow[],
 ): ReadyModulePreview | null {
-  const templateCode = TEMPLATE_CODE_BY_GROUP[preset.group];
-  if (!templateCode) return null;
+  const templateCodes = TEMPLATE_CODES_BY_GROUP[preset.group];
+  if (!templateCodes?.length) return null;
 
   const matches = rows
     .filter((row) =>
       row.release_status === 'READY' &&
-      row.template_code === templateCode &&
+      templateCodes.includes(row.template_code) &&
       sameMm(row.width_mm, preset.widthMm) &&
       sameMm(row.body_height_mm, preset.heightMm) &&
       sameMm(row.depth_mm, preset.depthMm) &&
