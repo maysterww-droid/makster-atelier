@@ -9,10 +9,11 @@ on:
 jobs:
   live-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       NEXT_PUBLIC_MAKSTER_SUPABASE_URL: https://gkqntgfrbngspvrsqvmx.supabase.co
       NEXT_PUBLIC_MAKSTER_SUPABASE_PUBLISHABLE_KEY: sb_publishable_EFtcR-56E5AdizaU-VC9EQ_nyVVUBGw
+      DREAM_PLANNER_QA_URL: http://127.0.0.1:3000
     defaults:
       run:
         working-directory: qa/dream-planner/source
@@ -36,3 +37,26 @@ jobs:
 
       - name: Next.js production build
         run: npm run build
+
+      - name: Install Chromium for browser QA
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Dream Planner
+        run: |
+          nohup npm start -- -p 3000 > /tmp/dream-planner.log 2>&1 &
+          echo $! > /tmp/dream-planner.pid
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000/planner-v3 >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/dream-planner.log
+          exit 1
+
+      - name: Browser UI / motion QA
+        run: npm run bridge:ui
+
+      - name: Show server log on failure
+        if: failure()
+        run: cat /tmp/dream-planner.log || true

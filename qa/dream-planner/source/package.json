@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "bridge:smoke": "node scripts/asset-bridge-smoke.mjs",
+    "bridge:ui": "node scripts/ui-smoke.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -21,7 +22,8 @@
     "typescript": "^5.5.4",
     "@types/node": "^20.14.12",
     "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0"
+    "@types/react-dom": "^18.3.0",
+    "playwright": "^1.55.0"
   },
   "description": "Makster Dream Planner v3 with Makster Asset Bridge 0.1 READY-only Module Library integration"
 }
