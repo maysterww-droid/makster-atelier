@@ -1,0 +1,27 @@
+{
+  "name": "makster-dream-planner-v3",
+  "version": "1.1.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "bridge:smoke": "node scripts/asset-bridge-smoke.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "^0.160.0",
+    "@react-three/fiber": "^8.16.8",
+    "@react-three/drei": "^9.108.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "@types/node": "^20.14.12",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0"
+  },
+  "description": "Makster Dream Planner v3 with Makster Asset Bridge 0.1 READY-only Module Library integration"
+}
