@@ -32,6 +32,11 @@
 .sceneStats span,.sceneStats strong{display:block}
 .sceneStats span{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .sceneStats strong{font-size:18px;margin-top:3px}
+.viewToggle{display:inline-flex;align-items:center;gap:4px;padding:4px;border:1px solid #dfc9b8;border-radius:13px;background:#f8efe8;box-shadow:inset 0 1px 0 rgba(255,255,255,.75);white-space:nowrap}
+.viewToggle button{appearance:none;border:1px solid transparent;border-radius:9px;min-width:72px;height:34px;padding:0 13px;background:transparent;color:#765846;font-size:12px;font-weight:800;line-height:1;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease}
+.viewToggle button:hover{background:rgba(255,255,255,.68);color:#4f3022}
+.viewToggle button[data-active=true]{background:#fff;border-color:#8d6046;color:#3f271b;box-shadow:0 3px 10px rgba(79,48,34,.12),inset 0 0 0 1px rgba(79,48,34,.05)}
+.viewToggle button:active{transform:translateY(1px)}
 .expandButton{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;padding:0 10px;border:1px solid #cda88e;border-radius:10px;background:#fffaf6;color:#4f3022;font-size:11px;font-weight:850;cursor:pointer;white-space:nowrap}
 .expandButton:hover{background:#f7ebe1;border-color:#9f6f50}
 
@@ -102,8 +107,8 @@
   .detailsPanel{grid-column:1/-1}
   .detailsBody{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start}
   .detailPreview{height:150px}
-  .detailName{margin-top:0}
   .sceneViewport{min-height:480px}
+  .detailName{margin-top:0}
 }
 @media(max-width:900px){
   .workspace{grid-template-columns:1fr;padding:12px;padding-bottom:0}
@@ -112,7 +117,7 @@
   .detailsBody{display:block}
   .sceneViewport{min-height:390px;padding:12px}
   .sceneHeader{display:block}
-  .sceneHeaderActions{justify-content:space-between;margin-top:10px}
+  .sceneHeaderActions{justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap}
   .sceneStats{text-align:left}
   .catalogHeader,.sceneHeader,.detailsHeader{padding:14px}
   .detailName{margin-top:14px}
@@ -130,6 +135,8 @@
   .sceneViewport{min-height:360px;padding:10px}
   .backsplash span{font-size:7px}
   .detailPreview{height:210px}
+  .viewToggle{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .viewToggle button{width:100%;min-width:0;height:36px}
   .expandButton span{display:none}
   .panBar{padding:8px 10px;gap:8px}
   .panBar span{display:none}
