@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import type { Locale } from '@/lib/i18n';
 import type { Module3DAsset } from '@/lib/module-3d-assets';
-import styles from './visual-builder.module.css';
 
 export type Project3DSceneItem = {
   sceneId: string;
@@ -95,5 +94,5 @@ try{
 </html>`;
   }, [items, assets, t]);
 
-  return <iframe className={styles.threeViewer} title="Makster Quote 3D Preview" srcDoc={srcDoc} sandbox="allow-scripts allow-same-origin" />;
+  return <iframe title="Makster Quote 3D Preview" srcDoc={srcDoc} sandbox="allow-scripts allow-same-origin" style={{display:'block',width:'100%',height:'100%',minHeight:440,border:0,borderRadius:12,background:'#fffaf6',alignSelf:'stretch',flex:'1 1 auto'}} />;
 }
