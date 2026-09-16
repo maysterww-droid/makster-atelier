@@ -87,10 +87,13 @@
 .scenePanelExpanded .sceneHeader{padding:14px 18px}
 .scenePanelExpanded .sceneFooter{padding:9px 18px}
 
-.detailsPanel{min-width:0}
+.detailsPanel{min-width:0;overflow:hidden}
 .detailsHeader{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.detailsBody{padding:14px}
-.detailPreview{height:150px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(180deg,#fffaf5,#f3e5da);padding:9px}
+.detailsBody{padding:14px;min-width:0}
+.detailsBody>div{min-width:0}
+.detailPreview{height:150px;min-width:0;display:flex;align-items:center;justify-content:center;border-radius:14px;background:linear-gradient(180deg,#fffaf5,#f3e5da);padding:9px;overflow:hidden;isolation:isolate}
+.detailPreview>svg{display:block;width:100%;height:100%;max-width:100%;max-height:100%}
+.detailAssetPreview{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;border-radius:10px}
 .detailName{font-size:15px;font-weight:800;margin-top:12px}
 .detailKey{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
 .detailRows{display:grid;gap:0;margin-top:12px;border-top:1px solid var(--line)}
