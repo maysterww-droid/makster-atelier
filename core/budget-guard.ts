@@ -1,0 +1,3 @@
+import type { BrandId } from './creative-director';import { CostLedger } from './cost-ledger';
+export type BudgetPolicy={brand_id:BrandId;project_limit:number;currency:string;require_human_override:boolean};
+export function assertWithinBudget(ledger:CostLedger,projectId:string,policy:BudgetPolicy,estimatedNextCost:number){if(estimatedNextCost<0)throw new Error('INVALID_ESTIMATED_COST');const projected=ledger.total(projectId,policy.brand_id,policy.currency)+estimatedNextCost;if(projected>policy.project_limit)throw new Error(`BUDGET_GUARD_BLOCKED: ${projected} ${policy.currency} > ${policy.project_limit} ${policy.currency}`);return projected;}

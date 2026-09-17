@@ -1,0 +1,2 @@
+import type { CreativeProviderAdapter, ProviderKind } from './provider-adapter';
+export class ProviderRegistry{private providers=new Map<string,CreativeProviderAdapter>();register(p:CreativeProviderAdapter){if(this.providers.has(p.name))throw new Error(`PROVIDER_ALREADY_REGISTERED: ${p.name}`);this.providers.set(p.name,p);}get(name:string){const p=this.providers.get(name);if(!p)throw new Error(`PROVIDER_NOT_FOUND: ${name}`);return p;}forKind(kind:ProviderKind){return [...this.providers.values()].filter(p=>p.kinds.includes(kind));}names(){return [...this.providers.keys()];}}

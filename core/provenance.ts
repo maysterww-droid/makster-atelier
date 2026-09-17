@@ -1,0 +1,3 @@
+import type { BrandId } from './creative-director';
+export type GenerationProvenance={id:string;project_id:string;brand_id:BrandId;shot_id?:string;take_id?:string;provider:string;model:string;prompt:string;prompt_version:string;reference_ids:string[];input_asset_ids:string[];output_asset_id:string;cost:number|null;currency:string|null;created_at:string};
+export class ProvenanceLog{private events:GenerationProvenance[]=[];append(e:GenerationProvenance){this.events.push(Object.freeze({...e,reference_ids:[...e.reference_ids],input_asset_ids:[...e.input_asset_ids]}));}forProject(projectId:string,brandId:BrandId){return this.events.filter(e=>e.project_id===projectId&&e.brand_id===brandId);}}
