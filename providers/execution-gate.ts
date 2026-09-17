@@ -1,0 +1,3 @@
+export type ExecutionMode='DRY_RUN'|'LIVE';
+export type GenerationAuthorization={mode:ExecutionMode;human_authorized:boolean;authorization_id?:string;max_cost?:number;currency?:string};
+export function assertGenerationAuthorized(a:GenerationAuthorization,estimatedCost:number){if(a.mode!=='LIVE')throw new Error('LIVE_GENERATION_DISABLED');if(!a.human_authorized||!a.authorization_id)throw new Error('HUMAN_GENERATION_AUTHORIZATION_REQUIRED');if(estimatedCost<0)throw new Error('INVALID_ESTIMATED_COST');if(a.max_cost!==undefined&&estimatedCost>a.max_cost)throw new Error(`GENERATION_COST_EXCEEDS_AUTHORIZATION: ${estimatedCost} > ${a.max_cost}`);}
