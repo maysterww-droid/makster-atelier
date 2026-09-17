@@ -1,0 +1,21 @@
+{
+  "schema_version": "0.1",
+  "brand_id": "VYTA",
+  "positioning": "Personal Health Intelligence",
+  "visual_language": {
+    "direction": ["calm", "human", "clean", "intelligent", "premium", "health-focused"],
+    "avoid": ["Makster wood/chocolate identity", "clinical fear imagery", "cheap wellness stock look", "unapproved UI invention"]
+  },
+  "product_truth": {
+    "prefer_real_assets": true,
+    "sources": ["approved VYTA UI", "approved Vita references", "approved product renders"],
+    "rules": [
+      "Keep Vita identity consistent across scenes.",
+      "Use real approved VYTA UI whenever product UI is shown.",
+      "Do not invent medical outcomes, diagnoses or unsupported health claims."
+    ]
+  },
+  "quality_gate": {
+    "block_on": ["vita_identity_drift", "invented_ui", "unsupported_health_claim", "brand_violation", "bad_typography", "obvious_ai_artifact", "low_premium_score"]
+  }
+}
