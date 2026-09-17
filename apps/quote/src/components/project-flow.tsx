@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { Locale } from '@/lib/i18n';
 import { getMeasurementMessages } from '@/lib/i18n-measurements';
 import { getPhase1Messages } from '@/lib/i18n-measurements-phase1';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { requireWorkspace } from '@/lib/workspace';
 import styles from './project-flow.module.css';
 
 type StepKey = 'project' | 'measurements' | 'modules' | 'materials' | 'cost' | 'price' | 'proposal';
@@ -26,7 +28,7 @@ type Step = {
   repairHref?: string;
 };
 
-export function ProjectFlow({ projectId, locale, active, measurementComplete, cabinetCount, completeCabinetCount, costReady, priceReady, proposalReady }: Props) {
+export async function ProjectFlow({ projectId, locale, active, measurementComplete, cabinetCount, completeCabinetCount, costReady, priceReady, proposalReady }: Props) {
   const m = getMeasurementMessages(locale);
   const p1 = getPhase1Messages(locale);
   const projectHref = `/projects/${projectId}`;
@@ -37,6 +39,17 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
   const priceHref = `${projectHref}#price`;
   const proposalHref = `${projectHref}/quote`;
   const materialsReady = cabinetCount > 0 && completeCabinetCount === cabinetCount;
+
+  // Planner is an organization entitlement, not a per-manager flag. The project page has already
+  // authenticated the workspace; this second workspace check keeps this component safe if reused.
+  const { organization } = await requireWorkspace();
+  const admin = createAdminClient();
+  const [{ data: plannerEntitlement }, { data: plannerImport }] = await Promise.all([
+    admin.from('makster_product_entitlements').select('status, features').eq('organization_id', organization.id).eq('product', 'DREAM_PLANNER').maybeSingle(),
+    admin.from('quote_planner_imports').select('id, intake_stage, status, source_project_id').eq('organization_id', organization.id).eq('project_id', projectId).maybeSingle(),
+  ]);
+  const plannerActive = Boolean(plannerEntitlement && ['active', 'trialing'].includes(String(plannerEntitlement.status)));
+  const plannerDesignAvailable = plannerActive && Boolean(plannerImport);
 
   const automaticActive:StepKey = !measurementComplete
     ? 'measurements'
@@ -119,6 +132,9 @@ export function ProjectFlow({ projectId, locale, active, measurementComplete, ca
   </>;
 
   return <div className={styles.wrap}>
+    {plannerDesignAvailable?<Link href={`${projectHref}/planner-design`} className={styles.plannerImport}>
+      <span><b>Dream Planner · 3D Design</b><small>{plannerImport?.intake_stage??'ESTIMATE_REVIEW'} · готовая кухня импортирована целиком</small></span><strong>Открыть 3D →</strong>
+    </Link>:null}
     <nav className={styles.flow} aria-label="Project workflow">
       {steps.map((step)=>{
         const href = step.blocked && step.repairHref ? step.repairHref : step.href;
