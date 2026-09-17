@@ -1,0 +1,2 @@
+import {creativeEntry} from '../integration/host-contract';import {launchCreativeStudio} from '../integration/host-bridge';
+const m=creativeEntry('MAKSTER_OFFICE');if(m.brand_id!=='MAKSTER_ATELIER'||m.route!=='/creative')throw new Error('Makster entry invalid');const v=creativeEntry('VYTA_OFFICE');if(v.brand_id!=='VYTA')throw new Error('VYTA entry invalid');let blocked=false;try{launchCreativeStudio({host_id:'MAKSTER_OFFICE',brand_id:'VYTA',user_id:'u',locale:'cs-CZ',return_path:'/office'});}catch{blocked=true;}if(!blocked)throw new Error('Host brand mismatch must block');
