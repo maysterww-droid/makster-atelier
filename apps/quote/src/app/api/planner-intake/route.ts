@@ -1,65 +1,107 @@
 import { timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { calculateQuoteCabinetPreview } from '@/lib/cabinet-overrides';
-import { costPreviewToJson, type ModuleKey, type PriceBookItem } from '@/lib/engineering';
+import { buildPlannerCabinetRows, plannerMeasurementPayload, plannerProjectSettings, type PlannerContract } from '@/lib/planner-intake';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 
-type PlannerModule={id:string;kind:string;widthMm:number;libraryModuleCode?:string;libraryTemplateCode?:string;libraryVersion?:number};
-type PlannerContract={contract:string;version:string;handoffId?:string;source?:{projectId?:string};tenant?:{organizationId?:string;deploymentId?:string};project?:{id?:string;name?:string;payload?:Record<string,any>};commercial?:{currency?:string;clientVisibleTotalGross?:number;pricing?:Record<string,any>};lead?:{contact?:{name?:string;email?:string;phone?:string}};manufacturing?:{runs?:Record<string,PlannerModule[]>;materials?:Record<string,unknown>;appliances?:Record<string,unknown>};intake?:{stage?:string}};
-
 function safeEqual(a:string,b:string){const aa=Buffer.from(a);const bb=Buffer.from(b);return aa.length===bb.length&&timingSafeEqual(aa,bb);}
 function authOk(request:NextRequest){const configured=String(process.env.MAKSTER_QUOTE_INGEST_TOKEN??'').trim();const supplied=String(request.headers.get('authorization')??'').replace(/^Bearer\s+/i,'').trim();return Boolean(configured&&supplied&&safeEqual(configured,supplied));}
-function safeBps(value:unknown,fallback:number,max=9500){const n=Number(value);return Number.isFinite(n)?Math.max(0,Math.min(max,Math.round(n))):fallback;}
-function moduleKey(kind:string):ModuleKey{if(kind==='drawer')return'b-drawer';if(kind==='oven')return'b-oven';if(kind==='dishwasher')return'dishwasher';if(kind==='wall')return'w-door';if(kind==='tall')return't-door';if(kind==='door'||kind==='sink'||kind==='hob')return'b-door';return'generic';}
-function moduleName(kind:string,code?:string){const labels:Record<string,string>={door:'Нижний шкаф',drawer:'Нижний шкаф с ящиками',sink:'Тумба под мойку',hob:'Тумба под варочную',oven:'Тумба под духовку',dishwasher:'ПММ',wall:'Верхний шкаф',tall:'Пенал',corner_blind:'Угловой глухой',corner_l:'Угловой L'};return `${labels[kind]??'Модуль'}${code?` · ${code}`:''}`;}
-function standardGeometry(kind:string){if(kind==='wall')return{heightMm:720,depthMm:350};if(kind==='tall')return{heightMm:2100,depthMm:560};return{heightMm:720,depthMm:560};}
-function roomShape(layout:unknown){const v=String(layout??'').toLowerCase();if(v.includes('island'))return'island';if(v.startsWith('u'))return'u';if(v.startsWith('l'))return'l';if(v.includes('straight'))return'straight';return'other';}
-function defaultShelfCount(key:ModuleKey){if(key==='b-door')return 1;if(key==='w-door'||key==='open')return 2;if(key==='t-door')return 4;if(key==='t-oven')return 2;if(key==='t-fridge')return 1;return 0;}
+function visualization(contract:PlannerContract){const payload=contract.project?.payload??{};return{materials:contract.manufacturing?.materials??{},appliances:contract.manufacturing?.appliances??{},lighting:payload.lighting??{},presentation:payload.presentation??{}};}
 
 export async function POST(request:NextRequest){
   if(!authOk(request))return NextResponse.json({ok:false,code:'UNAUTHORIZED'},{status:401});
   const contract=(await request.json().catch(()=>null)) as PlannerContract|null;
   if(!contract||contract.contract!=='MAKSTER_PROJECT_HANDOFF'||contract.version!=='1.1'||!contract.handoffId)return NextResponse.json({ok:false,code:'INVALID_PLANNER_HANDOFF'},{status:400});
-  const admin=createAdminClient();let createdProjectId:string|undefined;
+
+  const admin=createAdminClient();
+  let organizationId='';
+  let sourceProjectId='';
+  let createdProjectId:string|undefined;
   try{
-    const {data:handoff,error:handoffError}=await admin.from('makster_project_handoffs').select('id,organization_id,deployment_id,destination,status,source_project_id,contract').eq('id',contract.handoffId).eq('destination','QUOTE').maybeSingle();
+    const {data:handoff,error:handoffError}=await admin.from('makster_project_handoffs')
+      .select('id,organization_id,deployment_id,destination,status,source_project_id,consumer_ref')
+      .eq('id',contract.handoffId).eq('destination','QUOTE').maybeSingle();
     if(handoffError||!handoff)return NextResponse.json({ok:false,code:'HANDOFF_NOT_FOUND'},{status:404});
-    const organizationId=String(handoff.organization_id??'');if(!organizationId||contract.tenant?.organizationId&&contract.tenant.organizationId!==organizationId)return NextResponse.json({ok:false,code:'TENANT_MISMATCH'},{status:403});
-    const [{data:entitlement},{data:existing}]=await Promise.all([
-      admin.from('makster_product_entitlements').select('status,features').eq('organization_id',organizationId).eq('product','DREAM_PLANNER').maybeSingle(),
-      admin.from('quote_planner_imports').select('project_id').eq('handoff_id',handoff.id).maybeSingle(),
+
+    organizationId=String(handoff.organization_id??'');
+    sourceProjectId=String(contract.source?.projectId??contract.project?.id??handoff.source_project_id??'').trim();
+    const deploymentId=String(handoff.deployment_id??'').trim();
+    if(!organizationId||!deploymentId||!sourceProjectId)return NextResponse.json({ok:false,code:'INVALID_TENANT_ROUTE'},{status:400});
+    if(contract.tenant?.organizationId&&contract.tenant.organizationId!==organizationId)return NextResponse.json({ok:false,code:'TENANT_MISMATCH'},{status:403});
+
+    const [{data:entitlement},{data:sameHandoff},{data:link}]=await Promise.all([
+      admin.from('makster_product_entitlements').select('status').eq('organization_id',organizationId).eq('product','DREAM_PLANNER').maybeSingle(),
+      admin.from('quote_planner_imports').select('project_id,sync_count,latest_source_hash').eq('handoff_id',handoff.id).maybeSingle(),
+      admin.from('makster_project_sync_links').select('id,consumer_ref,latest_source_hash,sync_count,state').eq('organization_id',organizationId).eq('deployment_id',deploymentId).eq('destination','QUOTE').eq('source_project_id',sourceProjectId).maybeSingle(),
     ]);
     if(!entitlement||!['active','trialing'].includes(String(entitlement.status)))return NextResponse.json({ok:false,code:'PLANNER_ENTITLEMENT_REQUIRED'},{status:403});
-    if(existing?.project_id)return NextResponse.json({ok:true,id:existing.project_id,projectId:existing.project_id,url:`/projects/${existing.project_id}`,idempotent:true});
+    if(sameHandoff?.project_id)return NextResponse.json({ok:true,projectId:sameHandoff.project_id,url:`/projects/${sameHandoff.project_id}`,idempotent:true,unchanged:true,syncCount:sameHandoff.sync_count});
 
-    const payload=contract.project?.payload??{};const contact=contract.lead?.contact??{};
-    let clientId:string|null=null;
-    if(contact.email){const {data}=await admin.from('clients').select('id').eq('organization_id',organizationId).eq('email',contact.email).is('archived_at',null).limit(1).maybeSingle();clientId=data?.id??null;}
-    if(!clientId&&contact.phone){const {data}=await admin.from('clients').select('id').eq('organization_id',organizationId).eq('phone',contact.phone).is('archived_at',null).limit(1).maybeSingle();clientId=data?.id??null;}
-    if(!clientId){const {data,error}=await admin.from('clients').insert({organization_id:organizationId,display_name:String(contact.name||'Dream Planner lead').slice(0,200),email:contact.email||null,phone:contact.phone||null,notes:'Created automatically from Dream Planner intake.'}).select('id').single();if(error)throw error;clientId=data.id;}
+    const sourceHash=String(contract.sync?.sourceHash??'').trim()||`handoff:${handoff.id}`;
+    const existingProjectId=String(link?.consumer_ref??contract.sync?.consumerRef??handoff.consumer_ref??'').trim();
+    const nextSyncCount=Math.max(Number(link?.sync_count??0)+1,Number(contract.sync?.syncCount??1),1);
 
-    const settings={source:'DREAM_PLANNER',sourceProjectId:contract.source?.projectId??contract.project?.id,plannerHandoffId:handoff.id,plannerDeploymentId:handoff.deployment_id,intakeStage:'ESTIMATE_REVIEW',workflow:{measurementsProvided:true,modulesProvided:true,visualizationProvided:true},preliminaryPrice:{status:'PRELIMINARY',currency:contract.commercial?.currency??'EUR',gross:contract.commercial?.clientVisibleTotalGross??0,priceBookRevision:contract.commercial?.pricing?.priceBookRevision??null}};
-    const {data:project,error:projectError}=await admin.from('projects').insert({organization_id:organizationId,client_id:clientId,name:String(contract.project?.name||'Dream Planner Project').slice(0,200),project_type:'kitchen',status:'active',currency:contract.commercial?.currency??'EUR',settings}).select('id').single();if(projectError)throw projectError;createdProjectId=project.id;
-    const {data:revision,error:revisionError}=await admin.from('project_revisions').insert({organization_id:organizationId,project_id:project.id,revision_number:1,schema_version:'1.0.0',snapshot_json:contract.project??{},change_set_json:[{type:'planner_import',handoffId:handoff.id}],source:'import'}).select('id').single();if(revisionError)throw revisionError;
-    const {error:projectUpdateError}=await admin.from('projects').update({current_revision_id:revision.id}).eq('id',project.id).eq('organization_id',organizationId);if(projectUpdateError)throw projectUpdateError;
+    if(existingProjectId&&link?.latest_source_hash===sourceHash){
+      await Promise.all([
+        admin.from('makster_project_handoffs').update({status:'ACCEPTED',consumer_ref:existingProjectId,consumed_at:new Date().toISOString(),error_message:null}).eq('id',handoff.id),
+        admin.from('makster_project_sync_links').update({latest_handoff_id:handoff.id,state:'ACTIVE',updated_at:new Date().toISOString()}).eq('id',link.id),
+        admin.from('makster_project_handoff_events').insert({organization_id:organizationId,handoff_id:handoff.id,source_project_id:sourceProjectId,event_type:'UNCHANGED',status:'ACCEPTED',detail_json:{consumerRef:existingProjectId,sourceHash,syncCount:Number(link.sync_count??0)}}),
+      ]);
+      return NextResponse.json({ok:true,projectId:existingProjectId,url:`/projects/${existingProjectId}`,unchanged:true,idempotent:true,syncCount:Number(link.sync_count??0)});
+    }
 
-    const roomFeatures=Array.isArray(payload.roomFeatures)?payload.roomFeatures:[];
-    const featureText=(kind:string)=>roomFeatures.filter((x:any)=>String(x?.kind??'').toLowerCase().includes(kind)).map((x:any)=>`${x.wall??''} ${x.offsetMm??''} ${x.widthMm??''}x${x.heightMm??''}`.trim()).join('; ')||null;
-    const {error:measurementError}=await admin.from('quote_project_measurements').insert({organization_id:organizationId,project_id:project.id,room_shape:roomShape(payload.layout),room_height_mm:Number(payload.roomHeightMm)||null,wall_a_mm:Number(payload.lengthMm)||null,wall_b_mm:Number(payload.returnLengthMm)||null,windows_text:featureText('window'),doors_text:featureText('door'),plumbing_text:featureText('plumb'),electrical_text:featureText('electric'),appliances_text:JSON.stringify(contract.manufacturing?.appliances??{}),floor_walls_text:JSON.stringify(contract.manufacturing?.materials??{}),notes:'Imported from Dream Planner. Commercial intake is complete; verify site dimensions before manufacturing release.',status:'complete'});if(measurementError)throw measurementError;
+    let projectId=existingProjectId;
+    if(!projectId){
+      const contact=contract.lead?.contact??{};
+      let clientId:string|null=null;
+      if(contact.email){const {data}=await admin.from('clients').select('id').eq('organization_id',organizationId).eq('email',contact.email).is('archived_at',null).limit(1).maybeSingle();clientId=data?.id??null;}
+      if(!clientId&&contact.phone){const {data}=await admin.from('clients').select('id').eq('organization_id',organizationId).eq('phone',contact.phone).is('archived_at',null).limit(1).maybeSingle();clientId=data?.id??null;}
+      if(!clientId){const {data,error}=await admin.from('clients').insert({organization_id:organizationId,display_name:String(contact.name||'Dream Planner lead').slice(0,200),email:contact.email||null,phone:contact.phone||null,notes:'Created automatically from Dream Planner intake.'}).select('id').single();if(error)throw error;clientId=data.id;}
+      const {data:project,error}=await admin.from('projects').insert({organization_id:organizationId,client_id:clientId,name:String(contract.project?.name||'Dream Planner Project').slice(0,200),project_type:'kitchen',status:'active',currency:contract.commercial?.currency??'EUR',settings:{}}).select('id').single();
+      if(error)throw error;
+      projectId=project.id;
+      createdProjectId=project.id;
+    }
 
-    const runs=contract.manufacturing?.runs??{};const modules=Object.entries(runs).flatMap(([runId,list])=>(Array.isArray(list)?list:[]).map((m,index)=>({runId,index,module:m})));
-    const codes=[...new Set(modules.map(x=>x.module.libraryModuleCode).filter(Boolean))] as string[];
-    const libraryByCode=new Map<string,any>();
-    if(codes.length){const {data:libRows,error}=await admin.from('library_modules').select('module_code,display_name,active_version_id').in('module_code',codes);if(error)throw error;const versionIds=(libRows??[]).map(x=>x.active_version_id).filter(Boolean);const {data:versions,error:versionError}=versionIds.length?await admin.from('library_module_versions').select('id,version,width_mm,depth_mm,body_height_mm,leg_height_mm,library_status,release_status').in('id',versionIds):{data:[],error:null};if(versionError)throw versionError;const versionMap=new Map((versions??[]).map(v=>[v.id,v]));for(const row of libRows??[])libraryByCode.set(row.module_code,{...row,version:versionMap.get(row.active_version_id)});}
-    const [{data:org,error:orgError},{data:priceRows,error:priceError}]=await Promise.all([admin.from('organizations').select('settings').eq('id',organizationId).single(),admin.from('quote_price_book_items').select('id,category,name,unit,currency,purchase_price_minor,parameters_json').eq('organization_id',organizationId).eq('active',true)]);if(orgError||priceError)throw orgError||priceError;
-    const priceBook=(priceRows??[]).filter((x:any)=>x.currency===(contract.commercial?.currency??'EUR')) as PriceBookItem[];const quoteSettings=((org?.settings as any)?.quote??{}) as Record<string,any>;const ids=(quoteSettings.priceBookDefaults??{}) as Record<string,string>;const targetMarginBps=safeBps(quoteSettings.targetMarginBps,3500);const overheadBps=safeBps(quoteSettings.overheadBps,0);
-    const cabinetRows=modules.map(({runId,index,module},sortIndex)=>{const key=moduleKey(module.kind);const lib=module.libraryModuleCode?libraryByCode.get(module.libraryModuleCode):null;const v=lib?.version;const ready=Boolean(v&&v.library_status==='READY'&&Number(v.width_mm)>0&&Number(v.depth_mm)>0&&Number(v.body_height_mm)>0);const fallback=standardGeometry(module.kind);const heightMm=ready?Number(v.body_height_mm)+Number(v.leg_height_mm||0):fallback.heightMm;const depthMm=ready?Number(v.depth_mm):fallback.depthMm;const widthMm=ready?Number(v.width_mm):Number(module.widthMm)||600;const input={moduleKey:key,widthMm,heightMm,depthMm,thicknessMm:18,gapMm:2,drawers:key==='b-drawer'?3:0,doors:key==='t-door'?2:1,shelfCount:defaultShelfCount(key),stretcherDepthMm:100,shelfSetbackMm:20,applianceOpeningHeightMm:600,backMode:'groove' as const,backThicknessMm:4,backInsetMm:10,backGrooveDepthMm:8,frontEdgeIncluded:true,boardItemId:ids.boardItemId,frontItemId:ids.frontItemId,backItemId:ids.backItemId,edgeItemId:ids.edgeItemId,hingeItemId:ids.hingeItemId,drawerItemId:ids.drawerItemId,labourItemId:ids.labourItemId,labourHours:0};const preview=calculateQuoteCabinetPreview(input,priceBook,{targetMarginBps,overheadBps,taxBps:0});const cost=costPreviewToJson(preview) as Record<string,any>;if(!ready){cost.complete=false;cost.warnings=[...((cost.warnings as string[]|undefined)??[]),'Planner module has no READY library geometry; verify height/depth before final quote.'];}return{organization_id:organizationId,project_id:project.id,project_revision_id:revision.id,module_key:key,name:moduleName(module.kind,module.libraryModuleCode),sort_order:sortIndex*10,width_mm:widthMm,height_mm:heightMm,depth_mm:depthMm,quantity:1,dimension_source:'planner',measurement_reference:`Dream Planner ${runId} · ${module.id}`,construction_json:{...input,planner:{runId,index,sourceModuleId:module.id,libraryModuleCode:module.libraryModuleCode??null,libraryTemplateCode:module.libraryTemplateCode??null,libraryVersion:module.libraryVersion??null,geometryStatus:ready?'READY':'REVIEW'}},material_refs_json:{plannerMaterials:contract.manufacturing?.materials??{},boardItemId:ids.boardItemId??null,frontItemId:ids.frontItemId??null,backItemId:ids.backItemId??null,edgeItemId:ids.edgeItemId??null,labourItemId:ids.labourItemId??null},hardware_refs_json:{hingeItemId:ids.hingeItemId??null,drawerItemId:ids.drawerItemId??null},computed_parts_json:{usage:preview.usage,parts:preview.parts,hardware:preview.hardware.map(x=>({...x,costMinor:x.costMinor.toString()})),operations:preview.operations.map(x=>({...x,costMinor:x.costMinor.toString()})),notes:preview.notes},computed_cost_json:cost,engine_version:'mq-planner-import-0.1'};});
-    if(cabinetRows.length){const {error}=await admin.from('quote_cabinets').insert(cabinetRows);if(error)throw error;}
-    const {error:importError}=await admin.from('quote_planner_imports').insert({organization_id:organizationId,handoff_id:handoff.id,deployment_id:handoff.deployment_id,project_id:project.id,source_project_id:String(contract.source?.projectId??contract.project?.id??''),contract_version:contract.version,intake_stage:'ESTIMATE_REVIEW',status:'IMPORTED',planner_snapshot:contract.project??{},pricing_snapshot:contract.commercial?.pricing??{},visualization_snapshot:{materials:contract.manufacturing?.materials??{},appliances:contract.manufacturing?.appliances??{},lighting:payload.lighting??{},presentation:payload.presentation??{}}});if(importError)throw importError;
-    await admin.from('makster_project_handoffs').update({status:'ACCEPTED',consumer_ref:project.id,consumed_at:new Date().toISOString(),error_message:null}).eq('id',handoff.id);
-    return NextResponse.json({ok:true,id:project.id,projectId:project.id,url:`/projects/${project.id}`,intakeStage:'ESTIMATE_REVIEW',moduleCount:cabinetRows.length,readyGeometryCount:cabinetRows.filter((x:any)=>x.construction_json?.planner?.geometryStatus==='READY').length});
-  }catch(error){if(createdProjectId)await admin.from('projects').delete().eq('id',createdProjectId);if(contract?.handoffId)await admin.from('makster_project_handoffs').update({status:'FAILED',error_message:error instanceof Error?error.message:'Quote Planner intake failed'}).eq('id',contract.handoffId);return NextResponse.json({ok:false,code:'PLANNER_IMPORT_FAILED',message:error instanceof Error?error.message:'Planner import failed'},{status:500});}
+    const settings=plannerProjectSettings(contract,{id:handoff.id,deployment_id:handoff.deployment_id});
+    const measurement=plannerMeasurementPayload(organizationId,projectId,contract);
+    const cabinetRows=await buildPlannerCabinetRows(admin,organizationId,projectId,'',contract);
+    const mode=existingProjectId?'UPDATE':'CREATE';
+    const {data:syncResult,error:syncError}=await admin.rpc('quote_apply_planner_sync_v1',{
+      p_organization_id:organizationId,
+      p_project_id:projectId,
+      p_handoff_id:handoff.id,
+      p_contract_version:contract.version,
+      p_source_project_id:sourceProjectId,
+      p_source_hash:sourceHash,
+      p_sync_count:nextSyncCount,
+      p_project_name:String(contract.project?.name||'Dream Planner Project'),
+      p_currency:contract.commercial?.currency??'EUR',
+      p_settings:settings,
+      p_snapshot:contract.project??{},
+      p_measurement:measurement,
+      p_cabinets:cabinetRows,
+      p_pricing:contract.commercial?.pricing??{},
+      p_visualization:visualization(contract),
+    });
+    if(syncError)throw syncError;
+
+    const now=new Date().toISOString();
+    const syncLinkPayload={organization_id:organizationId,deployment_id:deploymentId,destination:'QUOTE',source_project_id:sourceProjectId,consumer_ref:projectId,latest_handoff_id:handoff.id,latest_source_hash:sourceHash,state:'ACTIVE',sync_count:nextSyncCount,updated_at:now};
+    const [{error:linkError},{error:handoffUpdateError},{error:eventError}]=await Promise.all([
+      admin.from('makster_project_sync_links').upsert(syncLinkPayload,{onConflict:'organization_id,deployment_id,destination,source_project_id'}),
+      admin.from('makster_project_handoffs').update({status:'ACCEPTED',consumer_ref:projectId,consumed_at:now,error_message:null}).eq('id',handoff.id),
+      admin.from('makster_project_handoff_events').insert({organization_id:organizationId,handoff_id:handoff.id,source_project_id:sourceProjectId,event_type:mode,status:'ACCEPTED',detail_json:{consumerRef:projectId,sourceHash,syncCount:nextSyncCount,result:syncResult}}),
+    ]);
+    if(linkError||handoffUpdateError||eventError)throw linkError||handoffUpdateError||eventError;
+
+    return NextResponse.json({ok:true,projectId,url:`/projects/${projectId}`,mode,intakeStage:'ESTIMATE_REVIEW',syncCount:nextSyncCount,...((syncResult&&typeof syncResult==='object')?syncResult:{})});
+  }catch(error){
+    if(createdProjectId)await admin.from('projects').delete().eq('id',createdProjectId);
+    if(contract?.handoffId)await admin.from('makster_project_handoffs').update({status:'FAILED',error_message:error instanceof Error?error.message:'Quote Planner intake failed'}).eq('id',contract.handoffId);
+    if(organizationId&&sourceProjectId&&contract?.handoffId)await admin.from('makster_project_handoff_events').insert({organization_id:organizationId,handoff_id:contract.handoffId,source_project_id:sourceProjectId,event_type:'FAILED',status:'FAILED',detail_json:{message:error instanceof Error?error.message:'Planner intake failed'}});
+    return NextResponse.json({ok:false,code:'PLANNER_IMPORT_FAILED',message:error instanceof Error?error.message:'Planner import failed'},{status:500});
+  }
 }
