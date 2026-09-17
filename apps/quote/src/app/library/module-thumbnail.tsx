@@ -5,9 +5,9 @@ type Props={preset:QuoteModulePreset;previewUrl?:string|null;bridgeVersion?:numb
 
 export function ModuleThumbnail({preset,previewUrl,bridgeVersion}:Props){
   if(previewUrl){
-    return <div aria-hidden="true" title={`Makster Asset Bridge · READY${bridgeVersion?` · V${bridgeVersion}`:''}`} style={{height:124,position:'relative',display:'grid',placeItems:'center',borderRadius:14,background:'var(--mq-surface-soft,#fff7f0)',border:'1px solid var(--mq-border,#dfd0c0)',overflow:'hidden'}}>
-      <img src={previewUrl} alt="" style={{width:'100%',height:'100%',objectFit:'contain',display:'block'}}/>
-      <span style={{position:'absolute',right:7,bottom:7,padding:'3px 6px',borderRadius:999,background:'rgba(43,29,22,.78)',color:'#fff',fontSize:9,fontWeight:700,letterSpacing:'.06em'}}>BLENDER{bridgeVersion?` · V${bridgeVersion}`:''}</span>
+    return <div aria-hidden="true" title={`Makster Asset Bridge · READY${bridgeVersion?` · V${bridgeVersion}`:''}`} style={{height:124,position:'relative',display:'grid',placeItems:'center',borderRadius:14,background:'radial-gradient(circle at 50% 40%,#fffdf9 0%,#f5ede5 72%,#eadfd5 100%)',border:'1px solid var(--mq-border,#dfd0c0)',overflow:'hidden'}}>
+      <img src={previewUrl} alt="" style={{width:'100%',height:'100%',objectFit:'contain',display:'block',boxSizing:'border-box',padding:7,filter:'contrast(1.06) saturate(.96)'}}/>
+      <span style={{position:'absolute',right:7,bottom:7,padding:'3px 6px',borderRadius:999,background:'rgba(43,29,22,.76)',color:'#fff',fontSize:9,fontWeight:700,letterSpacing:'.06em'}}>BLENDER{bridgeVersion?` · V${bridgeVersion}`:''}</span>
     </div>;
   }
 
@@ -18,8 +18,8 @@ export function ModuleThumbnail({preset,previewUrl,bridgeVersion}:Props){
   const drawerCount=preset.moduleKey==='b-drawer'?Math.max(1,preset.drawers):0;
   const doorCount=drawerCount?0:Math.max(0,preset.doors);
   const open=preset.moduleKey==='open';
-  return <div aria-hidden="true" style={{height:124,display:'grid',placeItems:'center',borderRadius:14,background:'var(--mq-surface-soft,#fff7f0)',border:'1px solid var(--mq-border,#dfd0c0)',overflow:'hidden'}}>
-    <div style={{position:'relative',width, height:isTall?104:isLow?58:82,border:'3px solid var(--mq-button,#2b1d16)',borderRadius:5,background:'var(--mq-surface,#fffdfa)',boxShadow:'0 8px 18px rgba(62,36,22,.08)'}}>
+  return <div aria-hidden="true" style={{height:124,display:'grid',placeItems:'center',borderRadius:14,background:'radial-gradient(circle at 50% 42%,#fffdf9 0%,#f6eee7 75%,#eee2d7 100%)',border:'1px solid var(--mq-border,#dfd0c0)',overflow:'hidden'}}>
+    <div style={{position:'relative',width, height:isTall?104:isLow?58:82,border:'3px solid var(--mq-button,#2b1d16)',borderRadius:5,background:'var(--mq-surface,#fffdfa)',boxShadow:'0 10px 22px rgba(62,36,22,.11)'}}>
       {drawerCount?Array.from({length:drawerCount}).map((_,i)=><span key={i} style={{position:'absolute',left:4,right:4,top:`${(i/drawerCount)*100+2}%`,height:`${Math.max(8,100/drawerCount-4)}%`,border:'1px solid var(--mq-copper,#b86e3e)',borderRadius:3}}/>):null}
       {doorCount?Array.from({length:doorCount}).map((_,i)=><span key={i} style={{position:'absolute',top:4,bottom:4,left:`${(i/doorCount)*100+2}%`,width:`${Math.max(12,100/doorCount-4)}%`,border:'1px solid var(--mq-copper,#b86e3e)',borderRadius:3}}/>):null}
       {open?Array.from({length:Math.min(6,Math.max(1,preset.shelfCount))}).map((_,i)=><span key={i} style={{position:'absolute',left:5,right:5,top:`${((i+1)/(Math.min(6,Math.max(1,preset.shelfCount))+1))*100}%`,borderTop:'2px solid var(--mq-copper,#b86e3e)'}}/>):null}
