@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "creative-project.schema.json",
+  "title": "CreativeProject",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "brand_id", "status", "brief", "shots", "approval", "provenance"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "brand_id": {"enum": ["MAKSTER_ATELIER", "VYTA"]},
+    "campaign_id": {"type": ["string", "null"]},
+    "status": {"enum": ["DRAFT", "BRIEF_READY", "CONCEPT_READY", "STORYBOARD_READY", "PRODUCING", "QA", "READY_FOR_APPROVAL", "APPROVED", "REJECTED", "DELIVERED"]},
+    "brief": {"type": "object"},
+    "concept": {"type": ["object", "null"]},
+    "script": {"type": ["object", "null"]},
+    "storyboard": {"type": ["object", "null"]},
+    "shots": {"type": "array", "items": {"$ref": "#/$defs/shot"}},
+    "approval": {"$ref": "#/$defs/approval"},
+    "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "shot": {
+      "type": "object",
+      "required": ["id", "order", "takes"],
+      "properties": {
+        "id": {"type": "string"},
+        "order": {"type": "integer", "minimum": 1},
+        "prompt": {"type": "string"},
+        "camera": {"type": "object"},
+        "lighting": {"type": "object"},
+        "references": {"type": "array", "items": {"type": "string"}},
+        "takes": {"type": "array", "items": {"type": "object"}},
+        "selected_take_id": {"type": ["string", "null"]}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "required": ["required", "status"],
+      "properties": {
+        "required": {"const": true},
+        "status": {"enum": ["PENDING", "APPROVED", "REJECTED"]},
+        "approved_by": {"type": ["string", "null"]},
+        "approved_at": {"type": ["string", "null"], "format": "date-time"},
+        "notes": {"type": ["string", "null"]}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["event", "timestamp"],
+      "properties": {
+        "event": {"type": "string"},
+        "provider": {"type": ["string", "null"]},
+        "model": {"type": ["string", "null"]},
+        "prompt_version": {"type": ["string", "null"]},
+        "reference_ids": {"type": "array", "items": {"type": "string"}},
+        "cost": {"type": ["number", "null"], "minimum": 0},
+        "currency": {"type": ["string", "null"]},
+        "timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}
