@@ -1,4 +1,5 @@
-import { checkoutConfigured, webhookConfigured } from '@/lib/billing';
+import { PAID_PLANS, PLAN_LABELS } from '@/lib/billing';
+import { stripeCheckoutConfigured, stripeWebhookConfigured } from '@/lib/stripe-billing';
 
 export type ReadinessState = 'ready' | 'warning' | 'blocked';
 
@@ -18,8 +19,10 @@ export function environmentReadiness(): ReadinessCheck[] {
   const validAppUrl = /^https:\/\//.test(appUrl);
   const supabasePublic = has('NEXT_PUBLIC_SUPABASE_URL') && has('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
   const emailReady = has('RESEND_API_KEY') && has('QUOTE_EMAIL_FROM');
-  const billingWebhookReady = webhookConfigured();
-  const billingCheckoutReady = checkoutConfigured('founder') && checkoutConfigured('pro') && checkoutConfigured('workshop');
+  const billingWebhookReady = stripeWebhookConfigured();
+  const configuredPlans = PAID_PLANS.filter((plan)=>stripeCheckoutConfigured(plan));
+  const missingPlans = PAID_PLANS.filter((plan)=>!stripeCheckoutConfigured(plan));
+  const billingCheckoutReady = missingPlans.length===0;
 
   return [
     {
@@ -47,16 +50,18 @@ export function environmentReadiness(): ReadinessCheck[] {
       detail: has('SUPABASE_SERVICE_ROLE_KEY') ? 'Service-role access is available to verified server jobs.' : 'SUPABASE_SERVICE_ROLE_KEY is required before live billing webhooks.',
     },
     {
-      key: 'lemon-webhook',
-      label: 'Lemon Squeezy webhook',
+      key: 'stripe-webhook',
+      label: 'Stripe webhook',
       state: billingWebhookReady ? 'ready' : 'warning',
-      detail: billingWebhookReady ? 'Webhook secret and trusted database access are configured.' : 'Lemon webhook secret and/or trusted Supabase access are not configured.',
+      detail: billingWebhookReady ? 'Stripe webhook secret and trusted database access are configured.' : 'STRIPE_WEBHOOK_SECRET and/or trusted Supabase access are not configured.',
     },
     {
-      key: 'lemon-checkout',
-      label: 'Paid plan checkout variants',
+      key: 'stripe-checkout',
+      label: 'Stripe plan prices',
       state: billingCheckoutReady ? 'ready' : 'warning',
-      detail: billingCheckoutReady ? 'Founder, Pro and Workshop checkout variants are configured.' : 'One or more Founder / Pro / Workshop Lemon Squeezy variant IDs are missing.',
+      detail: billingCheckoutReady
+        ? `All paid plans configured: ${configuredPlans.map((plan)=>PLAN_LABELS[plan]).join(', ')}.`
+        : `Missing Stripe prices: ${missingPlans.map((plan)=>PLAN_LABELS[plan]).join(', ')}. Expected envs: STRIPE_STARTER_MONTHLY_PRICE_ID, STRIPE_WORKSHOP_MONTHLY_PRICE_ID, STRIPE_ATELIER_MONTHLY_PRICE_ID.`,
     },
   ];
 }

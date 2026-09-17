@@ -26,6 +26,14 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Typecheck
         run: npm run typecheck
+      - name: Calculation QA
+        run: npm run calculation:qa
+      - name: Commercial flow QA
+        run: npm run commercial:qa
+      - name: Snapshot QA
+        run: npm run snapshot:qa
+      - name: Asset Bridge QA
+        run: npm run asset-bridge:qa
       - name: PDF smoke
         run: npm run pdf:smoke
       - name: Build

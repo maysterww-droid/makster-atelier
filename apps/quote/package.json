@@ -7,6 +7,10 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "calculation:qa": "node --experimental-strip-types scripts/calculation-qa.ts",
+    "commercial:qa": "node --experimental-strip-types scripts/commercial-flow-qa.ts",
+    "snapshot:qa": "node --experimental-strip-types scripts/snapshot-qa.ts",
+    "asset-bridge:qa": "node --experimental-strip-types scripts/asset-bridge-qa.ts",
     "pdf:smoke": "node scripts/pdf-smoke.mjs"
   },
   "dependencies": {

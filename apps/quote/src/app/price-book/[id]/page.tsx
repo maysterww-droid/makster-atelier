@@ -41,6 +41,7 @@ export default async function EditPriceBookItemPage({ params, searchParams }: Pr
       <section className="panel formPanel"><div className="panelHeader"><div><h2>{item.name}</h2><p className="muted">{m.editHelp}</p></div></div>
         {canManage ? <form action={updatePriceBookItem} className="stackForm padded">
           <input type="hidden" name="itemId" value={item.id}/>
+          <input type="hidden" name="hardwareRole" value={typeof parameters.hardwareRole === 'string' ? parameters.hardwareRole : ''}/>
           <div className="formGrid3"><label>{m.category}<select name="category" defaultValue={item.category}>{categories.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>{m.unit}<select name="unit" defaultValue={item.unit}>{units.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>{m.currency}<select name="currency" defaultValue={item.currency}>{currencies.map((currency) => <option key={currency} value={currency}>{currency}</option>)}</select></label></div>
           <label>{m.name}<input name="name" defaultValue={item.name} required /></label>
           <div className="formGrid2"><label>{m.manufacturer}<input name="manufacturer" defaultValue={item.manufacturer ?? ''} /></label><label>{m.sku}<input name="sku" defaultValue={item.sku ?? ''} /></label></div>

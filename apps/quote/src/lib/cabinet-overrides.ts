@@ -1,8 +1,12 @@
 import { calculateQuote } from './calculation';
 import { calculateCabinetPreview, type CabinetCostPreview, type CabinetInput, type PriceBookItem } from './engineering';
+import type { SpecialHardwareRole } from './special-hardware-presets';
 
 export type QuoteCabinetInput = CabinetInput & {
   frontWidthMm?: number;
+  specialHardwareRole?: SpecialHardwareRole;
+  specialHardwareQty?: number;
+  specialHardwareItemId?: string;
 };
 
 function moneyMinor(item: PriceBookItem | undefined) {
@@ -13,6 +17,34 @@ function moneyMinor(item: PriceBookItem | undefined) {
 function parameter(item: PriceBookItem | undefined, key: string) {
   const value = Number(item?.parameters_json?.[key] ?? 0);
   return Number.isFinite(value) ? value : 0;
+}
+
+function isDemo(item: PriceBookItem | undefined) {
+  return Boolean(item?.parameters_json && typeof item.parameters_json === 'object' && !Array.isArray(item.parameters_json) && item.parameters_json.demo);
+}
+
+function applyDemoGuard(preview: CabinetCostPreview, input: QuoteCabinetInput, items: PriceBookItem[]) {
+  const ids = new Set<string>([
+    input.boardItemId,
+    input.frontItemId,
+    input.backItemId,
+    input.edgeItemId,
+    input.hingeItemId,
+    input.drawerItemId,
+    input.labourItemId,
+    input.specialHardwareItemId,
+    ...preview.hardware.map((line) => line.priceBookItemId),
+    ...preview.operations.map((line) => line.priceBookItemId),
+  ].filter((id): id is string => Boolean(id)));
+  const demoNames = items.filter((item) => ids.has(item.id) && isDemo(item)).map((item) => item.name);
+  if (!demoNames.length) return preview;
+  const message = `DEMO Price Book: замените тестовые позиции реальными закупочными ценами (${demoNames.join(', ')}).`;
+  return {
+    ...preview,
+    warnings: preview.warnings.includes(message) ? preview.warnings : [...preview.warnings, message],
+    notes: [...preview.notes, 'DEMO-цены предназначены только для изучения Makster Quote и не разрешают считать коммерческий расчёт готовым.'],
+    complete: false,
+  };
 }
 
 function areaCost(item: PriceBookItem | undefined, areaM2: number) {
@@ -35,18 +67,93 @@ function linearCost(item: PriceBookItem | undefined, lengthM: number) {
   return BigInt(Math.round(lengthM * moneyMinor(item)));
 }
 
+function specialLabel(role: SpecialHardwareRole) {
+  if (role === 'cargo') return 'Cargo / бутылочница';
+  if (role === 'lift') return 'Lift-Up / Aventos';
+  if (role === 'corner') return 'Угловой механизм / LeMans / Magic Corner';
+  if (role === 'rail') return 'Гардеробная штанга / крепления';
+  return 'Раздвижная система фасадов';
+}
+
+function applySpecialHardware(base: CabinetCostPreview, input: QuoteCabinetInput, items: PriceBookItem[], options: { targetMarginBps:number; overheadBps?:number; taxBps?:number }) {
+  const role = input.specialHardwareRole;
+  if (!role) return base;
+  const quantity = Math.max(1, Math.round(Number(input.specialHardwareQty ?? 1) || 1));
+  const item = input.specialHardwareItemId ? items.find((candidate) => candidate.id === input.specialHardwareItemId) : undefined;
+  const replacesStandardHinges = role === 'cargo' || role === 'lift' || role === 'sliding';
+
+  let hardware = [...base.hardware];
+  let operations = [...base.operations];
+  let warnings = [...base.warnings];
+  let removedHardwareCost = 0n;
+  let removedHardwareQty = 0;
+  let removedOperationCost = 0n;
+
+  if (replacesStandardHinges) {
+    const hinges = hardware.filter((line) => line.key === 'hinge');
+    removedHardwareCost = hinges.reduce((sum, line) => sum + line.costMinor, 0n);
+    removedHardwareQty = hinges.reduce((sum, line) => sum + line.quantity, 0);
+    hardware = hardware.filter((line) => line.key !== 'hinge');
+    const hingeOperations = operations.filter((line) => line.key === 'hinge-cup');
+    removedOperationCost = hingeOperations.reduce((sum, line) => sum + line.costMinor, 0n);
+    operations = operations.filter((line) => line.key !== 'hinge-cup');
+    warnings = warnings.filter((warning) => !/петел|петли/i.test(warning));
+  }
+
+  let specialCost = 0n;
+  if (!item) {
+    warnings.push(`Не выбрана цена: ${specialLabel(role)}.`);
+  } else if (item.category !== 'hardware' || !['pcs','set'].includes(item.unit)) {
+    warnings.push(`${item.name}: специальная фурнитура должна иметь категорию hardware и единицу «шт» или «комплект».`);
+  } else {
+    specialCost = BigInt(Math.round(quantity * moneyMinor(item)));
+  }
+
+  const specialLine = {
+    key:'special-hardware' as never,
+    label:specialLabel(role),
+    quantity,
+    priceBookItemId:item?.id,
+    itemName:item?.name,
+    costMinor:specialCost,
+  } as CabinetCostPreview['hardware'][number];
+  hardware.push(specialLine);
+
+  const hardwareCost = base.detailCosts.hardware - removedHardwareCost + specialCost;
+  const productionCost = base.detailCosts.operations - removedOperationCost;
+  const costs = {
+    ...base.costs,
+    hardware: hardwareCost,
+    production: productionCost,
+  };
+  const pricing = calculateQuote({costs,overheadBps:options.overheadBps??0,targetMarginBps:options.targetMarginBps,taxBps:options.taxBps??0});
+
+  return {
+    ...base,
+    hardware,
+    operations,
+    warnings,
+    complete:warnings.length===0,
+    usage:{...base.usage,hardwareQty:Math.max(0,base.usage.hardwareQty-removedHardwareQty)+quantity},
+    detailCosts:{...base.detailCosts,hardware:hardwareCost,operations:productionCost},
+    costs,
+    pricing,
+    notes:[...base.notes,`${specialLabel(role)} считается отдельной позицией фурнитуры Price Book, ${quantity} комплект(а).${replacesStandardHinges?' Стандартные петли для этого пресета не считаются.':''}`],
+  };
+}
+
 export function calculateQuoteCabinetPreview(
   input: QuoteCabinetInput,
   items: PriceBookItem[],
   options: { targetMarginBps: number; overheadBps?: number; taxBps?: number },
 ): CabinetCostPreview {
-  const base = calculateCabinetPreview(input, items, options);
+  const withSpecial = applySpecialHardware(calculateCabinetPreview(input, items, options), input, items, options);
   const requested = Number(input.frontWidthMm ?? 0);
-  if (!(requested > 0) || !['b-door', 'w-door'].includes(input.moduleKey)) return base;
+  if (!(requested > 0) || !['b-door', 'w-door'].includes(input.moduleKey)) return applyDemoGuard(withSpecial, input, items);
 
-  const index = base.parts.findIndex((part) => part.key === 'door-front');
-  if (index < 0) return base;
-  const oldPart = base.parts[index];
+  const index = withSpecial.parts.findIndex((part) => part.key === 'door-front');
+  if (index < 0) return applyDemoGuard(withSpecial, input, items);
+  const oldPart = withSpecial.parts[index];
   const doors = Math.max(1, oldPart.quantity);
   const gap = Math.max(0, Number(input.gapMm) || 0);
   const visibleWidth = Math.max(1, Math.min(Number(input.widthMm), requested));
@@ -59,30 +166,29 @@ export function calculateQuoteCabinetPreview(
 
   const frontItem = input.frontItemId ? items.find((item) => item.id === input.frontItemId) : undefined;
   const edgeItem = input.edgeItemId ? items.find((item) => item.id === input.edgeItemId) : undefined;
-  const oldFrontCost = base.detailCosts.fronts;
   const newFrontCost = areaCost(frontItem, newFrontM2);
-  const edgeWithoutFront = base.detailCosts.edges - linearCost(edgeItem, oldFrontEdgeM);
+  const edgeWithoutFront = withSpecial.detailCosts.edges - linearCost(edgeItem, oldFrontEdgeM);
   const newEdgeCost = edgeWithoutFront + linearCost(edgeItem, newFrontEdgeM);
 
-  const parts = [...base.parts];
+  const parts = [...withSpecial.parts];
   parts[index] = { ...oldPart, widthMm: Math.round(newWidth * 100) / 100, edgeLengthMm: Math.round(newEdgePerPart * 100) / 100 };
 
-  let operations = base.operations;
-  let productionCost = base.detailCosts.operations;
-  const edgeOperationIndex = base.operations.findIndex((operation) => operation.key === 'edge-banding');
+  let operations = withSpecial.operations;
+  let productionCost = withSpecial.detailCosts.operations;
+  const edgeOperationIndex = withSpecial.operations.findIndex((operation) => operation.key === 'edge-banding');
   if (edgeOperationIndex >= 0) {
-    const operation = base.operations[edgeOperationIndex];
+    const operation = withSpecial.operations[edgeOperationIndex];
     const quantity = Math.max(0, operation.quantity - oldFrontEdgeM + newFrontEdgeM);
     const operationItem = operation.priceBookItemId ? items.find((item) => item.id === operation.priceBookItemId) : undefined;
     let costMinor = operation.costMinor;
     if (operationItem?.unit === 'm') costMinor = BigInt(Math.round(quantity * moneyMinor(operationItem)));
-    operations = [...base.operations];
+    operations = [...withSpecial.operations];
     operations[edgeOperationIndex] = { ...operation, quantity, costMinor };
     productionCost = operations.reduce((sum, line) => sum + line.costMinor, 0n);
   }
 
   const costs = {
-    ...base.costs,
+    ...withSpecial.costs,
     fronts: newFrontCost,
     edges: newEdgeCost,
     production: productionCost,
@@ -94,17 +200,17 @@ export function calculateQuoteCabinetPreview(
     taxBps: options.taxBps ?? 0,
   });
 
-  return {
-    ...base,
+  const adjusted: CabinetCostPreview = {
+    ...withSpecial,
     parts,
     operations,
     usage: {
-      ...base.usage,
-      frontM2: Math.max(0, base.usage.frontM2 - oldFrontM2 + newFrontM2),
-      edgeM: Math.max(0, base.usage.edgeM - oldFrontEdgeM + newFrontEdgeM),
+      ...withSpecial.usage,
+      frontM2: Math.max(0, withSpecial.usage.frontM2 - oldFrontM2 + newFrontM2),
+      edgeM: Math.max(0, withSpecial.usage.edgeM - oldFrontEdgeM + newFrontEdgeM),
     },
     detailCosts: {
-      ...base.detailCosts,
+      ...withSpecial.detailCosts,
       fronts: newFrontCost,
       edges: newEdgeCost,
       operations: productionCost,
@@ -112,8 +218,9 @@ export function calculateQuoteCabinetPreview(
     costs,
     pricing,
     notes: [
-      ...base.notes,
-      `Глухой угловой модуль: мебельный фасад рассчитан по видимой ширине ${visibleWidth.toFixed(0)} мм при ширине корпуса ${Number(input.widthMm).toFixed(0)} мм. Точная угловая геометрия и присадка относятся к Makster Pro.`,
+      ...withSpecial.notes,
+      `Угловой модуль: мебельный фасад рассчитан по видимой ширине ${visibleWidth.toFixed(0)} мм при ширине корпуса ${Number(input.widthMm).toFixed(0)} мм. Точная угловая геометрия и присадка относятся к Makster Pro.`,
     ],
   };
+  return applyDemoGuard(adjusted, input, items);
 }

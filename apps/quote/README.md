@@ -1,16 +1,23 @@
-# Makster Quote 0.1.15
+# Makster Quote 0.2
 
 Makster Quote is the quotation-first product in the Makster ecosystem: deterministic furniture costing, commercial variants, immutable client quotes, secure delivery and sales follow-up.
 
-## Current milestone — 0.1.15
+## Current product pass — 0.2
 
-The current release hardens real-money calculation paths and completes the first full multilingual application workflow.
+The current branch keeps the proven 0.1.15 commercial core and adds the final product-flow, measurements, expanded library, Price Book onboarding/transparency and canonical Stripe plan model before the controlled production merge.
 
 Implemented now:
 
 - Email/password auth and protected workshop onboarding
 - shared Makster projects, clients and immutable revisions
+- guided project flow: Project → Measurements → Modules → Materials & Hardware → True Cost → Price → Client Quote
+- structured measurements with private project photos and dimension-source tracking
+- expanded module library for kitchens, wardrobes, bathrooms and utility furniture
+- workshop templates, favourites and recently used modules
+- explicit special hardware costing for Cargo, Lift-Up/Aventos, corner mechanisms, wardrobe rails and sliding systems
 - workshop Price Book with manual entry, editing, deactivation and CSV import
+- Price Book readiness/onboarding with DEMO data that is never considered commercially complete
+- detailed price provenance so a user can see which Price Book item, quantity and formula produced each cost
 - Price Book currencies: CZK / EUR / PLN / USD
 - strict project-currency isolation: a project never consumes a Price Book row in another currency
 - deterministic Engineering Core for lower, wall, tall, open and appliance furniture modules
@@ -48,20 +55,18 @@ Implemented now:
 - client, project and quote workspaces with search/filter/follow-up cues
 - project duplication without copying historical published quote versions
 - client/project archiving safeguards
-- Lemon Squeezy checkout foundation for Founder / Pro / Workshop variants
-- verified Lemon Squeezy webhook endpoint using HMAC SHA-256 `X-Signature`
-- idempotent billing event journal and stale-event protection
-- subscription sync into `quote_subscriptions`
-- Customer Portal hand-off for existing subscriptions, preventing duplicate paid subscriptions
+- Stripe Managed Payments checkout and Customer Portal foundation
+- verified Stripe webhook endpoint with signature validation, idempotent billing-event journal and stale-event protection
+- canonical plan grid: Free Pilot €0 / Starter €9 / Workshop €29 / Atelier €79 per month
 - CI with locked install, TypeScript, multilingual PDF smoke and Next.js production build
 
-See `ENGINEERING_RULES_0.1.2.md` for the frozen calculation assumptions of the current engineering engine. The application release is 0.1.15; the cabinet engineering core intentionally keeps its own engine version until its formulas change.
+See `ENGINEERING_RULES_0.1.2.md` for the frozen calculation assumptions of the current engineering engine. The cabinet engineering core intentionally keeps its own engine version until its formulas change.
 
 ## Currency safety
 
 Price Book entries carry their own currency. Project editor, server-side cabinet costing, finishing/service selection, live preview and immutable quote publication all filter prices by the project currency.
 
-Makster Quote 0.1.15 deliberately performs no automatic FX conversion. If a workshop quotes in both CZK and EUR, it should maintain explicit CZK and EUR Price Book rows. This keeps cost calculations deterministic and prevents an exchange-rate update from silently changing a saved commercial calculation.
+Makster Quote deliberately performs no automatic FX conversion. If a workshop quotes in both CZK and EUR, it should maintain explicit CZK and EUR Price Book rows. This keeps cost calculations deterministic and prevents an exchange-rate update from silently changing a saved commercial calculation.
 
 If a Price Book row used by a saved module is later deactivated or moved to another currency, publication is blocked until that module is recalculated with current valid prices.
 
@@ -93,15 +98,26 @@ The server-side email adapter uses Resend. A successful send includes both a sec
 
 Live email sending is disabled when the required server-only provider configuration is absent. Manual secure-link generation remains available independently of email.
 
-## Billing foundation
+## Billing — Stripe Managed Payments
 
-Billing uses Lemon Squeezy server-side only. Paid checkout URLs are created for configured Founder / Pro / Workshop variant IDs. Checkout custom data carries `organization_id` and `user_id` so verified subscription webhooks can map purchases back to the Makster workspace.
+The canonical Makster Quote plan model is:
 
-`/api/webhooks/lemonsqueezy` verifies the HMAC SHA-256 signature before any database write. Billing writes use a server-only Supabase service-role client. Webhook handling is idempotent through `quote_billing_events`, and stale provider events cannot overwrite newer subscription state.
+| Plan | Monthly price | Intended use |
+| --- | ---: | --- |
+| Free Pilot | €0 | Evaluate Quote on a real project |
+| Starter | €9 | One furniture maker |
+| Workshop | €29 | Workshop / small team |
+| Atelier | €79 | Growing team / advanced workflow |
 
-Existing subscribers are sent to the Lemon Squeezy Customer Portal instead of being allowed to create a parallel duplicate subscription.
+New paid checkouts use Stripe-hosted subscription Checkout with Managed Payments. The checkout carries `organization_id`, `user_id` and the canonical plan key in metadata, so verified subscription webhooks can map the purchase back to the Makster workspace.
 
-Commercial prices and actual Lemon Squeezy variant IDs remain external configuration rather than hardcoded product data.
+`/api/stripe/webhook` forwards to the verified Stripe webhook handler. Billing writes use a server-only Supabase service-role client. Webhook handling is idempotent through `quote_billing_events`, and stale provider events cannot overwrite newer subscription state.
+
+Existing Stripe subscribers are sent to Stripe Customer Portal instead of being allowed to create a parallel duplicate subscription.
+
+Stripe Product/Price IDs remain external configuration. The application never invents or substitutes a commercial price. A paid plan whose canonical Stripe Price ID is not configured is shown in Billing as pending and cannot start checkout.
+
+Historical `Founder` / `Pro` plan values and old Lemon Squeezy code remain temporary compatibility only while the existing sandbox subscription completes its lifecycle. They are not part of the new plan grid and must not be used for new checkout sessions. Final legacy-code removal belongs to the cleanup phase after Stripe regression testing.
 
 ## Product boundary
 
@@ -113,7 +129,7 @@ The client response is a recorded acceptance/rejection event, not a qualified el
 
 ## Environment variables
 
-Only the Supabase publishable key belongs in browser-visible environment variables. Supabase service-role, Resend and Lemon Squeezy credentials are server-only and must never use the `NEXT_PUBLIC_` prefix.
+Only Supabase publishable configuration belongs in browser-visible environment variables. Supabase service-role, Resend and Stripe credentials are server-only and must never use the `NEXT_PUBLIC_` prefix.
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
@@ -124,19 +140,23 @@ NEXT_PUBLIC_APP_URL=
 RESEND_API_KEY=
 QUOTE_EMAIL_FROM=
 
-LEMONSQUEEZY_API_KEY=
-LEMONSQUEEZY_WEBHOOK_SECRET=
-LEMONSQUEEZY_STORE_ID=
-LEMONSQUEEZY_TEST_MODE=true
-LEMONSQUEEZY_VARIANT_FOUNDER=
-LEMONSQUEEZY_VARIANT_PRO=
-LEMONSQUEEZY_VARIANT_WORKSHOP=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_STARTER_MONTHLY_PRICE_ID=
+STRIPE_WORKSHOP_MONTHLY_PRICE_ID=
+STRIPE_ATELIER_MONTHLY_PRICE_ID=
 ```
 
-`NEXT_PUBLIC_APP_URL` is the canonical application origin used for client quote links and Lemon Squeezy redirects. The Lemon Squeezy webhook callback is:
+`NEXT_PUBLIC_APP_URL` is the canonical application origin used for client quote links and Stripe redirects. The active Stripe webhook callback is:
 
 ```text
-<NEXT_PUBLIC_APP_URL>/api/webhooks/lemonsqueezy
+<NEXT_PUBLIC_APP_URL>/api/stripe/webhook
+```
+
+For the permanent sandbox this resolves to:
+
+```text
+https://sandbox.app.quote.maksteratelier.com/api/stripe/webhook
 ```
 
 Apply all Makster Quote Supabase migrations in timestamp order before enabling production traffic, live email delivery or live billing.
