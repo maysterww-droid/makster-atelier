@@ -14,6 +14,8 @@ type Props = {
   children: ReactNode;
 };
 
+const plannerPriceLabel={ru:'Цены Dream Planner',en:'Dream Planner Prices',cs:'Ceny Dream Planneru',de:'Dream Planner Preise',pl:'Ceny Dream Planner'} as const;
+
 export async function AppShell({ organizationName, role, plan = 'free', children }: Props) {
   const canManageSystem = role === 'owner' || role === 'admin';
   const locale = await getInterfaceLocale();
@@ -36,6 +38,7 @@ export async function AppShell({ organizationName, role, plan = 'free', children
           <Link className="navItem" href="/analytics">{m.analytics}</Link>
           <Link className="navItem" href="/clients">{m.customers}</Link>
           <Link className="navItem" href="/price-book">{m.priceBook}</Link>
+          <Link className="navItem" href="/price-book/planner">{plannerPriceLabel[locale]}</Link>
           <Link className="navItem" href="/library">{m.cabinetLibrary}</Link>
           <span className="navItem disabled">{m.hardware}</span>
           <Link className="navItem" href="/settings/pricing">{m.pricingSettings}</Link>
