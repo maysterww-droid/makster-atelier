@@ -1,0 +1,12 @@
+{
+  "id":"MAK-CR-0001","brand_id":"MAKSTER_ATELIER","status":"STORYBOARD_READY",
+  "brief":{"objective":"Generate qualified enquiries for custom premium kitchens","audience":"Homeowners and renovation clients in Czechia","channel":"Instagram / Meta","locale":"cs-CZ","duration_seconds":15,"aspect_ratios":["9:16","1:1","16:9"]},
+  "concept":{"id":"CON-001","title":"Material. Precision. Yours.","premise":"A restrained cinematic journey from material and joinery detail to a finished premium kitchen.","hook":"A macro material detail resolves into a complete custom interior.","product_truth":["custom furniture","precision production","real project assets preferred"],"references":[]},
+  "script":[
+    {"id":"B1","start_s":0,"end_s":3,"visual":"Macro walnut grain and precise edge detail","on_screen_text":"Na míru."},
+    {"id":"B2","start_s":3,"end_s":7,"visual":"Slow camera move across joinery and hardware detail","on_screen_text":"Precizně."},
+    {"id":"B3","start_s":7,"end_s":12,"visual":"Reveal the complete kitchen in warm natural light","on_screen_text":"Pro váš prostor."},
+    {"id":"B4","start_s":12,"end_s":15,"visual":"Approved Makster Atelier logo end card","on_screen_text":"Makster Atelier"}
+  ],
+  "storyboard":[],"shots":[],"approval":{"required":true,"status":"PENDING"},"provenance":[]
+}
