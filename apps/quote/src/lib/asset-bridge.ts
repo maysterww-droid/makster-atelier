@@ -11,6 +11,7 @@ export type ReadyModuleLibraryRow = {
   preview_bucket: string | null;
   preview_path: string | null;
   preview_mime_type: string | null;
+  metadata: Record<string, unknown> | null;
 };
 
 export type ReadyModulePreview = {
@@ -33,6 +34,16 @@ function sameMm(value: number | string, expected: number) {
   return Math.abs(Number(value) - expected) < 0.001;
 }
 
+function textValue(value: unknown) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function previewIsApproved(metadata: Record<string, unknown> | null) {
+  const source = metadata ?? {};
+  const style = textValue(source.preview_style || source.previewStyle).toLowerCase();
+  return source.preview_approved === true || source.previewApproved === true || style === 'studio_v1' || style === 'studio';
+}
+
 export function findReadyModulePreview(
   preset: QuoteModulePreset,
   rows: ReadyModuleLibraryRow[],
@@ -48,7 +59,8 @@ export function findReadyModulePreview(
       sameMm(row.body_height_mm, preset.heightMm) &&
       sameMm(row.depth_mm, preset.depthMm) &&
       Boolean(row.preview_bucket) &&
-      Boolean(row.preview_path),
+      Boolean(row.preview_path) &&
+      previewIsApproved(row.metadata),
     )
     .sort((a, b) => Number(b.version) - Number(a.version));
 
