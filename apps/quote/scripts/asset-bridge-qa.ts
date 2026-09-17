@@ -13,6 +13,7 @@ const rows: ReadyModuleLibraryRow[] = [
     preview_bucket: 'makster-library',
     preview_path: 'door/V0011/preview.png',
     preview_mime_type: 'image/png',
+    metadata: { preview_approved: true, preview_style: 'studio_v1' },
   },
   {
     module_code: 'KITCHEN_BASE_001_TANDEMBOX',
@@ -25,6 +26,7 @@ const rows: ReadyModuleLibraryRow[] = [
     preview_bucket: 'makster-library',
     preview_path: 'tandembox/V0012/preview.png',
     preview_mime_type: 'image/png',
+    metadata: { preview_approved: true, preview_style: 'studio_v1' },
   },
   {
     module_code: 'KITCHEN_BASE_001_WOOD_DRAWER',
@@ -37,6 +39,7 @@ const rows: ReadyModuleLibraryRow[] = [
     preview_bucket: 'makster-library',
     preview_path: 'wood/V0013/preview.png',
     preview_mime_type: 'image/png',
+    metadata: { preview_approved: true, preview_style: 'studio_v1' },
   },
   {
     module_code: 'BROKEN_DRAFT_DRAWER',
@@ -49,6 +52,7 @@ const rows: ReadyModuleLibraryRow[] = [
     preview_bucket: 'makster-library',
     preview_path: 'draft/V0014/preview.png',
     preview_mime_type: 'image/png',
+    metadata: { preview_approved: true, preview_style: 'studio_v1' },
   },
 ];
 
