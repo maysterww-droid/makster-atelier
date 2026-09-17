@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1",
+  "brand_id": "MAKSTER_ATELIER",
+  "positioning": "Premium custom furniture design, production and installation",
+  "visual_language": {
+    "direction": ["premium", "architectural", "material-led", "realistic", "restrained", "warm"],
+    "palette_direction": "wood and chocolate tones",
+    "avoid": ["VYTA mint/green identity", "cheap stock-ad look", "plastic CGI surfaces", "overdone AI glow", "visual clutter"]
+  },
+  "product_truth": {
+    "prefer_real_assets": true,
+    "sources": ["Makster Module Library", "Blender exports", "Dream Planner", "approved project renders", "approved photography"],
+    "rules": [
+      "Use real module/product references whenever available instead of inventing cabinetry.",
+      "Preserve cabinet geometry, fronts, materials and hardware continuity across shots.",
+      "Do not invent unsupported production capabilities or customer claims."
+    ]
+  },
+  "quality_gate": {
+    "block_on": ["product_drift", "floating_geometry", "impossible_hardware", "fake_wood_texture", "brand_violation", "bad_typography", "obvious_ai_artifact", "low_premium_score"]
+  }
+}
