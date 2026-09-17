@@ -1,0 +1,4 @@
+import type { MaksterModuleAsset } from './makster-module-contract';
+export type ProductTruthSnapshot={module_id:string;version:string;dimensions_mm:MaksterModuleAsset['dimensions_mm'];materials:readonly string[];hardware:readonly string[];source:'MAKSTER_MODULE_LIBRARY'};
+export function productTruth(m:MaksterModuleAsset):ProductTruthSnapshot{return Object.freeze({module_id:m.module_id,version:m.version,dimensions_mm:{...m.dimensions_mm},materials:[...m.materials],hardware:[...m.hardware],source:'MAKSTER_MODULE_LIBRARY'});}
+export function assertTruthCompatible(a:ProductTruthSnapshot,b:ProductTruthSnapshot){if(a.module_id!==b.module_id||a.version!==b.version)throw new Error('PRODUCT_TRUTH_VERSION_DRIFT');if(JSON.stringify(a.dimensions_mm)!==JSON.stringify(b.dimensions_mm))throw new Error('PRODUCT_GEOMETRY_DRIFT');}

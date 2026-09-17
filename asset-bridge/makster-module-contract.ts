@@ -1,0 +1,4 @@
+export type ModuleStatus='DRAFT'|'VALIDATED'|'ROUNDTRIP_PASS'|'READY';
+export type DimensionsMm={width:number;height:number;depth:number};
+export type MaksterModuleAsset={module_id:string;version:string;status:ModuleStatus;dimensions_mm:DimensionsMm;category:string;preview_uri:string;glb_uri:string;module_json_uri:string;motion_json_uri?:string;validation_report_uri:string;blend_uri?:string;materials:string[];hardware:string[];checksum?:string;published_at?:string};
+export function assertCreativeReadyModule(m:MaksterModuleAsset){if(m.status!=='READY')throw new Error(`MODULE_NOT_READY: ${m.module_id}`);if(!m.preview_uri||!m.glb_uri||!m.module_json_uri||!m.validation_report_uri)throw new Error(`MODULE_PACKAGE_INCOMPLETE: ${m.module_id}`);if(m.dimensions_mm.width<=0||m.dimensions_mm.height<=0||m.dimensions_mm.depth<=0)throw new Error(`MODULE_DIMENSIONS_INVALID: ${m.module_id}`);}
