@@ -59,3 +59,40 @@ button{transition:transform .12s ease,border-color .12s ease,background .12s eas
 /* Creative Studio Usability 1.0 */
 .mobileReviewItem{width:100%;display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;text-align:left;margin-top:7px;padding:11px;border:1px solid #3d3029;border-radius:8px;background:#1b1512;color:#d8cdc6}.mobileReviewItem b{color:#c79776}.mobileReviewItem span{font-size:10px;color:#a99b92}.mobileReviewItem em{font-style:normal;font-size:8px;color:#b99174}
 @media(max-width:800px){#p01ProductionInbox .panel,#studioMediaLibrary .panel,#p01MobileReview .panel{padding:14px}.mobileReview{position:relative}.mobileReviewItem{grid-template-columns:58px 1fr;padding:14px 12px;min-height:58px}.mobileReviewItem em{grid-column:2;font-size:10px}.mobileReviewItem span{font-size:11px;line-height:1.35}#p01DropZone{min-height:120px;display:grid;place-items:center;align-content:center;gap:10px}#p01DropZone button{min-height:44px;padding:10px 18px}#studioMediaLibrary{max-height:420px;overflow:auto}}
+
+/* Usability 1.0 complete */
+#quickP01Mobile{display:none}
+.usabilityFocus{outline:2px solid #a97d61;outline-offset:4px;transition:outline-color .25s}
+.studioInbox,.studioLibrary,.foundMaterials,.mobileReview{overflow:hidden}
+.usabilityStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 12px}
+.usabilityStats span{display:grid;gap:3px;padding:10px 12px;border:1px solid #3b2e28;border-radius:8px;background:#17120f;color:#8f8179;font-size:9px}
+.usabilityStats b{font-size:17px;color:#d5c7bd}
+.studioDrop{display:grid;place-items:center;align-content:center;gap:6px;min-height:118px;padding:20px;border:1px dashed #6b5142;border-radius:10px;background:#15110f;text-align:center;cursor:pointer}
+.studioDrop b{font-size:11px}.studioDrop span{font-size:9px;color:#8d8179}.studioDrop.drag{border-style:solid;transform:scale(.995);background:#201813}
+.ingestQueue{margin-top:12px;border:1px solid #342923;border-radius:9px;overflow:hidden}
+.ingestQueueHead{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 10px;background:#17120f}
+.ingestQueueHead button{font-size:8px;padding:6px 8px}
+.ingestRow{display:grid;grid-template-columns:minmax(160px,1fr) minmax(90px,.7fr) 82px auto;gap:10px;align-items:center;padding:9px 10px;border-top:1px solid #2c231f}
+.ingestRow>div:first-child{min-width:0}.ingestRow b,.ingestRow small{display:block}.ingestRow b{font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ingestRow small{font-size:7px;color:#7f746d;margin-top:3px}
+.ingestProgress{height:5px;background:#0f0c0b;border-radius:8px;overflow:hidden}.ingestProgress i{display:block;height:100%;background:#9d765d}
+.ingestStatus{font-size:7px;letter-spacing:.05em;text-align:center;padding:4px 6px;border:1px solid #4a3a31;border-radius:10px;color:#b7a89f}.ingestStatus.routed{color:#9fc3a5;border-color:#426048}.ingestStatus.duplicate{color:#bca28d}.ingestStatus.failed{color:#dfa494;border-color:#6b463c}.ingestStatus.storing{color:#d0b18f}
+.missingCompact{display:grid;gap:4px;margin-top:10px;padding:9px 10px;border-radius:8px;background:#15110f}.missingCompact b{font-size:8px}.missingCompact span{font-size:8px;color:#837870;line-height:1.4}
+.libraryToolbar{display:grid;grid-template-columns:1fr 160px;gap:8px;margin-bottom:10px}.libraryToolbar input,.libraryToolbar select{background:#110e0c;border:1px solid #41322b;color:#d7cbc3;border-radius:7px;padding:9px}
+.libraryList{display:grid;gap:6px}.libraryRow{display:grid;grid-template-columns:minmax(0,1fr) 90px 76px;gap:8px;align-items:center;padding:9px 10px;border:1px solid #30261f;border-radius:8px;background:#17120f}.libraryRow>div{min-width:0}.libraryRow b,.libraryRow small{display:block}.libraryRow b{font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.libraryRow small{font-size:7px;color:#7d716a;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.libraryRow>span{font-size:7px;color:#99877b;text-align:center}.libraryRow button{padding:7px 8px}.libraryEmpty,.reviewClear{padding:16px;border:1px dashed #3b2e28;border-radius:8px;text-align:center;color:#8b7e76;font-size:9px}
+.foundGrid{display:grid;gap:7px}.foundRow{display:grid;grid-template-columns:78px minmax(0,1fr) 110px;gap:10px;align-items:center;padding:10px;border:1px solid #332821;border-radius:8px;background:#17120f}.foundRow>span{font-size:7px;text-align:center;padding:5px;border:1px solid #4a3a31;border-radius:10px}.foundRow>span.pass{color:#9fc3a5;border-color:#426048}.foundRow>span.wait{color:#c7a287}.foundRow b,.foundRow small{display:block}.foundRow b{font-size:9px}.foundRow small{font-size:8px;color:#81756e;margin-top:3px}.foundRow a{font-size:8px;color:#c89b7c;text-align:right}
+.mobileReviewList{display:grid;gap:8px}.mobileReviewCard{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:stretch}.mobileReviewActions{display:flex;gap:6px}.mobileReviewActions button{min-width:82px}.mobileReviewActions button:last-child{border-color:#51684f}
+.usabilityPreviewStage,.mobileReviewStage{display:grid;place-items:center;min-height:280px;background:#090807;border-radius:12px;overflow:hidden;margin:10px 0 12px}.usabilityPreviewStage video,.usabilityPreviewStage img,.mobileReviewStage video,.mobileReviewStage img{width:100%;max-height:68vh;object-fit:contain}.usabilityPreviewStage audio,.mobileReviewStage audio{width:min(620px,92%)}
+.mobileReviewDecision{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.mobileReviewDecision button{min-height:46px;font-weight:700}
+@media(max-width:800px){
+ #quickP01Mobile{display:block;right:12px!important;bottom:max(72px,calc(env(safe-area-inset-bottom) + 64px))!important;padding:12px 14px!important;font-size:10px!important}
+ .usabilityStats{grid-template-columns:1fr 1fr 1fr}.usabilityStats span{padding:9px}.usabilityStats b{font-size:15px}
+ .studioInbox .pagehead{display:grid;gap:10px}.studioInbox .pagehead>button{width:100%;min-height:44px}
+ .studioDrop{min-height:130px;padding:18px 12px}
+ .ingestRow{grid-template-columns:minmax(0,1fr) 70px}.ingestProgress{grid-column:1/2}.ingestStatus{grid-column:2;grid-row:1}.ingestRow>button{grid-column:2}
+ .libraryToolbar{grid-template-columns:1fr}.libraryRow{grid-template-columns:minmax(0,1fr) 72px}.libraryRow>span{grid-column:2;grid-row:1}.libraryRow button{grid-column:2}
+ .foundRow{grid-template-columns:68px 1fr}.foundRow a{grid-column:2;text-align:left}
+ .mobileReviewCard{grid-template-columns:1fr}.mobileReviewActions{display:grid;grid-template-columns:1fr 1fr}.mobileReviewActions button{min-height:42px}
+ .mobileReviewItem{grid-template-columns:58px 1fr auto}.mobileReviewItem em{grid-column:auto;font-size:9px}
+ .mobileReviewModal .modalbox,.usabilityPreview .modalbox{width:calc(100vw - 16px);max-height:calc(100vh - 16px);padding:12px}
+ .usabilityPreviewStage,.mobileReviewStage{min-height:220px}.mobileReviewDecision{position:sticky;bottom:0;background:#15110f;padding-top:8px}
+}
