@@ -24,7 +24,7 @@ def run_job(jid,handoff):
 class H(BaseHTTPRequestHandler):
     def reply(self,code,obj):
         b=json.dumps(obj).encode();self.send_response(code);cors(self);self.send_header("Content-Type","application/json");self.send_header("Content-Length",str(len(b)));self.end_headers();self.wfile.write(b)
-    def serve_output(self,target):
+    def serve_output(self,target,download=False):
         if not target.exists() or not target.is_file(): return self.reply(404,{"error":"output not found"})
         size=target.stat().st_size; start=0; end=size-1; code=200
         rng=self.headers.get("Range","")
@@ -38,7 +38,7 @@ class H(BaseHTTPRequestHandler):
         length=end-start+1
         self.send_response(code);cors(self);self.send_header("Content-Type",mimetypes.guess_type(target.name)[0] or "application/octet-stream");self.send_header("Accept-Ranges","bytes")
         if code==206:self.send_header("Content-Range",f"bytes {start}-{end}/{size}")
-        self.send_header("Content-Length",str(length));self.send_header("Content-Disposition",f'inline; filename="{target.name}"');self.end_headers()
+        self.send_header("Content-Length",str(length));self.send_header("Content-Disposition",f'{"attachment" if download else "inline"}; filename="{target.name}"');self.end_headers()
         with target.open("rb") as f:
             f.seek(start); remaining=length
             while remaining>0:
@@ -53,7 +53,8 @@ class H(BaseHTTPRequestHandler):
         if parsed.path.startswith("/output/"):
             name=Path(unquote(parsed.path[len("/output/"):])).name
             if not name:return self.reply(400,{"error":"output name required"})
-            return self.serve_output(JOBS/name)
+            download=parse_qs(parsed.query).get("download",["0"])[0]=="1"
+            return self.serve_output(JOBS/name,download)
         self.reply(404,{"error":"not found"})
     def do_POST(self):
         parsed=urlparse(self.path)
