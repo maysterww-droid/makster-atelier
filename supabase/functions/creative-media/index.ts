@@ -34,6 +34,14 @@ function safeName(name: string) {
   return clean.slice(-120) || "file";
 }
 
+function randomCapabilityToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
 async function requireWorkspace(req: Request, admin: ReturnType<typeof adminClient>) {
   const workspaceId = (req.headers.get("x-creative-workspace") || "").trim();
   const token = (req.headers.get("x-creative-token") || "").trim();
@@ -79,6 +87,25 @@ Deno.serve(async (req: Request) => {
         admin.from("creative_studio_snapshots").select("*", { count: "exact", head: true }).eq("workspace_id", workspaceId),
       ]);
       return json({ ok: true, workspace: { id: workspaceId, label: workspace.label }, mediaCount: mediaCount || 0, snapshotCount: snapshotCount || 0 });
+    }
+
+    if (action === "claim") {
+      if (workspace.metadata?.claimed === true) return json({ error: "WORKSPACE_ALREADY_CLAIMED" }, 409);
+      const token = randomCapabilityToken();
+      const tokenHash = await sha256Hex(token);
+      const metadata = { ...(workspace.metadata || {}), claimed: true, claimed_at: new Date().toISOString() };
+      const { error } = await admin.from("creative_studio_workspaces").update({ token_hash: tokenHash, metadata, updated_at: new Date().toISOString() }).eq("workspace_id", workspaceId);
+      if (error) throw new Error(error.message);
+      return json({ ok: true, workspace: workspaceId, token });
+    }
+
+    if (action === "rotate-token") {
+      const token = randomCapabilityToken();
+      const tokenHash = await sha256Hex(token);
+      const metadata = { ...(workspace.metadata || {}), claimed: true, rotated_at: new Date().toISOString() };
+      const { error } = await admin.from("creative_studio_workspaces").update({ token_hash: tokenHash, metadata, updated_at: new Date().toISOString() }).eq("workspace_id", workspaceId);
+      if (error) throw new Error(error.message);
+      return json({ ok: true, workspace: workspaceId, token });
     }
 
     if (action === "list") {
