@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Makster Creative Studio Local Render Agent — localhost only, zero external spend."""
 import json, subprocess, threading
+from urllib.parse import urlparse, parse_qs
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -29,7 +30,15 @@ class H(BaseHTTPRequestHandler):
         if self.path.startswith("/jobs/"): return self.reply(200,jobs.get(self.path.split("/")[-1],{"status":"UNKNOWN"}))
         self.reply(404,{"error":"not found"})
     def do_POST(self):
-        if self.path!="/render": return self.reply(404,{"error":"not found"})
+        parsed=urlparse(self.path)
+        if parsed.path=="/media":
+            name=Path(parse_qs(parsed.query).get("name",[""])[0]).name
+            if not name:return self.reply(400,{"error":"media name required"})
+            n=int(self.headers.get("Content-Length","0"))
+            if n<=0:return self.reply(400,{"error":"empty media"})
+            target=MEDIA/name;target.write_bytes(self.rfile.read(n))
+            return self.reply(201,{"ok":True,"name":name,"bytes":n})
+        if parsed.path!="/render": return self.reply(404,{"error":"not found"})
         n=int(self.headers.get("Content-Length","0"));spec=json.loads(self.rfile.read(n) or b"{}")
         if spec.get("rules",{}).get("externalProviders") is not False:return self.reply(400,{"error":"externalProviders must be false"})
         jid="P01-"+str(len(jobs)+1);jobs[jid]={"status":"QUEUED","progress":0};threading.Thread(target=run_job,args=(jid,spec),daemon=True).start();self.reply(202,{"jobId":jid,"status":"QUEUED"})
