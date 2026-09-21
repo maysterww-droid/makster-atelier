@@ -3,7 +3,7 @@
 <aside class="rail" id="rail"><div class="brand"><b>MAKSTER</b><span>ATELIER</span></div><div class="studio">Creative Studio <em>2.1</em></div><button class="new" data-action="new">＋ Новый проект</button>
 <nav id="nav"><button class="on" data-view="projects">▦ <span>Projects</span></button><button data-view="brief">◫ <span>Brief</span></button><button data-view="concept">◇ <span>Concept</span></button><button data-view="script">≡ <span>Script</span></button><button data-view="storyboard">▤ <span>Storyboard</span></button><button data-view="shots">▶ <span>Shots & Takes</span></button><button data-view="timeline">⌁ <span>Timeline</span></button><button data-view="qa">✓ <span>QA</span></button><button data-view="approval">◎ <span>Approval</span></button><button data-view="exports">⇩ <span>Exports</span></button><button data-view="costs">€ <span>Cost Center</span></button></nav>
 <div class="shared">SHARED PRODUCTION<span>Makster Atelier / Creative</span><span>VYTA / Creative</span></div></aside>
-<main><header><button class="menu" id="menu">☰</button><div class="title"><small id="crumb">PROJECT / MAKSTER ATELIER</small><h1 id="title">Creative Projects</h1></div><div class="projectstate"><span id="saveState">✓ Saved</span><span id="headerReady">0% ready</span></div><div class="headright"><span class="pill">● DRY RUN</span><button id="lang">RU · CS · EN</button><button id="preview">Preview ▷</button><button class="primary" id="generate">Generate</button></div></header>
+<main><header><button class="menu" id="menu">☰</button><div class="title"><small id="crumb">PROJECT / MAKSTER ATELIER</small><h1 id="title">Creative Projects</h1></div><div class="projectstate"><span id="saveState">✓ Saved</span><span id="headerReady">0% ready</span></div><div class="headright"><span class="pill">● DRY RUN</span><button id="lang">RU · CS · EN</button><button id="cloudConnectBtnV03">☁ Cloud</button><button id="preview">Preview ▷</button><button class="primary" id="generate">Generate</button></div></header>
 <section class="content">
 <div class="view active" id="projects"><div class="homehero"><div><small>CREATIVE PRODUCTION HOME</small><h2>Добро пожаловать в Studio</h2><p>Продолжайте активный production или создайте новый проект.</p></div><button class="accent" id="continueProject">Continue →</button></div><div class="homestats"><article><small>ACTIVE PROJECT</small><b id="homeActive">YouTube Pilot 01</b></article><article><small>READINESS</small><b id="homeProgress">0%</b></article><article><small>NEXT ACTION</small><b id="homeNext">Storyboard</b></article></div><div class="homequeue"><div><small>PRODUCTION QUEUE</small><b>Что требует внимания</b></div><div id="homeQueue"></div></div><div class="pagehead"><div><small>WORKSPACE</small><h2>Creative Projects</h2><p>Проекты Makster и VYTA в одном производственном Studio.</p></div><button class="accent" data-action="new">＋ Новый проект</button></div><div class="projectgrid"><article class="project activeproject" data-project="youtube" data-open="youtube"><div class="projectcover"><span>MAKSTER CREATIVE</span><strong>YouTube Studio</strong><b>YouTube</b></div><div class="projectmeta"><b>Long-form · Shorts · Series</b><span>P01 in production · reusable master content</span><i>ACTIVE</i></div></article><article class="project" data-project="makster" data-open="storyboard"><div class="projectcover"><span>MAKSTER ATELIER</span><strong>Makster Creative</strong><b>Makster</b></div><div class="projectmeta"><b>Furniture · Planner · Technology</b><span>Brand production workspace</span><i>ACTIVE</i></div></article><article class="project" data-project="vyta" data-open="brief"><div class="projectcover"><span>VYTA</span><strong>Personal Health Intelligence</strong><b>VYTA</b></div><div class="projectmeta"><b>Health · Product · Brand</b><span>Creative production workspace</span><i>ACTIVE</i></div></article><article class="project ghost" data-action="new"><div class="plus">＋</div><b>Новый проект</b><span>Начать с brief</span></article><div id="savedProjects"></div></div><div class="projecttools" id="projectTools"><button id="renameProject">Rename</button><button id="duplicateProject">Duplicate</button><button id="archiveProject">Archive</button><button class="danger" id="deleteProject">Delete</button></div></div>
 <div class="view" id="youtube"><div class="pagehead"><div><small>YOUTUBE PRODUCTION</small><h2>YouTube Workspace</h2><p>Выпуски канала, Master, Shorts и Cutdowns в одном производственном пространстве.</p></div><button class="accent" id="newYoutubeEpisode">＋ Новый выпуск</button></div><div id="youtubeEpisodes"></div></div>
@@ -19,6 +19,19 @@
 </section></main></div><div class="toast" id="toast"></div>
 <div class="modal" id="modal"><div class="modalbox"><button class="close" id="close">×</button><div class="previewhead"><small>MASTER PREVIEW · DREAM PLANNER</small><select id="previewLang"><option>RU</option><option>CS</option><option>EN</option></select></div><div class="mock" id="mock"><div><small id="previewScene">SCENE 01</small><b id="previewCopy">Увидеть.<br>Рассчитать.<br>До производства.</b><span id="previewMeta">55 sec · RU / CS / EN</span></div></div><div class="player"><button id="prevScene">◀</button><button id="playScene">▶</button><span id="previewTime">00:00 / 00:55</span><button id="nextPreview">▶|</button></div></div></div>
 <div class="sheet" id="sheet"><div><b>Новый Creative Project</b><button id="sheetClose">×</button></div><label>Название<input id="newName" placeholder="Например: Makster Pro Launch"></label><label>Бренд<select><option>Makster Atelier</option><option>VYTA</option></select></label><button class="accent" id="create">Создать draft</button></div>
+
+<div id="cloudModalV03" class="cloudModalV03">
+  <div class="cloudCardV03">
+    <div class="pagehead"><div><small>CREATIVE CLOUD</small><h3>Подключение workspace</h3><p>Endpoint и Workspace ID уже заполнены. Вставь private workspace token один раз.</p></div><button id="cloudCloseV03">✕</button></div>
+    <div class="cloudGridV03">
+      <label>Endpoint<input id="cloudEndpointV03" value="https://gkqntgfrbngspvrsqvmx.supabase.co/functions/v1/creative-studio-cloud" readonly></label>
+      <label>Workspace ID<input id="cloudWorkspaceV03" value="cs_7jynRxjL85r4ErP" readonly></label>
+      <label>Workspace token<input id="cloudTokenV03" type="password" placeholder="Вставь token сюда"></label>
+    </div>
+    <div class="cloudActionsV03"><button class="accent" id="cloudSaveV03">Подключить</button><button id="cloudForgetV03">Удалить token</button></div>
+    <p id="cloudMessageV03">Token хранится только в этом браузере.</p>
+  </div>
+</div>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id), $$=q=>[...document.querySelectorAll(q)], esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -167,6 +180,41 @@ function renderEpisodeCostEverywhereV02(){renderEpisodeCostDashboardV02();if(act
 const renderP01CostBaseV02=renderP01;renderP01=function(){const out=renderP01CostBaseV02();renderEpisodeCostBadgeV02();return out}
 const saveCreativeCostsCostBaseV02=saveCreativeCosts;saveCreativeCosts=function(x){const out=saveCreativeCostsCostBaseV02(x);renderEpisodeCostEverywhereV02();return out}
 ensureP01HistoricalSpendV02();renderEpisodeCostEverywhereV02();
+
+const CLOUD_UI_CFG_KEY_V03='cs:creative:cloud-ui:v03';
+function cloudUiCfgV03(){try{return JSON.parse(localStorage.getItem(CLOUD_UI_CFG_KEY_V03)||'{}')||{}}catch{return {}}}
+function cloudUiSetMessageV03(text,ok){const e=$('cloudMessageV03');if(!e)return;e.textContent=text;e.className=ok?'cloudOkV03':'cloudBadV03'}
+function cloudUiOpenV03(){const cfg=cloudUiCfgV03();$('cloudTokenV03').value=cfg.token||'';$('cloudModalV03').classList.add('on')}
+function cloudUiCloseV03(){$('cloudModalV03').classList.remove('on')}
+async function cloudUiCallV03(action,payload={}){
+  const cfg=cloudUiCfgV03(),endpoint=$('cloudEndpointV03')?.value||'https://gkqntgfrbngspvrsqvmx.supabase.co/functions/v1/creative-studio-cloud',workspaceId=$('cloudWorkspaceV03')?.value||'cs_7jynRxjL85r4ErP',token=$('cloudTokenV03')?.value||cfg.token||'';
+  if(!token)throw new Error('Вставь workspace token');
+  const r=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json','x-creative-workspace':workspaceId,'x-creative-token':token},body:JSON.stringify({action,...payload})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok||d.error)throw new Error(d.error||d.message||('HTTP '+r.status));
+  return d
+}
+async function cloudUiConnectV03(){
+  const token=$('cloudTokenV03').value.trim();if(!token)return cloudUiSetMessageV03('Вставь workspace token',false);
+  localStorage.setItem(CLOUD_UI_CFG_KEY_V03,JSON.stringify({endpoint:$('cloudEndpointV03').value,workspaceId:$('cloudWorkspaceV03').value,token}));
+  cloudUiSetMessageV03('Проверяю подключение…',true);
+  try{
+    const [pair,workspace,ev]=await Promise.all([cloudUiCallV03('pair'),cloudUiCallV03('workspace-get'),cloudUiCallV03('events-list')]);
+    const events=Array.isArray(ev.events)?ev.events:[];
+    const w=workspace.workspace||workspace;
+    $('cloudConnectBtnV03').textContent='☁ Cloud ✓';
+    $('cloudConnectBtnV03').classList.add('accent');
+    cloudUiSetMessageV03('Подключено · revision '+(w.revision??'—')+' · '+events.length+' cost events',true);
+    notify('Creative Cloud connected');
+  }catch(e){$('cloudConnectBtnV03').textContent='☁ Cloud';$('cloudConnectBtnV03').classList.remove('accent');cloudUiSetMessageV03('Ошибка: '+e.message,false)}
+}
+function cloudUiInitV03(){
+  $('cloudConnectBtnV03').onclick=cloudUiOpenV03;$('cloudCloseV03').onclick=cloudUiCloseV03;$('cloudModalV03').onclick=e=>{if(e.target===$('cloudModalV03'))cloudUiCloseV03()};
+  $('cloudSaveV03').onclick=cloudUiConnectV03;$('cloudForgetV03').onclick=()=>{localStorage.removeItem(CLOUD_UI_CFG_KEY_V03);$('cloudTokenV03').value='';$('cloudConnectBtnV03').textContent='☁ Cloud';$('cloudConnectBtnV03').classList.remove('accent');cloudUiSetMessageV03('Token удалён из этого браузера.',true)};
+  const cfg=cloudUiCfgV03();if(cfg.token){$('cloudTokenV03').value=cfg.token;cloudUiConnectV03()}
+}
+cloudUiInitV03();
+
 
 })();
 </script></body></html>
