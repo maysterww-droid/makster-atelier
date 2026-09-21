@@ -71,7 +71,7 @@ Deno.serve(async (req: Request) => {
   try {
     const url = new URL(req.url);
     if (req.method === "GET" && (url.searchParams.get("action") === "health" || url.pathname.endsWith("/creative-media"))) {
-      return json({ ok: true, service: "creative-media", bucket: BUCKET, version: 1 });
+      return json({ ok: true, service: "creative-media", bucket: BUCKET, version: 2 });
     }
     if (req.method !== "POST") return json({ error: "METHOD_NOT_ALLOWED" }, 405);
 
