@@ -16,6 +16,8 @@ Usability 1.1 adds private cloud media sync and a browser Download Manager witho
 - The browser stores only the publishable key plus the user's capability-style Pair Code.
 - Workspace tokens are stored in Postgres only as SHA-256 hashes.
 - New workspace registration is not public; authorized workspaces are provisioned server-side.
+- The initial bootstrap Pair Code is claim-once: first successful pairing rotates it automatically.
+- A connected device can rotate the active Pair Code manually; this immediately invalidates the previous code on other devices.
 
 Tables:
 - `public.creative_studio_workspaces`
