@@ -39,7 +39,11 @@ def main():
         td=Path(td); clips=[]
         for i,x in enumerate(timeline):
             dst=td/f"{i:02d}.mp4"; src=media/x["source"]
-            run(["ffmpeg","-y","-i",str(src),"-t",str(x["duration"]),"-vf","scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30","-an","-c:v","libx264","-pix_fmt","yuv420p",str(dst)])
+            offset=max(0,float(x.get("sourceOffset",0) or 0))
+            cmd=["ffmpeg","-y"]
+            if offset: cmd += ["-ss",str(offset)]
+            cmd += ["-i",str(src),"-t",str(x["duration"]),"-vf","scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30","-an","-c:v","libx264","-pix_fmt","yuv420p",str(dst)]
+            run(cmd)
             clips.append(dst)
         concat=td/"concat.txt"; concat.write_text("".join(f"file '{p.as_posix()}'\n" for p in clips))
         visual=td/"visual.mp4"; run(["ffmpeg","-y","-f","concat","-safe","0","-i",str(concat),"-c","copy",str(visual)])
