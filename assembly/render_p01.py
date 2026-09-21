@@ -1,10 +1,25 @@
 #!/usr/bin/env python3
 """Makster Creative Studio local renderer. Zero external-provider spend."""
-import json, subprocess, sys, tempfile
+import json, subprocess, sys, tempfile, shutil
 from pathlib import Path
 
 def run(cmd):
     subprocess.run(cmd, check=True)
+
+def probe(path):
+    p=subprocess.run(["ffprobe","-v","error","-show_entries","format=duration:stream=codec_type,width,height,r_frame_rate","-of","json",str(path)],capture_output=True,text=True,check=True)
+    return json.loads(p.stdout)
+
+def post_render_qa(out, spec):
+    q=probe(out); dur=float(q.get("format",{}).get("duration",0)); streams=q.get("streams",[])
+    v=next((s for s in streams if s.get("codec_type")=="video"),{}); a=next((s for s in streams if s.get("codec_type")=="audio"),None)
+    issues=[]
+    if abs(dur-float(spec["output"]["durationSeconds"]))>0.5: issues.append("duration mismatch")
+    if v.get("width")!=1920 or v.get("height")!=1080: issues.append("resolution mismatch")
+    if not a: issues.append("audio stream missing")
+    report={"status":"PASS" if not issues else "FAIL","file":out.name,"duration":dur,"width":v.get("width"),"height":v.get("height"),"fps":v.get("r_frame_rate"),"audio":bool(a),"issues":issues}
+    out.with_suffix(".qa.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
+    return report
 
 def main():
     if len(sys.argv)<3:
@@ -44,6 +59,8 @@ def main():
             run(["ffmpeg","-y",*inputs,"-filter_complex",";".join(filters),"-map","0:v:0","-map","[aout]","-c:v","copy","-c:a","aac","-t",str(spec["output"]["durationSeconds"]),str(out)])
         else:
             run(["ffmpeg","-y","-i",str(visual),"-c","copy",str(out)])
-    print(out)
+    report=post_render_qa(out,spec)
+    if report["status"]!="PASS": raise SystemExit("post-render QA failed: "+", ".join(report["issues"]))
+    print(json.dumps({"output":str(out),"qa":report},ensure_ascii=False))
 
 if __name__=="__main__": main()
