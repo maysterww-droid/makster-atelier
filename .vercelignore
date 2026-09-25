@@ -1,0 +1,17 @@
+.git
+.openai
+.sites-runtime
+.vinext
+.wrangler
+components
+db
+design-qa.md
+drizzle
+drizzle.config.ts
+examples
+gallery-roadmap.md
+hooks
+lib
+qa
+scripts
+vite.config.ts
