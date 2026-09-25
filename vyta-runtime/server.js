@@ -2,7 +2,7 @@ import http from "node:http";
 const port=Number(process.env.PORT||3000);
 const runtimeSecret=process.env.VYTA_RUNTIME_SHARED_SECRET||"";
 const adapters={
- stt:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"},
+ stt:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external",status:"benchmark_ready",protocol:"openai_compatible_http",endpoint_env:"VYTA_STT_BASE_URL",model_env:"VYTA_STT_MODEL"},
  tts:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"},
  reasoning:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"}
 };
@@ -18,6 +18,7 @@ http.createServer((req,res)=>{
  if(req.method==="GET"&&req.url==="/health")return json(res,200,{ok:true,service:"vyta-runtime",version:"0.1.0"});
  if(req.method==="GET"&&req.url==="/")return json(res,200,{service:"VYTA Runtime",version:"0.1.0",policy:"self-host-first"});
  if(req.method==="GET"&&req.url==="/v1/adapters")return json(res,200,{runtime:"VYTA Runtime 0.1",execute:false,adapters});
+ if(req.method==="GET"&&req.url==="/v1/stt/status")return json(res,200,{adapter:"stt",mode:"benchmark",configured:Boolean(process.env.VYTA_STT_BASE_URL),model:process.env.VYTA_STT_MODEL||null,execute:false});
  if(req.method==="POST"&&req.url==="/v1/route"){
   if(!runtimeSecret)return json(res,503,{error:"runtime_secret_not_configured"});
   const supplied=req.headers["x-vyta-runtime-secret"]||"";
