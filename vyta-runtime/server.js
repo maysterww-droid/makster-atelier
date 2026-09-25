@@ -1,6 +1,11 @@
 import http from "node:http";
 const port=Number(process.env.PORT||3000);
-const runtimeSecret=process.env.VYTA_RUNTIME_SHARED_SECRET||"";\nconst adapters={stt:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"},tts:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"},reasoning:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"}};
+const runtimeSecret=process.env.VYTA_RUNTIME_SHARED_SECRET||"";
+const adapters={
+ stt:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"},
+ tts:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"},
+ reasoning:{kind:"provider_adapter",preferred:"vyta_self_hosted",fallback:"external"}
+};
 const json=(res,status,body)=>{res.writeHead(status,{"content-type":"application/json"});res.end(JSON.stringify(body));};
 const route=(capability,complexity,externalAllowed=true)=>{
  if(["stt","tts","action"].includes(capability)&&complexity<=1)return{tier:"vyta_small",provider:"vyta",reason:"low_complexity"};
@@ -11,13 +16,14 @@ const route=(capability,complexity,externalAllowed=true)=>{
 };
 http.createServer((req,res)=>{
  if(req.method==="GET"&&req.url==="/health")return json(res,200,{ok:true,service:"vyta-runtime",version:"0.1.0"});
- if(req.method==="GET"&&req.url==="/")return json(res,200,{service:"VYTA Runtime",version:"0.1.0",policy:"self-host-first"});\n if(req.method==="GET"&&req.url==="/v1/adapters")return json(res,200,{runtime:"VYTA Runtime 0.1",execute:false,adapters});
+ if(req.method==="GET"&&req.url==="/")return json(res,200,{service:"VYTA Runtime",version:"0.1.0",policy:"self-host-first"});
+ if(req.method==="GET"&&req.url==="/v1/adapters")return json(res,200,{runtime:"VYTA Runtime 0.1",execute:false,adapters});
  if(req.method==="POST"&&req.url==="/v1/route"){
   if(!runtimeSecret)return json(res,503,{error:"runtime_secret_not_configured"});
   const supplied=req.headers["x-vyta-runtime-secret"]||"";
   if(supplied!==runtimeSecret)return json(res,401,{error:"unauthorized"});
   let raw="";
-  req.on("data",c=>raw+=c);
+  req.on("data",chunk=>raw+=chunk);
   req.on("end",()=>{try{
    const b=JSON.parse(raw||"{}");
    const allowed=["realtime","stt","tts","reasoning","action"];
