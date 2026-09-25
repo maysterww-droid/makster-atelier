@@ -2,5 +2,22 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm exec next build"
+  "buildCommand": "pnpm exec next build",
+  "alias": [
+    "www.maksteratelier.com",
+    "maksteratelier.com"
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "maksteratelier.com"
+        }
+      ],
+      "destination": "https://www.maksteratelier.com/:path*",
+      "permanent": true
+    }
+  ]
 }
