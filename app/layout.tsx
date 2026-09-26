@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./planner-promo.css";
+import { InteractionAnalytics } from "./interaction-analytics";
 import { SiteMotion } from "./site-motion";
 import { siteUrl } from "./seo";
 
@@ -72,6 +74,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         {children}
         <SiteMotion />
+        <InteractionAnalytics />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
