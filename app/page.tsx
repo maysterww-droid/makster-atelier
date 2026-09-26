@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { ArrowDown, ArrowRight, Factory, Mail, MapPinned, Phone, Upload, UsersRound } from "lucide-react";
 import { copy } from "./content";
 import { portfolioProjects, portfolioUi } from "./portfolio-data";
@@ -8,6 +8,7 @@ import { SiteFooter, SiteHeader } from "./site-chrome";
 import { PlannerControl } from "./planner-control";
 import { quoteCopy } from "./quote-copy";
 import { useMaksterLanguage } from "./use-language";
+import { enquiryFeedback, sendEnquiry, type EnquiryState } from "./enquiry-client";
 
 const proofIcons = [Factory, UsersRound, MapPinned];
 const proofMarks = ["CZ", "1", "EU"];
@@ -43,13 +44,19 @@ export default function Home() {
   const quote = quoteCopy[lang];
   const portfolio = portfolioUi[lang];
   const featuredProjects = portfolioProjects.filter((project) => project.featured);
+  const [enquiryState, setEnquiryState] = useState<EnquiryState>("idle");
 
-  const submitEnquiry = (event: FormEvent<HTMLFormElement>) => {
+  const submitEnquiry = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const subject = encodeURIComponent(`MAKSTER ATELIER — ${String(data.get("name") || "project")}`);
-    const body = encodeURIComponent(`${t.form[0]}: ${data.get("name")}\n${t.form[1]}: ${data.get("contact")}\n\n${t.form[2]}:\n${data.get("project")}`);
-    window.location.href = `mailto:info@maksteratelier.com?subject=${subject}&body=${body}`;
+    const form = event.currentTarget;
+    setEnquiryState("sending");
+    try {
+      await sendEnquiry(form, lang, "home");
+      form.reset();
+      setEnquiryState("sent");
+    } catch {
+      setEnquiryState("error");
+    }
   };
 
   return (
@@ -212,11 +219,13 @@ export default function Home() {
           </div>
         </div>
         <form className="contact-form" onSubmit={submitEnquiry}>
+          <input className="form-honeypot" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" />
           <label>{t.form[0]}<input name="name" required autoComplete="name" /></label>
           <label>{t.form[1]}<input name="contact" required autoComplete="email" /></label>
           <label>{t.form[2]}<textarea name="project" required rows={5} /></label>
-          <p><Upload size={18} />{t.upload}</p>
-          <button className="button button-gold" type="submit">{t.form[3]}<ArrowRight size={18} /></button>
+          <label className="upload-field"><span><Upload size={18} />{t.upload}</span><input name="files" type="file" multiple accept=".pdf,image/jpeg,image/png,image/webp" /><small>{enquiryFeedback[lang].files}</small></label>
+          <button className="button button-gold" type="submit" disabled={enquiryState === "sending"}>{enquiryState === "sending" ? enquiryFeedback[lang].sending : t.form[3]}<ArrowRight size={18} /></button>
+          {enquiryState !== "idle" && enquiryState !== "sending" && <p className={`form-status ${enquiryState}`} role="status" aria-live="polite">{enquiryFeedback[lang][enquiryState]}</p>}
         </form>
       </section>
 
