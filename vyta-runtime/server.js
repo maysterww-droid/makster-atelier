@@ -14,6 +14,8 @@ let persistQueue=Promise.resolve();
 async function loadConversationStates(){try{const rows=JSON.parse(await readFile(stateFile,"utf8"));for(const x of rows)if(x?.id)conversationStates.set(x.id,x);console.log("VYTA_CONVERSATION_STATE_LOADED",conversationStates.size)}catch(e){if(e.code!=="ENOENT")console.error("VYTA_CONVERSATION_STATE_LOAD_FAILED",e.message)}}
 function persistConversationStates(){const rows=[...conversationStates.values()];persistQueue=persistQueue.then(()=>writeFile(stateFile,JSON.stringify(rows))).catch(e=>console.error("VYTA_CONVERSATION_STATE_SAVE_FAILED",e.message));return persistQueue;}
 const TURN_STATES=new Set(["LISTEN","HOLD","COMMIT","BACKCHANNEL","POSSIBLE_INTERRUPT","CONFIRMED_INTERRUPT","BACKGROUND"]);
+const BACKCHANNEL_RE=/^(uh[- ]?huh|mhm|mm[- ]?hm|yeah|yep|ok(?:ay)?|угу|ага|мгм|да)[.!? ]*$/i;
+function classifyForegroundText(text){const t=String(text||"").trim();if(!t)return "unknown";if(BACKCHANNEL_RE.test(t))return "backchannel";if(t.length>=8)return "interrupt";return "unknown";}
 function createConversationState(id=crypto.randomUUID()){const now=Date.now(),x={id,state:"LISTEN",turn:0,created_at:now,updated_at:now,last_text:"",history:[]};conversationStates.set(id,x);persistConversationStates();return x}
 function setTurnState(c,next,reason=""){if(!TURN_STATES.has(next))throw new Error("invalid_turn_state");const prev=c.state;c.state=next;c.updated_at=Date.now();c.history.push({ts:c.updated_at,from:prev,to:next,reason});if(c.history.length>50)c.history.shift();persistConversationStates();return c}
 
