@@ -29,7 +29,7 @@ export async function sendEnquiry(form: HTMLFormElement, language: Lang, source:
     headers: { Accept: "application/json" },
     body: data,
   });
-  const result = await response.json().catch(() => null);
+  const result = (await response.json().catch(() => null)) as { success?: boolean | string; message?: string } | null;
   if (!response.ok || result?.success === "false" || result?.success === false) {
     throw new Error(result?.message || "Enquiry failed");
   }
