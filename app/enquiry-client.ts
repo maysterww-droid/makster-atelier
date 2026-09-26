@@ -1,4 +1,5 @@
 import type { Lang } from "./content";
+import { trackMaksterEvent } from "./interaction-analytics";
 
 export type EnquiryState = "idle" | "sending" | "sent" | "error";
 
@@ -33,4 +34,5 @@ export async function sendEnquiry(form: HTMLFormElement, language: Lang, source:
   if (!response.ok || result?.success === "false" || result?.success === false) {
     throw new Error(result?.message || "Enquiry failed");
   }
+  trackMaksterEvent("enquiry_submitted", { source, language });
 }
