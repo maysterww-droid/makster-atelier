@@ -29,5 +29,8 @@ export async function sendEnquiry(form: HTMLFormElement, language: Lang, source:
     headers: { Accept: "application/json" },
     body: data,
   });
-  if (!response.ok) throw new Error("Enquiry failed");
+  const result = await response.json().catch(() => null);
+  if (!response.ok || result?.success === "false" || result?.success === false) {
+    throw new Error(result?.message || "Enquiry failed");
+  }
 }
