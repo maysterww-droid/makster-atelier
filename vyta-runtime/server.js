@@ -6,6 +6,7 @@ import {tmpdir} from "node:os";
 import {join} from "node:path";
 import WebSocket,{WebSocketServer} from "ws";
 const port=Number(process.env.PORT||3000),runtimeSecret=process.env.VYTA_RUNTIME_SHARED_SECRET||"";
+// build-trigger: audio-cancel-gate-r68
 const sessions=new Map();
 const streamSessions=new Map();
 const conversationStates=new Map();
