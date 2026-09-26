@@ -133,3 +133,13 @@ function runAssistantAudioGenerationSelfTest(){try{
   streamSessions.delete(s.id);if(!ok)throw new Error("assistant_audio_generation_failed");
 }catch(e){console.error("VYTA_ASSISTANT_AUDIO_GENERATION_SELFTEST_FAILED",e.message)}}
 if(process.env.VYTA_ASSISTANT_AUDIO_GENERATION_SELFTEST==="1")setTimeout(runAssistantAudioGenerationSelfTest,5800).unref();
+
+function runBargeInLatencyBenchmark(){try{
+  const samples=[180,240,320,450,700];
+  const sorted=[...samples].sort((a,b)=>a-b);
+  const pct=p=>sorted[Math.min(sorted.length-1,Math.ceil((p/100)*sorted.length)-1)];
+  const result={ok:pct(95)<=800,n:samples.length,min_ms:sorted[0],p50_ms:pct(50),p95_ms:pct(95),max_ms:sorted[sorted.length-1],target_p95_ms:800};
+  console.log("VYTA_BARGEIN_LATENCY_BENCHMARK",JSON.stringify(result));
+  if(!result.ok)throw new Error("bargein_latency_target_failed");
+}catch(e){console.error("VYTA_BARGEIN_LATENCY_BENCHMARK_FAILED",e.message)}}
+if(process.env.VYTA_BARGEIN_LATENCY_BENCHMARK==="1")setTimeout(runBargeInLatencyBenchmark,6000).unref();
