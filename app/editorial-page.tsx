@@ -15,6 +15,7 @@ import { portfolioProjects, portfolioUi, type ProjectStatus } from "./portfolio-
 import { SiteFooter, SiteHeader } from "./site-chrome";
 import { PlannerControl } from "./planner-control";
 import { useMaksterLanguage } from "./use-language";
+import { enquiryFeedback, sendEnquiry, type EnquiryState } from "./enquiry-client";
 
 export type EditorialKind = "services" | "process" | "materials" | "projects" | "about" | "contact";
 
@@ -166,6 +167,7 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
   const materialLibrary = materialLibraryCopy[lang];
   const portfolio = portfolioUi[lang];
   const [projectFilter, setProjectFilter] = useState<"all" | ProjectStatus>("all");
+  const [enquiryState, setEnquiryState] = useState<EnquiryState>("idle");
   const [defaultKicker, defaultTitle, defaultBody] = pageHeading(kind, t);
   const kicker = kind === "materials" ? materialArt[lang].kicker : defaultKicker;
   const title = kind === "materials" ? materialArt[lang].title : defaultTitle;
@@ -175,12 +177,17 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
     ? portfolioProjects
     : portfolioProjects.filter((project) => project.status === projectFilter);
 
-  const submitEnquiry = (event: FormEvent<HTMLFormElement>) => {
+  const submitEnquiry = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const subject = encodeURIComponent(`MAKSTER ATELIER — ${String(data.get("name") || "project")}`);
-    const mailBody = encodeURIComponent(`${t.form[0]}: ${data.get("name")}\n${t.form[1]}: ${data.get("contact")}\n${t.form[2]}: ${data.get("project")}\n${String(data.get("type") || "")}`);
-    window.location.href = `mailto:info@maksteratelier.com?subject=${subject}&body=${mailBody}`;
+    const form = event.currentTarget;
+    setEnquiryState("sending");
+    try {
+      await sendEnquiry(form, lang, "contact-page");
+      form.reset();
+      setEnquiryState("sent");
+    } catch {
+      setEnquiryState("error");
+    }
   };
 
   return (
@@ -396,13 +403,15 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
           <section className="contact-art exact-section section-shell">
             <div className="contact-form-title"><p className="eyebrow">{x.formKicker}</p><h2>{t.form[2]}.</h2></div>
             <form className="contact-art-form exact-contact-form" onSubmit={submitEnquiry}>
+              <input className="form-honeypot" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" />
               <label>{t.form[0]}<input name="name" required autoComplete="name" /></label>
               <label>{t.form[1]}<input name="contact" required autoComplete="email" /></label>
               <fieldset><legend>{x.projectTypeLabel}</legend>{x.projectTypes.map((type, index) => <label key={type}><input type="radio" name="type" value={type} defaultChecked={index === 0} /><span>0{index + 1}</span>{type}</label>)}</fieldset>
               <label>{t.location}<input name="city" /></label>
               <label>{t.form[2]}<textarea name="project" required rows={5} /></label>
-              <p className="upload-line"><Upload size={22} /><span><b>{x.attachments}</b><small>{t.upload}</small></span></p>
-              <button className="button button-gold" type="submit">{t.form[3]}<ArrowRight size={18} /></button>
+              <label className="upload-field upload-line"><span><Upload size={22} /><b>{x.attachments}</b></span><input name="files" type="file" multiple accept=".pdf,image/jpeg,image/png,image/webp" /><small>{enquiryFeedback[lang].files}</small></label>
+              <button className="button button-gold" type="submit" disabled={enquiryState === "sending"}>{enquiryState === "sending" ? enquiryFeedback[lang].sending : t.form[3]}<ArrowRight size={18} /></button>
+              {enquiryState !== "idle" && enquiryState !== "sending" && <p className={`form-status ${enquiryState}`} role="status" aria-live="polite">{enquiryFeedback[lang][enquiryState]}</p>}
               <small className="privacy-line">{x.privacy}</small>
             </form>
           </section>

@@ -585,6 +585,15 @@ img{display:block;max-width:100%}
 .contact-form input,.contact-form textarea,.contact-art-form input,.contact-art-form textarea{width:100%;border:1px solid rgba(222,169,84,.32);border-radius:0;background:#090a08;color:var(--ivory);padding:15px}
 .contact-form p,.contact-art-form p{display:flex;align-items:center;gap:10px;margin:0;color:var(--muted);font-size:12px}
 .contact-form button,.contact-art-form button{width:100%}
+.form-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;opacity:0!important}
+.upload-field{display:grid;gap:8px}
+.upload-field>span{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
+.upload-field input[type="file"]{padding:10px;font-size:12px}
+.upload-field small{color:var(--muted);font-size:10px;line-height:1.45}
+.form-status{padding:12px;border:1px solid rgba(222,169,84,.32);font-size:12px;line-height:1.5}
+.form-status.sent{color:#b8d6ae}
+.form-status.error{color:#e3a5a5}
+.contact-form button:disabled,.contact-art-form button:disabled{cursor:wait;opacity:.65}
 
 /* Internal pages — desktop design boards */
 .art-site{background:radial-gradient(circle at 8% 18%,rgba(222,169,84,.045),transparent 26%),#050605}
