@@ -15,6 +15,19 @@ export async function sendEnquiry(form: HTMLFormElement, language: Lang, source:
   const data = new FormData(form);
   data.set("language", language);
   data.set("source", source);
-  const response = await fetch("/api/enquiry", { method: "POST", body: data });
+  data.set("_subject", "New MAKSTER ATELIER enquiry");
+  data.set("_template", "table");
+  data.set("_captcha", "false");
+  data.set("_honey", String(data.get("company") || ""));
+  data.delete("company");
+
+  const contact = String(data.get("contact") || "");
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) data.set("email", contact);
+
+  const response = await fetch("https://formsubmit.co/ajax/info@maksteratelier.com", {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: data,
+  });
   if (!response.ok) throw new Error("Enquiry failed");
 }
