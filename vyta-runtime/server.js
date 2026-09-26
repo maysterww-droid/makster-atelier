@@ -119,3 +119,17 @@ function runAssistantAudioCancelSelfTest(){try{
   if(!ok)throw new Error("assistant_audio_cancel_failed");
 }catch(e){console.error("VYTA_ASSISTANT_AUDIO_CANCEL_SELFTEST_FAILED",e.message)}}
 if(process.env.VYTA_ASSISTANT_AUDIO_CANCEL_SELFTEST==="1")setTimeout(runAssistantAudioCancelSelfTest,5600).unref();
+
+function runAssistantAudioGenerationSelfTest(){try{
+  const s=createStreamSession();s.conversation=createConversationState();s.assistant_speaking=true;
+  const g0=s.assistant_cancel_generation||0;
+  const oldBefore=pushAssistantAudioChunk(s,Buffer.alloc(3200),g0);
+  cancelAssistantOutput(s,"selftest.interrupt");
+  const oldAfter=pushAssistantAudioChunk(s,Buffer.alloc(3200),g0);
+  s.assistant_speaking=true;const g1=s.assistant_cancel_generation||0;
+  const newAfter=pushAssistantAudioChunk(s,Buffer.alloc(3200),g1);
+  const ok=oldBefore===true&&oldAfter===false&&newAfter===true&&g1===g0+1;
+  console.log("VYTA_ASSISTANT_AUDIO_GENERATION_SELFTEST",JSON.stringify({ok,g0,g1,oldBefore,oldAfter,newAfter}));
+  streamSessions.delete(s.id);if(!ok)throw new Error("assistant_audio_generation_failed");
+}catch(e){console.error("VYTA_ASSISTANT_AUDIO_GENERATION_SELFTEST_FAILED",e.message)}}
+if(process.env.VYTA_ASSISTANT_AUDIO_GENERATION_SELFTEST==="1")setTimeout(runAssistantAudioGenerationSelfTest,5800).unref();
