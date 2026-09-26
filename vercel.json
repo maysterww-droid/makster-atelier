@@ -3,7 +3,7 @@
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm exec next build",
-  "ignoreCommand": "node scripts/vercel-ignore.mjs",
+  "ignoreCommand": "git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" -- . ':(exclude)vyta-runtime/**' ':(exclude)railway-preview/**'",
   "alias": [
     "www.maksteratelier.com",
     "maksteratelier.com"
