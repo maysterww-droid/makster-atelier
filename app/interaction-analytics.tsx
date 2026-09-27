@@ -32,6 +32,8 @@ export function InteractionAnalytics() {
       };
     }
 
+    // Vercel Web Analytics is enabled at project level; this local endpoint
+    // keeps page views and Makster custom events on the first-party domain.
     const analyticsScript = document.createElement("script");
     analyticsScript.defer = true;
     analyticsScript.src = "/_vercel/insights/script.js";
