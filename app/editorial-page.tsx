@@ -30,11 +30,11 @@ const heroImages: Record<EditorialKind, string> = {
 
 const serviceImages = [
   "/media/projects/green-oak-kitchen-wide.webp", "/media/projects/hallway-cover.webp",
-  "/media/projects/apartment-living-cover.webp", "/media/projects/salon-partition-cover.webp",
+  "/media/projects/mint-classic-kitchen/cover.webp", "/media/projects/salon-partition-cover.webp",
 ];
 
 const processImages = [
-  "/media/projects/apartment-living-cover.webp", "/media/kitchen-white-oak-wide.webp",
+  "/media/projects/ivory-classic-interior/kitchen-front.webp", "/media/kitchen-white-oak-wide.webp",
   "/media/kitchen-beams-angle.webp", "/media/kitchen-worktop-detail.webp",
   "/media/projects/classic-craft-side.webp", "/media/kitchen-blue-installation.webp",
 ];
@@ -116,7 +116,7 @@ function ArtHero({
         ) : kind === "projects" ? (
           <picture>
             <source media="(max-width: 760px)" srcSet="/media/projects/salon-partition-cover.webp" />
-            <img src="/media/projects/apartment-living-cover.webp" alt="" fetchPriority="high" />
+            <img src="/media/projects/ivory-classic-interior/kitchen-front.webp" alt="" fetchPriority="high" />
           </picture>
         ) : <img src={heroImages[kind]} alt="" fetchPriority="high" />}
         <span className="art-hero-photo-shade" />
