@@ -14,7 +14,7 @@ const proofIcons = [Factory, UsersRound, MapPinned];
 const proofMarks = ["CZ", "1", "EU"];
 
 const homeServiceImages = [
-  "/media/projects/grey-classic-kitchen-cover.webp",
+  "/media/projects/green-oak-kitchen-wide.webp",
   "/media/projects/hallway-cover.webp",
   "/media/projects/apartment-living-cover.webp",
   "/media/projects/salon-partition-cover.webp",
