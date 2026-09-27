@@ -39,8 +39,8 @@ export default function PlannerPage() {
           <p className="planner-page-lead">{t.lead}</p>
           <ul className="planner-feature-list">{t.features.map((feature)=><li key={feature}><Check size={18}/>{feature}</li>)}</ul>
           <div className="planner-page-actions">
-            <a className="button button-gold" href="mailto:info@maksteratelier.com?subject=Dream%20Planner"><Mail size={18}/>{t.launch}</a>
-            <a className="button button-outline" href="/kontakt">{t.discuss}<ArrowRight size={18}/></a>
+            <a className="button button-gold" href="mailto:info@maksteratelier.com?subject=Dream%20Planner" data-analytics="planner-notify"><Mail size={18}/>{t.launch}</a>
+            <a className="button button-outline" href="/kontakt" data-analytics="planner-consultation">{t.discuss}<ArrowRight size={18}/></a>
           </div>
         </div>
         <div className="planner-page-visual">
