@@ -139,7 +139,7 @@ function runBargeInLatencyBenchmark(){try{
   const samples=raw.length?raw:[700];
   const sorted=[...samples].sort((a,b)=>a-b);
   const pct=p=>sorted[Math.min(sorted.length-1,Math.ceil((p/100)*sorted.length)-1)];
-  const result={ok:pct(95)<=800,n:samples.length,min_ms:sorted[0],p50_ms:pct(50),p95_ms:pct(95),max_ms:sorted[sorted.length-1],target_p95_ms:800,source:raw.length?"measured_env":"latest_real_e2e"};
+  const enough=samples.length>=5;const result={ok:enough&&pct(95)<=800,enough_samples:enough,n:samples.length,min_ms:sorted[0],p50_ms:pct(50),p95_ms:pct(95),max_ms:sorted[sorted.length-1],target_p95_ms:800,min_samples:5,source:raw.length?"measured_env":"latest_real_e2e"};
   console.log("VYTA_BARGEIN_LATENCY_BENCHMARK",JSON.stringify(result));
   if(!result.ok)throw new Error("bargein_latency_target_failed");
 }catch(e){console.error("VYTA_BARGEIN_LATENCY_BENCHMARK_FAILED",e.message)}}
