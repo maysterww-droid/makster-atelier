@@ -100,7 +100,7 @@ export const portfolioProjects: PortfolioProject[] = [
   {
     slug: "complete-apartment",
     status: "completed",
-    cover: "/media/projects/apartment-living-cover.webp",
+    cover: "/media/projects/apartment-kitchen.webp",
     images: ["/media/projects/apartment-living-cover.webp", "/media/projects/apartment-kitchen.webp", "/media/projects/apartment-dining.webp", "/media/projects/apartment-bedroom.webp"],
     featured: true,
     copy: {
