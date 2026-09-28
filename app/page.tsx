@@ -17,7 +17,7 @@ const homeServiceImages = [
   "/media/projects/green-oak-kitchen-wide.webp",
   "/media/projects/hallway-cover.webp",
   "/media/projects/hallway-detail.webp",
-  "/media/projects/salon-partition-cover.webp",
+  "/media/projects/dark-wood-library/7134.webp",
 ];
 
 const materialPartners = [
