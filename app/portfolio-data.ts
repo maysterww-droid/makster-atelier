@@ -80,8 +80,6 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/salon-partition-cover.webp",
     images: ["/media/projects/salon-partition-cover.webp", "/media/projects/salon-partition-detail.webp"],
-    featured: true,
-    featuredRank: 2,
     copy: {
       ru: { title: "Световая перегородка для салона", category: "Коммерческий интерьер", details: "Шпон · зеркала · стекло · интегрированная подсветка" },
       ua: { title: "Світлова перегородка для салону", category: "Комерційний інтер’єр", details: "Шпон · дзеркала · скло · інтегроване підсвічування" },
@@ -125,6 +123,8 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/wine-cellar-cover.webp",
     images: ["/media/projects/wine-cellar-cover.webp", "/media/projects/wine-cellar-detail.webp", "/media/projects/wine-cellar-bar.webp"],
+    featured: true,
+    featuredRank: 2,
     copy: {
       ru: { title: "Винная комната", category: "Нестандартная мебель", details: "Стеллажи · винные ячейки · бар · сложная архитектура" },
       ua: { title: "Винна кімната", category: "Нестандартні меблі", details: "Стелажі · винні комірки · бар · складна архітектура" },

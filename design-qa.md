@@ -48,3 +48,43 @@
 
 - The supplied reference uses a cleaned, highly polished kitchen image. The implementation keeps the authentic project photos unchanged, as required, so temporary objects visible in the originals remain visible.
 - Header wording and navigation depth continue to use the site's existing six-language information architecture rather than copying the reference literally.
+
+---
+
+## Incremental QA — featured project swap (2026-10-02)
+
+### Evidence
+
+- Source visual truth: `/workspace/scratch/127c5bc0c639/attachments/bf79e02a-f28c-4645-a656-f40e907c39ad/2026-10-01 (75).png` and `/workspace/scratch/127c5bc0c639/attachments/fe76937e-7bc2-4e67-b12b-667778825a46/2026-10-01 (74).png`.
+- Browser-rendered implementation: Work Mode cloud-browser capture of `http://terminal.local:4173/#realizace` in this QA run (the browser capture API did not expose a local filesystem path).
+- Viewport: 1365 × 936 CSS px, desktop, device density 1×.
+- State: homepage selected-project grid, English localization; project №2 visible.
+
+### Full-view and focused comparison
+
+- The homepage keeps the approved black-and-gold composition, typography, spacing, overlay treatment, status badge, image proportions, and seven-card hierarchy.
+- Project №2 now uses the authentic wine-room photograph and the localized wine-room title/category/details.
+- The salon partition no longer appears in the seven selected cards. Its project data and route remain intact for the expanded all-projects catalogue.
+- A focused crop comparison was not needed because this change swaps an existing project card into the unchanged card component; the supplied wine-room photograph is shown without alteration.
+
+### Required fidelity surfaces
+
+- Fonts and typography: unchanged; the existing serif title and compact metadata retain their approved sizes and wrapping.
+- Spacing and layout rhythm: unchanged; the new card occupies the same grid slot with no overflow or reflow regression.
+- Colors and visual tokens: unchanged; black surfaces, ivory copy, gold accents, status badge, and image shade remain consistent.
+- Image quality and asset fidelity: pass; the real wine-room cover image is used directly, without generated furniture or architectural edits.
+- Copy and content: pass; all six existing localized wine-room strings remain connected to the card and detail route.
+
+### Interaction and build checks
+
+- Production build: passed (`npm run build`, 34 static pages generated).
+- Selected-project data: 7 projects; wine room rank 2; salon partition excluded from featured results.
+- The all-projects reveal implementation is unchanged from the previously verified interaction. In this local Work Mode browser, storage-backed client interactions could not be exercised even though the page rendered and no application console errors were reported; production verification remains required on the Vercel Preview before release.
+- ESLint is blocked by the repository's pre-existing missing ESLint 9 flat configuration; this data-only change introduces no new lint configuration issue.
+
+### Findings
+
+- No actionable P0/P1/P2 visual mismatch found in the rendered selected-project grid.
+- Preview interaction verification is the remaining release gate, not a visual defect.
+
+final result: passed
