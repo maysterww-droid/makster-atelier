@@ -167,15 +167,21 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
   const materialLibrary = materialLibraryCopy[lang];
   const portfolio = portfolioUi[lang];
   const [projectFilter, setProjectFilter] = useState<"all" | ProjectStatus>("all");
+  const [showAllProjects, setShowAllProjects] = useState(false);
   const [enquiryState, setEnquiryState] = useState<EnquiryState>("idle");
   const [defaultKicker, defaultTitle, defaultBody] = pageHeading(kind, t);
   const kicker = kind === "materials" ? materialArt[lang].kicker : defaultKicker;
   const title = kind === "materials" ? materialArt[lang].title : defaultTitle;
   const body = kind === "materials" ? materialHeroBody[lang] : defaultBody;
   const plannerLabel = kind === "materials" ? materialPlannerLabel[lang] : t.plannerPrimary;
-  const projectCards = projectFilter === "all"
-    ? portfolioProjects
-    : portfolioProjects.filter((project) => project.status === projectFilter);
+  const featuredProjectCards = portfolioProjects
+    .filter((project) => project.featured)
+    .sort((a, b) => (a.featuredRank ?? 99) - (b.featuredRank ?? 99));
+  const projectCards = !showAllProjects
+    ? featuredProjectCards
+    : projectFilter === "all"
+      ? portfolioProjects
+      : portfolioProjects.filter((project) => project.status === projectFilter);
 
   const submitEnquiry = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -326,20 +332,22 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
       {kind === "projects" && (
         <>
           <section className="projects-art exact-section section-shell">
-            <div className="project-filter" aria-label={portfolio.all}>
-              {(["all", "completed", "installation", "production"] as const).map((filter) => (
-                <button
-                  aria-pressed={projectFilter === filter}
-                  className={projectFilter === filter ? "active" : ""}
-                  key={filter}
-                  onClick={() => setProjectFilter(filter)}
-                  type="button"
-                >
-                  {filter === "all" ? portfolio.all : portfolio[filter]}
-                </button>
-              ))}
-            </div>
-            <div className="projects-art-heading"><h2>{x.projectsIntro}</h2><strong>{String(projectCards.length).padStart(2, "0")}</strong></div>
+            {showAllProjects ? (
+              <div className="project-filter" aria-label={portfolio.all}>
+                {(["all", "completed", "installation", "production"] as const).map((filter) => (
+                  <button
+                    aria-pressed={projectFilter === filter}
+                    className={projectFilter === filter ? "active" : ""}
+                    key={filter}
+                    onClick={() => setProjectFilter(filter)}
+                    type="button"
+                  >
+                    {filter === "all" ? portfolio.all : portfolio[filter]}
+                  </button>
+                ))}
+              </div>
+            ) : <p className="eyebrow project-selection-label">{portfolio.selected}</p>}
+            <div className="projects-art-heading"><h2>{showAllProjects ? portfolio.all : x.projectsIntro}</h2><strong>{String(projectCards.length).padStart(2, "0")}</strong></div>
             <div className="project-art-grid exact-project-grid">
               {projectCards.map((project, index) => (
                 <article className={index === 0 || project.wide ? "project-art-card wide" : "project-art-card"} key={project.slug}>
@@ -363,6 +371,11 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
                 </article>
               ))}
             </div>
+            {!showAllProjects && (
+              <button className="portfolio-show-all" onClick={() => setShowAllProjects(true)} type="button">
+                <span>{portfolio.all}</span><ArrowRight size={19} />
+              </button>
+            )}
           </section>
           <section className="project-final-cta">
             <img src="/media/kitchen-sink-detail.webp" alt="" />

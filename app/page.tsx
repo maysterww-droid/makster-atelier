@@ -43,7 +43,9 @@ export default function Home() {
   const t = copy[lang];
   const quote = quoteCopy[lang];
   const portfolio = portfolioUi[lang];
-  const featuredProjects = portfolioProjects.filter((project) => project.featured);
+  const featuredProjects = portfolioProjects
+    .filter((project) => project.featured)
+    .sort((a, b) => (a.featuredRank ?? 99) - (b.featuredRank ?? 99));
   const [enquiryState, setEnquiryState] = useState<EnquiryState>("idle");
 
   const submitEnquiry = async (event: FormEvent<HTMLFormElement>) => {

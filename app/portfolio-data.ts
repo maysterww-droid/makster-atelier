@@ -18,6 +18,7 @@ export type PortfolioProject = {
   heroLayout?: "portrait";
   images: string[];
   featured?: boolean;
+  featuredRank?: number;
   wide?: boolean;
   copy: Record<Lang, ProjectCopy>;
 };
@@ -31,13 +32,18 @@ export const portfolioUi: Record<Lang, {
   back: string;
   gallery: string;
   result: string;
+  selected: string;
+  imageLabels: string[];
+  features: [string, string, string];
+  detailIntro: string;
+  close: string;
 }> = {
-  ru: { all: "Все проекты", completed: "Готово", installation: "Монтаж", production: "Производство", open: "Смотреть проект", back: "Все реализации", gallery: "Детали проекта", result: "Реальная работа нашей команды" },
-  ua: { all: "Усі проєкти", completed: "Готово", installation: "Монтаж", production: "Виробництво", open: "Дивитися проєкт", back: "Усі реалізації", gallery: "Деталі проєкту", result: "Реальна робота нашої команди" },
-  cs: { all: "Všechny projekty", completed: "Dokončeno", installation: "Montáž", production: "Výroba", open: "Zobrazit projekt", back: "Všechny realizace", gallery: "Detail projektu", result: "Skutečná práce našeho týmu" },
-  en: { all: "All projects", completed: "Completed", installation: "Installation", production: "Production", open: "View project", back: "All projects", gallery: "Project details", result: "Real work by our team" },
-  pl: { all: "Wszystkie projekty", completed: "Gotowe", installation: "Montaż", production: "Produkcja", open: "Zobacz projekt", back: "Wszystkie realizacje", gallery: "Szczegóły projektu", result: "Prawdziwa praca naszego zespołu" },
-  de: { all: "Alle Projekte", completed: "Fertiggestellt", installation: "Montage", production: "Fertigung", open: "Projekt ansehen", back: "Alle Projekte", gallery: "Projektdetails", result: "Echte Arbeit unseres Teams" },
+  ru: { all: "Все проекты", completed: "Готово", installation: "Монтаж", production: "Производство", open: "Смотреть проект", back: "Все реализации", gallery: "Детали проекта", result: "Реальная работа нашей команды", selected: "Избранные проекты", imageLabels: ["Общий вид", "Основной ракурс", "Композиция мебели", "Деталь конструкции", "Материалы и отделка", "Интерьер в пространстве", "Точная работа", "Финальный результат"], features: ["Индивидуальный проект", "Качественная фурнитура", "Точное исполнение"], detailIntro: "Каждый элемент изготовлен под конкретное пространство, выбранные материалы и реальный сценарий использования.", close: "Закрыть" },
+  ua: { all: "Усі проєкти", completed: "Готово", installation: "Монтаж", production: "Виробництво", open: "Дивитися проєкт", back: "Усі реалізації", gallery: "Деталі проєкту", result: "Реальна робота нашої команди", selected: "Обрані проєкти", imageLabels: ["Загальний вигляд", "Основний ракурс", "Композиція меблів", "Деталь конструкції", "Матеріали й оздоблення", "Інтер’єр у просторі", "Точна робота", "Фінальний результат"], features: ["Індивідуальний проєкт", "Якісна фурнітура", "Точне виконання"], detailIntro: "Кожен елемент виготовлено для конкретного простору, обраних матеріалів і реального сценарію використання.", close: "Закрити" },
+  cs: { all: "Všechny projekty", completed: "Dokončeno", installation: "Montáž", production: "Výroba", open: "Zobrazit projekt", back: "Všechny realizace", gallery: "Detail projektu", result: "Skutečná práce našeho týmu", selected: "Vybrané projekty", imageLabels: ["Celkový pohled", "Hlavní záběr", "Kompozice nábytku", "Konstrukční detail", "Materiály a povrchy", "Interiér v prostoru", "Precizní práce", "Finální výsledek"], features: ["Individuální projekt", "Kvalitní kování", "Přesné provedení"], detailIntro: "Každý prvek vznikl pro konkrétní prostor, zvolené materiály a skutečný způsob používání interiéru.", close: "Zavřít" },
+  en: { all: "All projects", completed: "Completed", installation: "Installation", production: "Production", open: "View project", back: "All projects", gallery: "Project details", result: "Real work by our team", selected: "Selected projects", imageLabels: ["Overall view", "Main perspective", "Furniture composition", "Construction detail", "Materials and finish", "Interior in context", "Precise craftsmanship", "Final result"], features: ["Individual design", "Quality hardware", "Precise execution"], detailIntro: "Every element was made for the specific space, selected materials and the way the interior is used in real life.", close: "Close" },
+  pl: { all: "Wszystkie projekty", completed: "Gotowe", installation: "Montaż", production: "Produkcja", open: "Zobacz projekt", back: "Wszystkie realizacje", gallery: "Szczegóły projektu", result: "Prawdziwa praca naszego zespołu", selected: "Wybrane projekty", imageLabels: ["Widok ogólny", "Główne ujęcie", "Kompozycja mebli", "Detal konstrukcji", "Materiały i wykończenie", "Wnętrze w przestrzeni", "Precyzyjne wykonanie", "Efekt końcowy"], features: ["Projekt indywidualny", "Wysokiej jakości okucia", "Precyzyjne wykonanie"], detailIntro: "Każdy element wykonaliśmy dla konkretnej przestrzeni, wybranych materiałów i rzeczywistego sposobu użytkowania wnętrza.", close: "Zamknij" },
+  de: { all: "Alle Projekte", completed: "Fertiggestellt", installation: "Montage", production: "Fertigung", open: "Projekt ansehen", back: "Alle Projekte", gallery: "Projektdetails", result: "Echte Arbeit unseres Teams", selected: "Ausgewählte Projekte", imageLabels: ["Gesamtansicht", "Hauptperspektive", "Möbelkomposition", "Konstruktionsdetail", "Materialien und Oberflächen", "Interieur im Raum", "Präzise Handarbeit", "Fertiges Ergebnis"], features: ["Individuelle Planung", "Hochwertige Beschläge", "Präzise Ausführung"], detailIntro: "Jedes Element wurde für den konkreten Raum, die gewählten Materialien und die tatsächliche Nutzung des Interieurs gefertigt.", close: "Schließen" },
 };
 
 export const portfolioProjects: PortfolioProject[] = [
@@ -46,7 +52,6 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/kitchen-oak-light-cover.webp",
     images: ["/media/projects/kitchen-oak-light-cover.webp", "/media/projects/kitchen-oak-light-wide.webp", "/media/projects/kitchen-oak-light-detail.webp"],
-    featured: true,
     copy: {
       ru: { title: "Светлая кухня с дубом", category: "Кухня на заказ", details: "Матовые фасады · дубовый декор · встроенный свет" },
       ua: { title: "Світла кухня з дубом", category: "Кухня на замовлення", details: "Матові фасади · дубовий декор · вбудоване світло" },
@@ -61,7 +66,6 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/kitchen-beams-cover.webp",
     images: ["/media/projects/kitchen-beams-cover.webp", "/media/projects/kitchen-beams-wide.webp", "/media/projects/kitchen-beams-detail.webp"],
-    featured: true,
     copy: {
       ru: { title: "Кухня под историческими балками", category: "Кухня на заказ", details: "Точная подгонка · сложная геометрия · готовый интерьер" },
       ua: { title: "Кухня під історичними балками", category: "Кухня на замовлення", details: "Точне припасування · складна геометрія · готовий інтер’єр" },
@@ -77,6 +81,7 @@ export const portfolioProjects: PortfolioProject[] = [
     cover: "/media/projects/salon-partition-cover.webp",
     images: ["/media/projects/salon-partition-cover.webp", "/media/projects/salon-partition-detail.webp"],
     featured: true,
+    featuredRank: 2,
     copy: {
       ru: { title: "Световая перегородка для салона", category: "Коммерческий интерьер", details: "Шпон · зеркала · стекло · интегрированная подсветка" },
       ua: { title: "Світлова перегородка для салону", category: "Комерційний інтер’єр", details: "Шпон · дзеркала · скло · інтегроване підсвічування" },
@@ -106,7 +111,6 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/apartment-kitchen.webp",
     images: ["/media/projects/apartment-kitchen.webp", "/media/projects/apartment-dining.webp", "/media/projects/apartment-bedroom.webp"],
-    featured: true,
     copy: {
       ru: { title: "Меблировка квартиры", category: "Комплексный интерьер", details: "Кухня · столовая · спальни · гардеробная" },
       ua: { title: "Меблювання квартири", category: "Комплексний інтер’єр", details: "Кухня · їдальня · спальні · гардеробна" },
@@ -121,7 +125,6 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/wine-cellar-cover.webp",
     images: ["/media/projects/wine-cellar-cover.webp", "/media/projects/wine-cellar-detail.webp", "/media/projects/wine-cellar-bar.webp"],
-    featured: true,
     copy: {
       ru: { title: "Винная комната", category: "Нестандартная мебель", details: "Стеллажи · винные ячейки · бар · сложная архитектура" },
       ua: { title: "Винна кімната", category: "Нестандартні меблі", details: "Стелажі · винні комірки · бар · складна архітектура" },
@@ -138,6 +141,8 @@ export const portfolioProjects: PortfolioProject[] = [
     hero: "/media/projects/gloss-walnut-kitchen/garden-view.webp",
     coverPosition: "center 52%",
     heroPosition: "center 50%",
+    featured: true,
+    featuredRank: 1,
     wide: true,
     images: [
       "/media/projects/gloss-walnut-kitchen/garden-view.webp",
@@ -162,6 +167,7 @@ export const portfolioProjects: PortfolioProject[] = [
     cover: "/media/projects/classic-childrens-room/cover.webp",
     hero: "/media/projects/classic-childrens-room/wide.webp",
     featured: true,
+    featuredRank: 3,
     images: [
       "/media/projects/classic-childrens-room/cover.webp",
       "/media/projects/classic-childrens-room/wide.webp",
@@ -186,6 +192,8 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/mint-classic-kitchen/cover.webp",
     hero: "/media/projects/mint-classic-kitchen/wide.webp",
+    featured: true,
+    featuredRank: 4,
     images: [
       "/media/projects/mint-classic-kitchen/cover.webp",
       "/media/projects/mint-classic-kitchen/wide.webp",
@@ -228,6 +236,8 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/ivory-classic-interior/kitchen-front.webp",
     hero: "/media/projects/ivory-classic-interior/dining-view.webp",
+    featured: true,
+    featuredRank: 5,
     images: [
       "/media/projects/ivory-classic-interior/kitchen-front.webp",
       "/media/projects/ivory-classic-interior/kitchen-angle.webp",
@@ -250,6 +260,8 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/wood-panel-bedroom/4322.webp",
     hero: "/media/projects/wood-panel-bedroom/4320.webp",
+    featured: true,
+    featuredRank: 6,
     images: [
       "/media/projects/wood-panel-bedroom/4322.webp",
       "/media/projects/wood-panel-bedroom/4321.webp",
@@ -269,6 +281,8 @@ export const portfolioProjects: PortfolioProject[] = [
     status: "completed",
     cover: "/media/projects/classic-wood-office/6682.webp",
     hero: "/media/projects/classic-wood-office/6727.webp",
+    featured: true,
+    featuredRank: 7,
     images: [
       "/media/projects/classic-wood-office/6682.webp",
       "/media/projects/classic-wood-office/6727.webp",
@@ -397,7 +411,6 @@ export const portfolioProjects: PortfolioProject[] = [
     slug: "grey-neoclassical-kitchen",
     status: "completed",
     cover: "/media/projects/grey-classic-kitchen-cover.webp",
-    featured: true,
     images: [
       "/media/projects/grey-classic-kitchen-cover.webp",
       "/media/projects/grey-classic-display.webp",
