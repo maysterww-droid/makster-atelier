@@ -1197,3 +1197,77 @@ html.motion-ready .hero-phases{animation-delay:.32s}
   html.motion-ready .art-hero-copy .eyebrow,html.motion-ready .art-hero-copy h1,html.motion-ready .art-hero-lead,html.motion-ready .art-hero-actions{animation:none}
   *,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
+
+/* Portfolio photo refresh — natural color, complete frames, editorial rhythm */
+.portfolio-home-grid .project-card img{
+  filter:saturate(.9) brightness(.88) contrast(1.02);
+}
+.portfolio-home-grid .project-overlay{
+  background:linear-gradient(0deg,rgba(4,4,3,.95) 0,rgba(4,4,3,.6) 31%,rgba(4,4,3,.08) 72%);
+}
+.art-site-projects .project-art-card:after{
+  background:linear-gradient(0deg,rgba(4,4,3,.97) 0,rgba(4,4,3,.62) 37%,rgba(4,4,3,.08) 75%);
+}
+.art-site-projects .project-art-card .project-card-media img{
+  filter:saturate(.9) brightness(.84) contrast(1.03);
+}
+.project-detail-hero>img{
+  filter:saturate(.9) brightness(.7) contrast(1.025);
+}
+.project-detail-grid{
+  display:block;
+  columns:2;
+  column-gap:15px;
+}
+.project-detail-grid figure,
+.project-detail-grid figure.wide{
+  display:inline-block;
+  width:100%;
+  height:auto;
+  margin:0 0 15px;
+  overflow:hidden;
+  break-inside:avoid;
+  border:1px solid var(--line);
+  background:#0c0d0b;
+  vertical-align:top;
+}
+.project-detail-grid img{
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit:contain;
+  filter:saturate(.94) contrast(1.015);
+}
+.project-detail-grid figcaption{
+  top:14px;
+  left:14px;
+  border:1px solid rgba(240,203,132,.28);
+  backdrop-filter:blur(7px);
+}
+
+@media(hover:hover) and (pointer:fine){
+  .art-site-projects .project-art-card:hover .project-card-media img{
+    filter:saturate(.98) brightness(.9) contrast(1.03);
+  }
+}
+
+@media(max-width:760px){
+  .portfolio-home-grid .project-card img{
+    filter:saturate(.92) brightness(.9) contrast(1.02);
+  }
+  .art-site-projects .project-card-media img{
+    filter:saturate(.92) brightness(.9) contrast(1.02)!important;
+  }
+  .project-detail-grid{
+    columns:1;
+  }
+  .project-detail-grid figure,
+  .project-detail-grid figure.wide{
+    height:auto;
+    margin-bottom:12px;
+  }
+  .project-detail-grid img{
+    width:100%;
+    height:auto;
+  }
+}

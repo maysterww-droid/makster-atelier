@@ -129,7 +129,13 @@ export default function Home() {
             const projectText = project.copy[lang];
             return (
             <a className={index === 0 ? "project-card project-card-wide" : "project-card"} key={project.slug} href={`/realizace/${project.slug}`}>
-              <img src={project.cover} alt={projectText.title} loading={index > 1 ? "lazy" : "eager"} />
+              <img
+                src={project.cover}
+                alt={projectText.title}
+                decoding="async"
+                loading={index > 1 ? "lazy" : "eager"}
+                style={{ objectPosition: project.coverPosition ?? "center" }}
+              />
               <b className="home-project-status">{portfolio[project.status]}</b>
               <div className="project-overlay"><span>{projectText.category} · {projectText.details}</span><h3>{projectText.title}</h3><i>{String(index + 1).padStart(2, "0")}</i></div>
             </a>

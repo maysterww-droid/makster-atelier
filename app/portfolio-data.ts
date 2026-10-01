@@ -13,8 +13,11 @@ export type PortfolioProject = {
   status: ProjectStatus;
   cover: string;
   hero?: string;
+  coverPosition?: string;
+  heroPosition?: string;
   images: string[];
   featured?: boolean;
+  wide?: boolean;
   copy: Record<Lang, ProjectCopy>;
 };
 
@@ -125,6 +128,31 @@ export const portfolioProjects: PortfolioProject[] = [
       en: { title: "Bespoke wine room", category: "Custom furniture", details: "Shelving · wine storage · bar · complex architecture" },
       pl: { title: "Pokój winny", category: "Meble nietypowe", details: "Regały · stojaki na wino · bar · złożona architektura" },
       de: { title: "Weinraum nach Maß", category: "Sondermöbel", details: "Regale · Weinlagerung · Bar · komplexe Architektur" },
+    },
+  },
+  {
+    slug: "gloss-walnut-kitchen",
+    status: "completed",
+    cover: "/media/projects/gloss-walnut-kitchen/cover.webp",
+    hero: "/media/projects/gloss-walnut-kitchen/garden-view.webp",
+    coverPosition: "center 52%",
+    heroPosition: "center 50%",
+    wide: true,
+    images: [
+      "/media/projects/gloss-walnut-kitchen/garden-view.webp",
+      "/media/projects/gloss-walnut-kitchen/cover.webp",
+      "/media/projects/gloss-walnut-kitchen/window-run.webp",
+      "/media/projects/gloss-walnut-kitchen/appliance-wall.webp",
+      "/media/projects/gloss-walnut-kitchen/island-detail.webp",
+      "/media/projects/gloss-walnut-kitchen/peninsula-detail.webp",
+    ],
+    copy: {
+      ru: { title: "Глянцевая кухня в орехе", category: "Кухня на заказ", details: "Ореховый декор · глянцевые фасады · остров · встроенная техника" },
+      ua: { title: "Глянцева кухня в горіховому декорі", category: "Кухня на замовлення", details: "Горіховий декор · глянцеві фасади · острів · вбудована техніка" },
+      cs: { title: "Lesklá kuchyň v ořechovém dekoru", category: "Kuchyň na míru", details: "Ořechový dekor · lesklá čela · ostrůvek · vestavné spotřebiče" },
+      en: { title: "Gloss walnut kitchen", category: "Bespoke kitchen", details: "Walnut décor · gloss fronts · island · integrated appliances" },
+      pl: { title: "Kuchnia w połysku z dekorem orzecha", category: "Kuchnia na wymiar", details: "Dekor orzecha · fronty w połysku · wyspa · zabudowane AGD" },
+      de: { title: "Hochglanzküche in Walnuss", category: "Küche nach Maß", details: "Walnussdekor · Hochglanzfronten · Insel · Einbaugeräte" },
     },
   },
   {
@@ -276,6 +304,30 @@ export const portfolioProjects: PortfolioProject[] = [
     },
   },
   {
+    slug: "mahogany-wardrobe",
+    status: "completed",
+    cover: "/media/projects/mahogany-wardrobe/cover.webp",
+    hero: "/media/projects/mahogany-wardrobe/room-view.webp",
+    coverPosition: "center 43%",
+    heroPosition: "center 44%",
+    images: [
+      "/media/projects/mahogany-wardrobe/cover.webp",
+      "/media/projects/mahogany-wardrobe/front.webp",
+      "/media/projects/mahogany-wardrobe/open.webp",
+      "/media/projects/mahogany-wardrobe/crown-detail.webp",
+      "/media/projects/mahogany-wardrobe/side-angle.webp",
+      "/media/projects/mahogany-wardrobe/room-view.webp",
+    ],
+    copy: {
+      ru: { title: "Классический шкаф из тёмного дерева", category: "Корпусная мебель на заказ", details: "Филенчатые фасады · карниз · внутреннее оснащение · точная столярная работа" },
+      ua: { title: "Класична шафа з темного дерева", category: "Корпусні меблі на замовлення", details: "Фільончасті фасади · карниз · внутрішнє оснащення · точна столярна робота" },
+      cs: { title: "Klasická skříň z tmavého dřeva", category: "Skříňový nábytek na míru", details: "Rámová dvířka · profilovaná římsa · vnitřní vybavení · precizní truhlářská práce" },
+      en: { title: "Classic dark wood wardrobe", category: "Bespoke cabinet furniture", details: "Panelled fronts · moulded cornice · fitted interior · precise joinery" },
+      pl: { title: "Klasyczna szafa z ciemnego drewna", category: "Meble skrzyniowe na wymiar", details: "Fronty płycinowe · profilowany gzyms · wyposażenie wnętrza · precyzyjne stolarstwo" },
+      de: { title: "Klassischer Schrank aus dunklem Holz", category: "Korpusmöbel nach Maß", details: "Kassettenfronten · Profilkranz · Innenausstattung · präzise Tischlerarbeit" },
+    },
+  },
+  {
     slug: "white-bedroom-furniture",
     status: "completed",
     cover: "/media/projects/white-bedroom-furniture/7795.webp",
@@ -293,6 +345,29 @@ export const portfolioProjects: PortfolioProject[] = [
       en: { title: "White bedroom furniture", category: "Bespoke bedroom furniture", details: "Bed · chest of drawers · dressing table · mirrored wardrobe" },
       pl: { title: "Białe meble do sypialni", category: "Meble do sypialni na wymiar", details: "Łóżko · komoda · toaletka · szafa z lustrami" },
       de: { title: "Weiße Schlafzimmermöbel", category: "Schlafzimmermöbel nach Maß", details: "Bett · Kommode · Schminktisch · Spiegelschrank" },
+    },
+  },
+  {
+    slug: "striped-bedroom",
+    status: "completed",
+    cover: "/media/projects/striped-bedroom/cover.webp",
+    hero: "/media/projects/striped-bedroom/bed-and-desk.webp",
+    coverPosition: "center 54%",
+    heroPosition: "center 55%",
+    images: [
+      "/media/projects/striped-bedroom/bed-and-desk.webp",
+      "/media/projects/striped-bedroom/cover.webp",
+      "/media/projects/striped-bedroom/wardrobe-front.webp",
+      "/media/projects/striped-bedroom/wardrobe-angle.webp",
+      "/media/projects/striped-bedroom/bed-detail.webp",
+    ],
+    copy: {
+      ru: { title: "Белая спальня с полосатым декором", category: "Мебель для спальни на заказ", details: "Шкаф во всю стену · кровать · рабочий стол · единый графичный декор" },
+      ua: { title: "Біла спальня зі смугастим декором", category: "Меблі для спальні на замовлення", details: "Шафа на всю стіну · ліжко · робочий стіл · єдиний графічний декор" },
+      cs: { title: "Bílá ložnice s pruhovaným dekorem", category: "Nábytek do ložnice na míru", details: "Celostěnová skříň · postel · pracovní stůl · jednotný grafický dekor" },
+      en: { title: "White bedroom with striped detailing", category: "Bespoke bedroom furniture", details: "Full-wall wardrobe · bed · desk · coordinated graphic detailing" },
+      pl: { title: "Biała sypialnia z pasiastym dekorem", category: "Meble do sypialni na wymiar", details: "Szafa na całą ścianę · łóżko · biurko · spójny graficzny dekor" },
+      de: { title: "Weißes Schlafzimmer mit Streifendekor", category: "Schlafzimmermöbel nach Maß", details: "Wandschrank · Bett · Schreibtisch · durchgängiges grafisches Dekor" },
     },
   },
   {

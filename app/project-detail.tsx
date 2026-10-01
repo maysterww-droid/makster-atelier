@@ -17,7 +17,13 @@ export default function ProjectDetail({ project }: { project: PortfolioProject }
     <main className="site project-detail-page">
       <SiteHeader lang={lang} onLanguage={changeLanguage} />
       <section className="project-detail-hero">
-        <img src={project.hero ?? project.cover} alt={text.title} fetchPriority="high" />
+        <img
+          src={project.hero ?? project.cover}
+          alt={text.title}
+          decoding="async"
+          fetchPriority="high"
+          style={{ objectPosition: project.heroPosition ?? project.coverPosition ?? "center" }}
+        />
         <span />
         <div className="section-shell project-detail-copy">
           <Link href="/realizace"><ArrowLeft size={17} />{ui.back}</Link>
@@ -36,7 +42,12 @@ export default function ProjectDetail({ project }: { project: PortfolioProject }
         <div className="project-detail-grid">
           {project.images.map((image, index) => (
             <figure className={index === 0 ? "wide" : ""} key={image}>
-              <img src={image} alt={`${text.title} — ${index + 1}`} loading={index === 0 ? "eager" : "lazy"} />
+              <img
+                src={image}
+                alt={`${text.title} — ${index + 1}`}
+                decoding="async"
+                loading={index === 0 ? "eager" : "lazy"}
+              />
               <figcaption>{String(index + 1).padStart(2, "0")}</figcaption>
             </figure>
           ))}

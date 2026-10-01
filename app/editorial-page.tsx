@@ -328,7 +328,13 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
           <section className="projects-art exact-section section-shell">
             <div className="project-filter" aria-label={portfolio.all}>
               {(["all", "completed", "installation", "production"] as const).map((filter) => (
-                <button className={projectFilter === filter ? "active" : ""} key={filter} onClick={() => setProjectFilter(filter)}>
+                <button
+                  aria-pressed={projectFilter === filter}
+                  className={projectFilter === filter ? "active" : ""}
+                  key={filter}
+                  onClick={() => setProjectFilter(filter)}
+                  type="button"
+                >
                   {filter === "all" ? portfolio.all : portfolio[filter]}
                 </button>
               ))}
@@ -336,8 +342,17 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
             <div className="projects-art-heading"><h2>{x.projectsIntro}</h2><strong>{String(projectCards.length).padStart(2, "0")}</strong></div>
             <div className="project-art-grid exact-project-grid">
               {projectCards.map((project, index) => (
-                <article className={index === 0 ? "project-art-card wide" : "project-art-card"} key={project.slug}>
-                  <picture className="project-card-media"><img src={project.cover} alt={project.copy[lang].title} loading={index > 2 ? "lazy" : "eager"} /></picture>
+                <article className={index === 0 || project.wide ? "project-art-card wide" : "project-art-card"} key={project.slug}>
+                  <picture className="project-card-media">
+                    <img
+                      src={project.cover}
+                      alt={project.copy[lang].title}
+                      decoding="async"
+                      fetchPriority={index === 0 ? "high" : "auto"}
+                      loading={index > 2 ? "lazy" : "eager"}
+                      style={{ objectPosition: project.coverPosition ?? "center" }}
+                    />
+                  </picture>
                   <span>{String(index + 1).padStart(2, "0")}</span><small>{project.copy[lang].category}</small>
                   <div>
                     <b className={`project-badge status-${project.status}`}>{portfolio[project.status]}</b>
