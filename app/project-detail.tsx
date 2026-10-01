@@ -16,7 +16,9 @@ export default function ProjectDetail({ project }: { project: PortfolioProject }
   return (
     <main className="site project-detail-page">
       <SiteHeader lang={lang} onLanguage={changeLanguage} />
-      <section className="project-detail-hero">
+      <section
+        className={`project-detail-hero${project.heroLayout === "portrait" ? " project-detail-hero-portrait" : ""}`}
+      >
         <img
           src={project.hero ?? project.cover}
           alt={text.title}

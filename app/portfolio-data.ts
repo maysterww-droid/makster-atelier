@@ -15,6 +15,7 @@ export type PortfolioProject = {
   hero?: string;
   coverPosition?: string;
   heroPosition?: string;
+  heroLayout?: "portrait";
   images: string[];
   featured?: boolean;
   wide?: boolean;
@@ -310,6 +311,7 @@ export const portfolioProjects: PortfolioProject[] = [
     hero: "/media/projects/mahogany-wardrobe/room-view.webp",
     coverPosition: "center 43%",
     heroPosition: "center 44%",
+    heroLayout: "portrait",
     images: [
       "/media/projects/mahogany-wardrobe/cover.webp",
       "/media/projects/mahogany-wardrobe/front.webp",
