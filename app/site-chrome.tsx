@@ -33,7 +33,7 @@ export function SiteHeader({ lang, onLanguage, home = false, minimalNav = false 
         {t.nav.map((item, index) => (
           <Link className={pathname === navLinks[index] ? "active" : ""} key={item} href={navLinks[index]}>{item}</Link>
         ))}
-        {!home && !minimalNav && <Link className={pathname === "/jak-pracujeme" ? "active" : ""} href="/jak-pracujeme">{t.processKicker}</Link>}
+        {!home && !minimalNav && <Link className={`process-nav-link${pathname === "/jak-pracujeme" ? " active" : ""}`} href="/jak-pracujeme">{t.processKicker}</Link>}
       </nav>
       <div className="header-actions">
         <div className="desktop-languages" aria-label="Language">

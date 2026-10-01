@@ -1239,10 +1239,11 @@ html.motion-ready .hero-phases{animation-delay:.32s}
   filter:saturate(.94) contrast(1.015);
 }
 .project-detail-grid figcaption{
-  top:14px;
-  left:14px;
-  border:1px solid rgba(240,203,132,.28);
-  backdrop-filter:blur(7px);
+  display:none;
+}
+
+@media(max-width:1480px) and (min-width:1181px){
+  .desktop-nav .process-nav-link{display:none}
 }
 
 @media(hover:hover) and (pointer:fine){
