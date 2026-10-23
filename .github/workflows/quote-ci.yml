@@ -1,0 +1,32 @@
+name: Makster Quote CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/quote/**'
+      - 'supabase/migrations/**makster_quote**'
+      - '.github/workflows/quote-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/quote
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: PDF smoke
+        run: npm run pdf:smoke
+      - name: Build
+        run: npm run build

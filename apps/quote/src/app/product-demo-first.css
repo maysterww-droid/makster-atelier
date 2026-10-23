@@ -1,0 +1,44 @@
+/* 0.9 Product Demo First — loaded last. */
+
+/* Hero should explain fast and reveal the product immediately. */
+.mq-premium [class*="hero"]{padding-top:62px!important;padding-bottom:34px!important;gap:36px!important}
+.mq-premium [class*="hero"] h1{max-width:760px!important}
+.mq-premium [class*="heroCopy"]>p{max-width:560px!important}
+.mq-premium [class*="visualStage"]{box-shadow:0 24px 66px rgba(50,30,18,.13)!important}
+
+/* Lower page: less prose, more scanability. */
+.mq-premium [class*="conversion"]{padding-top:66px!important;padding-bottom:76px!important}
+.mq-premium [class*="conversionHead"]{display:block!important}
+.mq-premium [class*="conversionHead"] h2{max-width:720px!important}
+.mq-premium [class*="audienceGrid"]{margin-top:30px!important}
+.mq-premium [class*="audienceCard"]{min-height:0!important}
+.mq-premium [class*="pilotPanel"]{margin-top:28px!important}
+.mq-premium [class*="trustBar"]{margin-top:12px!important}
+
+@media(max-width:780px){
+  .mq-premium [class*="hero"]{padding:34px 20px 18px!important;gap:16px!important}
+  .mq-premium [class*="hero"] h1{font-size:clamp(39px,11.2vw,50px)!important;line-height:.94!important;margin:10px 0 14px!important;letter-spacing:-.052em!important}
+  .mq-premium [class*="heroCopy"]>p{font-size:14px!important;line-height:1.48!important;margin-bottom:0!important;max-width:35ch!important}
+  .mq-premium [class*="actions"]{margin-top:20px!important;gap:7px!important}
+  .mq-premium [class*="actions"] a{min-height:48px!important;font-size:12px!important}
+  .mq-premium [class*="visualStage"]{margin-top:4px!important;padding:10px!important;border-radius:19px!important}
+  .mq-premium [class*="visualStage"] [class*="cockpit"]{margin-top:58px!important;border-radius:16px!important}
+  .mq-software-tag{font-size:6px!important;padding:7px 8px!important;letter-spacing:.11em!important}
+  .mq-live-project{padding:7px 8px!important}.mq-live-project span{font-size:6px!important}.mq-live-project b{font-size:9px!important}
+
+  .mq-premium #features{padding-top:54px!important;padding-bottom:58px!important}
+  .mq-premium #features [class*="sectionHead"] h2{font-size:36px!important}
+  .mq-premium [class*="conversion"]{padding:52px 20px 60px!important}
+  .mq-premium [class*="conversionHead"] h2{font-size:38px!important;line-height:1!important}
+  .mq-premium [class*="audienceGrid"]{margin-top:24px!important;gap:8px!important}
+  .mq-premium [class*="audienceCard"]{padding:18px!important;border-radius:17px!important}
+  .mq-premium [class*="audienceCard"] h3{font-size:21px!important;margin:18px 0 8px!important}
+  .mq-premium [class*="audienceCard"] li{font-size:10px!important}
+  .mq-premium [class*="pilotPanel"]{margin-top:18px!important;padding:22px 18px!important}
+  .mq-premium [class*="pilotPanel"] h3{font-size:31px!important}
+  .mq-premium [class*="pilotSteps"]{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .mq-premium [class*="pilotSteps"] article{min-height:64px!important;padding:12px!important}
+  .mq-premium [class*="trustBar"]{grid-template-columns:1fr 1fr!important}
+  .mq-premium [class*="trustBar"] div{padding:12px!important;border-bottom:1px solid #e5d8cb!important}
+  .mq-premium [class*="trustBar"] b{font-size:10px!important}
+}

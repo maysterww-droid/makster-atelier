@@ -1,0 +1,41 @@
+/* Mobile Product Demo: one state at a time instead of a long stack. */
+@media(max-width:780px){
+  .mq-premium [class*="stage0"] [class*="calculation"]{display:none!important}
+
+  .mq-premium [class*="stage1"] [class*="projectCanvas"],
+  .mq-premium [class*="stage2"] [class*="projectCanvas"],
+  .mq-premium [class*="stage3"] [class*="projectCanvas"]{display:none!important}
+
+  .mq-premium [class*="stage1"] [class*="calculation"],
+  .mq-premium [class*="stage2"] [class*="calculation"],
+  .mq-premium [class*="stage3"] [class*="calculation"]{
+    display:block!important;
+    min-height:300px;
+    padding:22px 18px!important;
+  }
+
+  .mq-premium [class*="stage1"] [class*="costBox"],
+  .mq-premium [class*="stage1"] [class*="clientBox"]{display:none!important}
+
+  .mq-premium [class*="stage2"] [class*="priceBook"],
+  .mq-premium [class*="stage2"] [class*="clientBox"]{display:none!important}
+
+  .mq-premium [class*="stage3"] [class*="priceBook"],
+  .mq-premium [class*="stage3"] [class*="costBox"]{display:none!important}
+
+  .mq-premium [class*="stage1"] [class*="priceBook"],
+  .mq-premium [class*="stage2"] [class*="costBox"],
+  .mq-premium [class*="stage3"] [class*="clientBox"]{
+    display:block!important;
+    min-height:250px;
+    padding:22px!important;
+    border-radius:18px!important;
+    transform:none!important;
+  }
+
+  .mq-premium [class*="stage1"] [class*="priceBook"] p,
+  .mq-premium [class*="stage2"] [class*="costBox"] p{padding:13px 0!important;font-size:11px!important}
+  .mq-premium [class*="stage2"] [class*="costBox"]>strong,
+  .mq-premium [class*="stage3"] [class*="clientBox"]>strong{font-size:34px!important}
+  .mq-premium [class*="stage3"] [class*="pdfMini"]{margin-top:28px;padding:16px!important}
+}

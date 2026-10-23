@@ -1,0 +1,121 @@
+.mq-premium{
+  --muted:#76695f;
+  --line:#dfd1c2;
+}
+
+/* Hero: remove the last mint/green light from the original theme. */
+.mq-premium [class*="heroGlow"]{
+  background:radial-gradient(circle,
+    rgba(197,145,97,.24) 0%,
+    rgba(226,195,160,.16) 34%,
+    rgba(247,242,235,0) 72%)!important;
+  filter:blur(10px)!important;
+}
+
+.mq-premium [class*="heroCopy"]>p,
+.mq-premium [class*="sectionHead"] p,
+.mq-premium [class*="workflow"] p,
+.mq-premium [class*="featureGrid"] p,
+.mq-premium [class*="productCards"] p,
+.mq-premium [class*="faqLayout"] p{
+  color:#786c63!important;
+}
+
+/* All small labels become warm graphite/taupe instead of sage. */
+.mq-premium [class*="eyebrow"]{
+  color:#75665b!important;
+}
+
+.mq-premium [class*="trustRow"] span{
+  color:#786a60!important;
+  border-color:#ddd0c3!important;
+  background:rgba(255,251,246,.76)!important;
+}
+
+.mq-premium [class*="fakeNav"]>*{
+  color:#ad9c90!important;
+}
+
+.mq-premium [class*="fakeNav"] b{
+  color:#fff7ef!important;
+}
+
+.mq-premium [class*="previewTop"] small,
+.mq-premium [class*="previewStats"] span,
+.mq-premium [class*="cabinetList"]>small,
+.mq-premium [class*="costCard"]>small,
+.mq-premium [class*="shotList"]>small,
+.mq-premium [class*="editorCard"]>small,
+.mq-premium [class*="priceRows"] small,
+.mq-premium [class*="documentMock"]>small,
+.mq-premium [class*="docTotal"] span{
+  color:#897a70!important;
+}
+
+.mq-premium [class*="darkStat"] span{
+  color:#c5b4a8!important;
+}
+
+/* Pricing: remove sage labels, descriptions and checks. */
+.mq-premium [class*="pricingSection"] [class*="eyebrow"],
+.mq-premium [class*="pricingSection"] [class*="sectionHead"] p,
+.mq-premium [class*="pricingGrid"] article>small{
+  color:#b7a79b!important;
+}
+
+.mq-premium [class*="pricingGrid"] li{
+  color:#d9cec5!important;
+}
+
+.mq-premium [class*="pricingGrid"] li::before{
+  color:#d2a06f!important;
+}
+
+/* FAQ plus and secondary microcopy. */
+.mq-premium [class*="faqList"] summary span,
+.mq-premium [class*="workflow"] article>span,
+.mq-premium [class*="featureGrid"] article>span{
+  color:#9a897c!important;
+}
+
+/* Final CTA: no mint text remains on the walnut panel. */
+.mq-premium [class*="finalCta"] [class*="eyebrow"]{
+  color:#efd3b7!important;
+}
+
+.mq-premium [class*="finalCta"] p{
+  color:#f2dfcf!important;
+}
+
+/* Warm the app preview chrome and neutral UI leftovers. */
+.mq-premium [class*="windowBar"]>span{
+  background:#d9cbbf!important;
+}
+
+.mq-premium [class*="windowBar"] em,
+.mq-premium [class*="shotList"] em,
+.mq-premium [class*="cabinetList"] small{
+  color:#8c7d72!important;
+}
+
+.mq-premium [class*="previewMain"] button{
+  border-color:#dfd1c4!important;
+  color:#5b493d!important;
+  background:#fffaf5!important;
+}
+
+/* Keep material storytelling warm as well. */
+.mq-premium [class*="story"] [class*="eyebrow"],
+.mq-premium [class*="material"] small,
+.mq-premium [class*="ecosystem"] small{
+  color:#7b695d!important;
+}
+
+@media(max-width:780px){
+  .mq-premium [class*="heroGlow"]{
+    background:radial-gradient(circle,
+      rgba(196,141,94,.20) 0%,
+      rgba(226,194,160,.12) 38%,
+      transparent 72%)!important;
+  }
+}

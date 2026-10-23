@@ -1,0 +1,61 @@
+/* 0.7 Visual Hook — fewer words, bigger visual logic, more motion. Loaded last. */
+
+/* Hero: software first. No furniture thumbnail. */
+.mq-premium [class*="visualStage"]{
+  padding:22px!important;
+  background:
+    radial-gradient(circle at 78% 12%,rgba(193,130,84,.15),transparent 30%),
+    linear-gradient(145deg,#eee2d6,#faf5ef 56%,#eadbcd)!important;
+  overflow:hidden!important;
+}
+.mq-premium [class*="visualStage"]:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(90,59,39,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(90,59,39,.04) 1px,transparent 1px);
+  background-size:28px 28px;mask-image:linear-gradient(to bottom,black,transparent 75%);
+}
+.mq-premium [class*="visualStage"] [class*="cockpit"]{
+  margin-top:86px!important;
+  box-shadow:0 30px 78px rgba(48,28,17,.18)!important;
+}
+.mq-live-project{
+  position:absolute;right:22px;top:20px;z-index:5;display:grid;grid-template-columns:auto auto;column-gap:8px;align-items:center;
+  padding:10px 12px;border-radius:14px;background:rgba(255,252,247,.92);border:1px solid #d9c8b9;box-shadow:0 10px 26px rgba(62,37,22,.09);backdrop-filter:blur(10px)
+}
+.mq-live-project span{grid-column:1/-1;font-size:7px;letter-spacing:.15em;color:#9d775d;font-weight:850}.mq-live-project b{font-size:13px;color:#2f2119}.mq-live-project em{font-style:normal;font-size:8px;color:#88786d}
+
+/* Make the live UI feel active without becoming noisy. */
+@media(prefers-reduced-motion:no-preference){
+  .mq-premium [class*="visualStage"] [class*="metrics"] article:nth-child(1){animation:metricPop 4.8s .5s ease-in-out infinite}
+  .mq-premium [class*="visualStage"] [class*="metrics"] article:nth-child(2){animation:metricPop 4.8s 1.05s ease-in-out infinite}
+  .mq-premium [class*="visualStage"] [class*="metrics"] article:nth-child(3){animation:metricPop 4.8s 1.6s ease-in-out infinite}
+  .mq-premium [class*="visualStage"] [class*="activeModule"]{animation:moduleGlow 4.8s 2.05s ease-in-out infinite}
+}
+@keyframes metricPop{0%,12%,100%{transform:translateY(0);box-shadow:none}18%,28%{transform:translateY(-4px);box-shadow:0 10px 24px rgba(114,70,42,.12)}}
+@keyframes moduleGlow{0%,14%,100%{box-shadow:none}20%,33%{box-shadow:0 0 0 2px rgba(180,117,75,.25),0 10px 22px rgba(104,61,34,.11)}}
+
+/* Trim text-heavy sections on mobile; details remain on desktop. */
+@media(max-width:780px){
+  .mq-premium [class*="hero"]{padding-top:48px!important;gap:22px!important}
+  .mq-premium [class*="hero"] h1{font-size:clamp(46px,13vw,61px)!important;line-height:.93!important}
+  .mq-premium [class*="heroCopy"]>p{font-size:15px!important;line-height:1.5!important;max-width:32ch}
+  .mq-premium [class*="visualStage"]{padding:12px!important;border-radius:22px!important}
+  .mq-premium [class*="visualStage"] [class*="cockpit"]{margin-top:70px!important}
+  .mq-software-tag{top:12px;left:12px}
+  .mq-live-project{right:12px;top:10px;padding:8px 9px}.mq-live-project em{display:none}.mq-live-project b{font-size:10px}
+
+  .mq-premium [class*="productCards"] article>div:first-child p{display:none!important}
+  .mq-premium [class*="productCards"] article>div:first-child h3{margin-bottom:16px!important}
+  .mq-premium [class*="materialIntro"] p{display:none!important}
+  .mq-premium [class*="ecosystemHeader"]>p{display:none!important}
+  .mq-premium [class*="conversionHead"]>p{display:none!important}
+  .mq-premium [class*="audienceCard"]>p{display:none!important}
+  .mq-premium [class*="audienceCard"] ul{margin-top:14px!important}
+  .mq-premium [class*="pilotPanel"]>div>p{display:none!important}
+  .mq-premium [class*="pilotSteps"] p{display:none!important}
+  .mq-premium [class*="pilotSteps"] article{min-height:76px!important;display:grid;align-content:center}
+
+  /* Keep the dark capabilities section dramatic but legible. */
+  .mq-premium #features [class*="sectionHead"]{max-width:100%!important}
+  .mq-premium #features [class*="sectionHead"] h2{font-size:42px!important;color:#fff!important}
+  .mq-premium #features [class*="featureGrid"] article{min-height:118px!important;box-shadow:0 14px 32px rgba(0,0,0,.12)!important}
+}

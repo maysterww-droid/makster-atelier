@@ -1,0 +1,117 @@
+/* 0.6 Clarity First — product first, furniture context second. Loaded last. */
+
+/* Hero: unmistakably software, with furniture only as project context. */
+.mq-premium [class*="visualStage"]{
+  min-height:0!important;
+  padding:28px!important;
+  overflow:visible!important;
+  border-radius:28px!important;
+  background:
+    radial-gradient(circle at 80% 8%,rgba(190,129,83,.13),transparent 28%),
+    linear-gradient(145deg,#eee2d6,#f8f2eb 52%,#eadbcd)!important;
+  border:1px solid #d8c7b7!important;
+  box-shadow:0 34px 90px rgba(66,40,24,.12)!important;
+}
+.mq-premium [class*="visualStage"] [class*="cockpit"]{
+  position:relative!important;
+  width:100%!important;
+  right:auto!important;
+  bottom:auto!important;
+  margin-top:104px!important;
+  transform:none!important;
+  box-shadow:0 26px 72px rgba(54,31,19,.16)!important;
+  z-index:3;
+}
+.mq-premium [class*="visualStage"] [class*="cockpitBody"]{min-height:390px!important}
+
+.mq-software-tag{
+  position:absolute;left:28px;top:28px;z-index:4;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 12px;border-radius:999px;
+  background:#2a1c15;color:#f7eadf;
+  font-size:8px;font-weight:850;letter-spacing:.14em;
+  box-shadow:0 10px 25px rgba(48,29,18,.13);
+}
+.mq-software-tag:before{content:"";width:6px;height:6px;border-radius:50%;background:#c48a5c;box-shadow:0 0 0 4px rgba(196,138,92,.13)}
+
+.mq-hero-context{
+  position:absolute;right:26px;top:18px;z-index:2;
+  width:190px;height:104px;border-radius:18px;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:2px;
+  padding:13px;color:white;
+  background:
+    linear-gradient(180deg,rgba(30,17,10,.02),rgba(30,17,10,.64)),
+    url('https://images.unsplash.com/photo-1769326541248-5e09a8ace25b?auto=format&fit=crop&fm=jpg&q=82&w=700') center/cover no-repeat;
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow:0 14px 34px rgba(64,38,22,.15);
+}
+.mq-hero-context small{font-size:7px;letter-spacing:.14em;color:#f0d6bd}.mq-hero-context b{font-size:13px}.mq-hero-context span{font-size:8px;color:#eaded3}
+
+.mq-premium [class*="heroCopy"]>p strong{color:#322219;font-weight:850}
+.mq-hero-flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:25px;color:#78695f;font-size:10px}
+.mq-hero-flow span{padding:8px 10px;border:1px solid #ddcfc1;border-radius:999px;background:rgba(255,253,249,.78)}
+.mq-hero-flow i{font-style:normal;color:#b27a53;font-weight:900}
+
+/* One scan and the visitor knows what the product is. */
+.mq-product-summary{
+  max-width:1240px;margin:0 auto;padding:6px 28px 74px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+}
+.mq-product-summary article{
+  min-height:190px;padding:24px;border:1px solid #ddcebf;border-radius:22px;
+  background:linear-gradient(145deg,rgba(255,253,249,.94),rgba(244,235,226,.82));
+  box-shadow:0 14px 38px rgba(70,43,26,.045);position:relative;overflow:hidden;
+}
+.mq-product-summary article:after{content:"";position:absolute;width:130px;height:130px;right:-65px;top:-65px;border-radius:50%;background:radial-gradient(circle,rgba(175,115,74,.10),transparent 70%)}
+.mq-product-summary article>span{font-size:10px;color:#a36e49;font-weight:850}.mq-product-summary small{display:block;margin-top:28px;font-size:8px;letter-spacing:.15em;color:#8e7767;font-weight:850}.mq-product-summary b{display:block;margin-top:8px;font-size:21px;line-height:1.12;color:#261c17;letter-spacing:-.025em}.mq-product-summary p{margin:11px 0 0;color:#786b61;font-size:12px;line-height:1.58}
+
+/* The capabilities section is intentionally dark, but now fully readable. */
+.mq-premium #features{
+  background:radial-gradient(circle at 18% 12%,rgba(161,100,62,.14),transparent 26%),linear-gradient(145deg,#211713,#2d1e17)!important;
+  color:#fff!important;
+  padding-top:88px!important;padding-bottom:96px!important;
+}
+.mq-premium #features [class*="sectionHead"] h2{color:#fff!important}
+.mq-premium #features [class*="sectionHead"] [class*="eyebrow"]{color:#d5ad87!important}
+.mq-premium #features [class*="featureGrid"] article{
+  background:linear-gradient(145deg,#fbf6f0,#eee4da)!important;
+  border-color:rgba(255,255,255,.16)!important;
+  color:#251b16!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.10)!important;
+}
+.mq-premium #features [class*="featureGrid"] h3{color:#251b16!important}
+.mq-premium #features [class*="featureGrid"] article>span{color:#a16d49!important}
+.mq-premium #features [class*="featureGrid"] p{color:#74665c!important}
+
+/* Keep furniture imagery clearly framed as examples, not as a showroom. */
+.mq-premium [class*="luxury"] [class*="eyebrow"],
+.mq-premium [class*="visual"] [class*="eyebrow"]{color:#8b654b!important}
+
+@media(max-width:1050px){
+  .mq-product-summary{grid-template-columns:1fr 1fr}.mq-product-summary article:last-child{grid-column:1/-1}
+}
+
+@media(max-width:780px){
+  .mq-premium [class*="hero"]{padding-top:58px!important;gap:28px!important}
+  .mq-premium [class*="hero"] h1{font-size:clamp(43px,12.2vw,58px)!important;line-height:.96!important;margin-bottom:20px!important}
+  .mq-premium [class*="heroCopy"]>p{font-size:15px!important;line-height:1.62!important}
+  .mq-hero-flow{margin-top:20px;gap:6px}.mq-hero-flow span{font-size:9px;padding:7px 9px}.mq-hero-flow i{font-size:10px}
+
+  .mq-premium [class*="visualStage"]{
+    margin:0!important;padding:14px!important;border-radius:22px!important;
+  }
+  .mq-software-tag{left:14px;top:14px;font-size:7px;padding:8px 10px}
+  .mq-hero-context{right:14px;top:12px;width:132px;height:76px;border-radius:14px;padding:9px}
+  .mq-hero-context b{font-size:10px}.mq-hero-context span{display:none}.mq-hero-context small{font-size:6px}
+  .mq-premium [class*="visualStage"] [class*="cockpit"]{margin-top:86px!important}
+  .mq-premium [class*="visualStage"] [class*="cockpitBody"]{min-height:auto!important}
+
+  .mq-product-summary{padding:12px 32px 64px;grid-template-columns:1fr;gap:9px}
+  .mq-product-summary article,.mq-product-summary article:last-child{grid-column:auto;min-height:0;padding:18px 19px;border-radius:17px}
+  .mq-product-summary small{margin-top:13px}.mq-product-summary b{font-size:18px}.mq-product-summary p{font-size:12px;margin-top:7px}
+
+  .mq-premium #features{padding-top:62px!important;padding-bottom:68px!important}
+  .mq-premium #features [class*="sectionHead"] h2{font-size:38px!important;line-height:1.02!important}
+  .mq-premium #features [class*="featureGrid"]{margin-top:28px!important}
+  .mq-premium #features [class*="featureGrid"] article{min-height:126px!important}
+}
