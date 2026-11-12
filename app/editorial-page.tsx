@@ -17,14 +17,13 @@ import { PlannerControl } from "./planner-control";
 import { useMaksterLanguage } from "./use-language";
 import { enquiryFeedback, sendEnquiry, type EnquiryState } from "./enquiry-client";
 
-export type EditorialKind = "services" | "process" | "materials" | "projects" | "about" | "contact";
+export type EditorialKind = "services" | "process" | "materials" | "projects" | "contact";
 
 const heroImages: Record<EditorialKind, string> = {
   services: "/media/projects/salon-interior-reception.webp",
   process: "/media/kitchen-blue-installation.webp",
   materials: "/media/projects/ivory-classic-vanity-wide.webp",
   projects: "/media/projects/salon-partition-cover.webp",
-  about: "/media/kitchen-white-oak-hero.webp",
   contact: "/media/projects/salon-interior-reception.webp",
 };
 
@@ -42,10 +41,6 @@ const processImages = [
 const materialImages = [
   "/media/projects/grey-classic-display.webp", "/media/projects/ivory-classic-vanity-wide.webp",
   "/media/projects/hallway-detail.webp", "/media/projects/grey-classic-vitrine.webp",
-];
-
-const teamImages = [
-  "/media/team-vyacheslav-stylized.webp", "/media/team-yuriy-stylized.webp", "/media/team-evgeniy-stylized.webp",
 ];
 
 const stageIcons = [MessageCircle, DraftingCompass, Ruler, ClipboardPenLine, Hammer, Truck];
@@ -74,10 +69,6 @@ const materialPlannerLabel: Record<Lang, string> = {
   en: "Choose in Dream Planner", pl: "Wybierz w Dream Planner", de: "Im Dream Planner auswählen",
 };
 
-const teamLabels: Record<Lang, string> = {
-  ru: "Наша команда.", ua: "Наша команда.", cs: "Náš tým.", en: "Our team.", pl: "Nasz zespół.", de: "Unser Team.",
-};
-
 function PlannerLabel({ text }: { text: string }) {
   const [before, after = ""] = text.split("Dream Planner");
   return <>{before}<b translate="no" lang="en">Dream Planner</b>{after}</>;
@@ -88,7 +79,6 @@ function pageHeading(kind: EditorialKind, t: (typeof copy)[keyof typeof copy]) {
   if (kind === "process") return [t.processKicker, t.processTitle, t.aboutBody];
   if (kind === "materials") return [t.materialsKicker, t.materialsTitle, t.materialsBody];
   if (kind === "projects") return [t.projectsKicker, t.projectsTitle, t.projectsBody];
-  if (kind === "about") return [t.aboutKicker, t.aboutTitle, t.aboutBody];
   return [t.contactKicker, t.contactTitle, t.contactBody];
 }
 
@@ -106,14 +96,7 @@ function ArtHero({
   return (
     <section className={`art-hero art-hero-${kind}`}>
       <div className="art-hero-photo">
-        {kind === "about" ? (
-          <>
-            <div className="about-hero-team">
-              {teamImages.slice(0, 2).map((image, index) => <img src={image} alt="" key={image} fetchPriority={index === 0 ? "high" : "auto"} />)}
-            </div>
-            <img className="about-mobile-photo" src={heroImages[kind]} alt="" fetchPriority="high" />
-          </>
-        ) : kind === "projects" ? (
+        {kind === "projects" ? (
           <picture>
             <source media="(max-width: 760px)" srcSet="/media/projects/salon-partition-cover.webp" />
             <img src="/media/projects/ivory-classic-interior/kitchen-front.webp" alt="" fetchPriority="high" />
@@ -386,28 +369,6 @@ export default function EditorialPage({ kind }: { kind: EditorialKind }) {
               <a href="mailto:info@maksteratelier.com">info@maksteratelier.com</a>
             </div>
           </section>
-        </>
-      )}
-
-      {kind === "about" && (
-        <>
-          <section className="about-direct section-shell"><h2>{x.aboutDirect}</h2><span /></section>
-          <section className="team-art exact-section section-shell">
-            <div className="exact-section-head"><h2>{teamLabels[lang]}</h2><p>{x.aboutTeamBody}</p></div>
-            <div className="team-art-grid exact-team-grid">
-              {t.team.map(([name, role], index) => (
-                <article key={name}><div className="team-art-photo"><img src={teamImages[index]} alt={name} /><span>0{index + 1}</span></div><h2 translate="no">{name}</h2><p>{role}</p><i /></article>
-              ))}
-            </div>
-          </section>
-
-          <section className="responsibility section-shell">
-            <h2>{x.responsibilityTitle}</h2><p>{x.responsibilityBody}</p>
-            <div>{x.responsibilitySteps.map(([step, text], index) => <article key={step}><span>0{index + 1}</span><h3>{step}</h3><p>{text}</p></article>)}</div>
-            <GoldLink href="/jak-pracujeme">{x.routeCta}</GoldLink>
-          </section>
-          <div className="section-shell"><ImageStatement kicker={x.realityKicker} title={x.realityTitle} body={x.realityBody} image="/media/kitchen-beams-front.webp" cta={ui.viewProjects} href="/realizace" /></div>
-          <section className="exact-final-cta section-shell"><p className="eyebrow">{x.contactKicker}</p><h2>{t.aboutTitle}</h2><GoldLink href="/kontakt" solid>{ui.projectCta}</GoldLink></section>
         </>
       )}
 

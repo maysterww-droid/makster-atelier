@@ -27,12 +27,6 @@ const materialPartners = [
   { brand: "BLUM · HETTICH", tone: "hardware" },
 ];
 
-const teamImages = [
-  "/media/team-vyacheslav-stylized.webp",
-  "/media/team-yuriy-stylized.webp",
-  "/media/team-evgeniy-stylized.webp",
-];
-
 function PlannerLabel({ text }: { text: string }) {
   const [before, after = ""] = text.split("Dream Planner");
   return <>{before}<b translate="no" lang="en">Dream Planner</b>{after}</>;
@@ -86,7 +80,7 @@ export default function Home() {
                 <span><PlannerLabel text={t.plannerPrimary} /></span>
                 <ArrowRight size={18} />
               </PlannerControl>
-              <a className="button button-outline" href="/o-nas">{t.atelierCta}</a>
+              <a className="button button-outline" href="/realizace">{portfolio.all}</a>
             </div>
             <div className="hero-phases">
               {t.heroPhases.map((phase, index) => <span key={phase}><i>{String(index + 1).padStart(2, "0")}</i>{phase}</span>)}
@@ -182,16 +176,6 @@ export default function Home() {
         <div className="planner-band-copy">
           <p className="eyebrow">{t.plannerKicker}</p><h2>{t.plannerTitle}</h2><p>{t.plannerBody}</p>
           <PlannerControl className="button button-gold"><span translate="no" lang="en">Dream Planner</span><ArrowRight size={18} /></PlannerControl>
-        </div>
-      </section>
-
-      <section className="about section-shell" id="o-nas">
-        <div className="section-heading">
-          <div><p className="eyebrow">{t.aboutKicker}</p><h2>{t.aboutTitle}</h2></div>
-          <p>{t.aboutBody}</p>
-        </div>
-        <div className="team-grid">
-          {t.team.map(([name, role], index) => <article key={name}><div className="team-photo"><img src={teamImages[index]} alt={name} /></div><span>0{index + 1}</span><h3 translate="no">{name}</h3><p>{role}</p></article>)}
         </div>
       </section>
 

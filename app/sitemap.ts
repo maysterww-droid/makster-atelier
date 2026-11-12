@@ -8,7 +8,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/realizace`, changeFrequency: "monthly", priority: 0.9 },
     { url: `${siteUrl}/sluzby`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${siteUrl}/materialy`, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteUrl}/o-nas`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/jak-pracujeme`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${siteUrl}/kontakt`, changeFrequency: "monthly", priority: 0.8 },
   ];

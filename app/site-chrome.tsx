@@ -6,7 +6,12 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { copy, languages, type Lang } from "./content";
 import { PlannerControl } from "./planner-control";
 
-const navLinks = ["/realizace", "/sluzby", "/materialy", "/o-nas", "/kontakt"];
+const navLinks = [
+  { href: "/realizace", labelIndex: 0 },
+  { href: "/sluzby", labelIndex: 1 },
+  { href: "/materialy", labelIndex: 2 },
+  { href: "/kontakt", labelIndex: 4 },
+] as const;
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
@@ -30,8 +35,8 @@ export function SiteHeader({ lang, onLanguage, home = false, minimalNav = false 
     <header className="site-header">
       <Link className="header-brand" href="/" aria-label="MAKSTER ATELIER"><Brand /></Link>
       <nav className="desktop-nav" aria-label={t.menu}>
-        {t.nav.map((item, index) => (
-          <Link className={pathname === navLinks[index] ? "active" : ""} key={item} href={navLinks[index]}>{item}</Link>
+        {navLinks.map(({ href, labelIndex }) => (
+          <Link className={pathname === href ? "active" : ""} key={href} href={href}>{t.nav[labelIndex]}</Link>
         ))}
         {!home && !minimalNav && <Link className={`process-nav-link${pathname === "/jak-pracujeme" ? " active" : ""}`} href="/jak-pracujeme">{t.processKicker}</Link>}
       </nav>
@@ -51,7 +56,7 @@ export function SiteHeader({ lang, onLanguage, home = false, minimalNav = false 
         <details className="mobile-menu">
           <summary aria-label={t.menu}><Menu className="menu-open" size={27} /><X className="menu-close" size={27} /></summary>
           <nav aria-label={t.menu}>
-            {t.nav.map((item, index) => <Link key={item} href={navLinks[index]}>{item}</Link>)}
+            {navLinks.map(({ href, labelIndex }) => <Link key={href} href={href}>{t.nav[labelIndex]}</Link>)}
             <Link href="/jak-pracujeme">{t.processKicker}</Link>
             <PlannerControl className="mobile-planner-control"><span translate="no" lang="en">Dream Planner</span></PlannerControl>
           </nav>
@@ -69,7 +74,7 @@ export function SiteFooter({ lang, onLanguage }: { lang: Lang; onLanguage: (lang
         <Link href="/" aria-label="MAKSTER ATELIER"><Brand compact /></Link>
         <p>{t.footer}</p>
         <nav className="footer-mobile-nav" aria-label={t.menu}>
-          {t.nav.map((item, index) => <Link key={item} href={navLinks[index]}><span>{item}</span><b>＋</b></Link>)}
+          {navLinks.map(({ href, labelIndex }) => <Link key={href} href={href}><span>{t.nav[labelIndex]}</span><b>＋</b></Link>)}
         </nav>
         <div className="footer-languages">
           {languages.map((item) => (
