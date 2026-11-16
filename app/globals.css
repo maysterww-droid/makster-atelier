@@ -1239,7 +1239,7 @@ html.motion-ready .hero-phases{animation-delay:.32s}
 }
 
 /* Homepage process film — centered editorial composition on desktop */
-@media(min-width:1024px){
+@media(min-width:900px){
   .home-process-video{padding-block:clamp(92px,8vw,128px);background:radial-gradient(circle at 50% 52%,rgba(222,169,84,.075),transparent 42%),#070806}
   .home-process-video:before{display:none}
   .home-process-video-shell{display:flex;width:min(1240px,calc(100vw - 92px));max-width:1240px;align-items:stretch;flex-direction:column;gap:52px}
