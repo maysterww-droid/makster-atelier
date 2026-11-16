@@ -1238,6 +1238,23 @@ html.motion-ready .hero-phases{animation-delay:.32s}
   .home-process-video-primary,.home-process-video-controls button{backdrop-filter:none}
 }
 
+/* Homepage process film — centered editorial composition on desktop */
+@media(min-width:1024px){
+  .home-process-video{padding-block:clamp(92px,8vw,128px);background:radial-gradient(circle at 50% 52%,rgba(222,169,84,.075),transparent 42%),#070806}
+  .home-process-video:before{display:none}
+  .home-process-video-shell{display:flex;width:min(1240px,calc(100vw - 92px));max-width:1240px;align-items:stretch;flex-direction:column;gap:52px}
+  .home-process-video-copy{display:flex;align-items:center;max-width:920px;margin-inline:auto;flex-direction:column;text-align:center}
+  .home-process-video-copy .eyebrow{justify-content:center}
+  .home-process-video-copy h2{font-size:clamp(48px,4.2vw,68px)}
+  .home-process-video-copy h3{max-width:720px;margin-top:22px;font-size:clamp(24px,2.1vw,31px)}
+  .home-process-video-copy>p:not(.eyebrow){max-width:680px;margin-top:18px;line-height:1.7}
+  .home-process-video-stages{width:min(780px,100%);margin-top:34px}
+  .home-process-video-stages li{align-content:center;justify-items:center;padding:18px 22px!important;text-align:center}
+  .home-process-video-link{margin-top:30px}
+  .home-process-video-figure{width:100%;max-width:1180px;margin-inline:auto}
+  .home-process-video-figure figcaption{padding-right:2px}
+}
+
 /* Portfolio photo refresh — natural color, complete frames, editorial rhythm */
 .portfolio-home-grid .project-card img{
   filter:saturate(.9) brightness(.88) contrast(1.02);

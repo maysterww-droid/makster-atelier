@@ -90,17 +90,6 @@ export default function Home() {
           <div className="hero-scroll">{t.scroll}<ArrowDown size={17} /></div>
         </div>
 
-        <div className="hero-materials">
-          <picture className="hero-approved-material-bg" aria-hidden="true">
-            <source media="(max-width: 760px)" srcSet="/media/approved-home-mobile.webp" />
-            <img src="/media/approved-home-desktop.webp" alt="" />
-          </picture>
-          <div className="hero-material-copy">
-            <p className="eyebrow">{t.materialKicker}</p>
-            <h2>{t.materialTitle}</h2>
-          </div>
-          <a href="/materialy">{t.materialContinue}<ArrowRight size={20} /></a>
-        </div>
       </section>
 
       <HomeProcessVideo lang={lang} />
