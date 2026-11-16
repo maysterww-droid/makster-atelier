@@ -10,6 +10,7 @@ import { quoteCopy } from "./quote-copy";
 import { useMaksterLanguage } from "./use-language";
 import { enquiryFeedback, sendEnquiry, type EnquiryState } from "./enquiry-client";
 import { HomeProcessVideo } from "./home-process-video";
+import { siteUrl } from "./seo";
 
 const proofIcons = [Factory, UsersRound, MapPinned];
 const proofMarks = ["CZ", "1", "EU"];
@@ -27,6 +28,18 @@ const materialPartners = [
   { brand: "CLEAF", tone: "cleaf" },
   { brand: "BLUM · HETTICH", tone: "hardware" },
 ];
+
+const processVideoJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  name: "MAKSTER — Od návrhu k realizaci",
+  description: "Proměna prvního náčrtu v návrh, výrobu a interiér na míru od MAKSTER ATELIER.",
+  thumbnailUrl: `${siteUrl}/media/process-video/makster-final-poster.webp`,
+  uploadDate: "2026-11-16",
+  duration: "PT15S",
+  contentUrl: `${siteUrl}/media/process-video/makster-final-15s.mp4`,
+  embedUrl: siteUrl,
+};
 
 function PlannerLabel({ text }: { text: string }) {
   const [before, after = ""] = text.split("Dream Planner");
@@ -58,6 +71,10 @@ export default function Home() {
 
   return (
     <main className="site" id="top">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(processVideoJsonLd) }}
+      />
       <section className="hero">
         <SiteHeader lang={lang} onLanguage={changeLanguage} home />
 
