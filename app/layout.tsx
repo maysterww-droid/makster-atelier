@@ -31,9 +31,10 @@ export const metadata: Metadata = {
       "Kuchyně, vestavěné skříně a kompletní nábytkové celky na míru. Výroba v České republice.",
     url: "/",
     images: [{
-      url: "/media/approved-home-desktop.webp",
-      width: 1536,
-      height: 1024,
+      url: "/media/social/makster-share.jpg",
+      width: 1200,
+      height: 630,
+      type: "image/jpeg",
       alt: "MAKSTER ATELIER — nábytek a interiéry na míru",
     }],
   },
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MAKSTER ATELIER | Nábytek na míru bez kompromisů",
     description: "Kuchyně, vestavěné skříně a kompletní nábytkové celky na míru.",
-    images: ["/media/approved-home-desktop.webp"],
+    images: ["/media/social/makster-share.jpg"],
   },
   icons: {
     icon: "/favicon.svg",
