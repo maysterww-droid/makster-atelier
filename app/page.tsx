@@ -9,6 +9,7 @@ import { PlannerControl } from "./planner-control";
 import { quoteCopy } from "./quote-copy";
 import { useMaksterLanguage } from "./use-language";
 import { enquiryFeedback, sendEnquiry, type EnquiryState } from "./enquiry-client";
+import { HomeProcessVideo } from "./home-process-video";
 
 const proofIcons = [Factory, UsersRound, MapPinned];
 const proofMarks = ["CZ", "1", "EU"];
@@ -101,6 +102,8 @@ export default function Home() {
           <a href="/materialy">{t.materialContinue}<ArrowRight size={20} /></a>
         </div>
       </section>
+
+      <HomeProcessVideo lang={lang} />
 
       <section className="proof-row section-shell" aria-label="MAKSTER ATELIER">
         {t.stats.map(([strong, small], index) => {

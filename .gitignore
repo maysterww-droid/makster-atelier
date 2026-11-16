@@ -4,3 +4,4 @@ node_modules/
 next-env.d.ts
 .env*
 *.log
+public/media/process-video/makster-final-15s.mp4
