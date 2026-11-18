@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 import "./planner-promo.css";
 import { InteractionAnalytics } from "./interaction-analytics";
@@ -30,19 +31,6 @@ export const metadata: Metadata = {
     description:
       "Kuchyně, vestavěné skříně a kompletní nábytkové celky na míru. Výroba v České republice.",
     url: "/",
-    images: [{
-      url: "/media/social/makster-share.jpg",
-      width: 1200,
-      height: 630,
-      type: "image/jpeg",
-      alt: "MAKSTER ATELIER — nábytek a interiéry na míru",
-    }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "MAKSTER ATELIER | Nábytek na míru bez kompromisů",
-    description: "Kuchyně, vestavěné skříně a kompletní nábytkové celky na míru.",
-    images: ["/media/social/makster-share.jpg"],
   },
   icons: {
     icon: "/favicon.svg",
@@ -88,6 +76,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {children}
         <SiteMotion />
         <InteractionAnalytics />
+        <Script id="metricool-tracker" strategy="afterInteractive">
+          {`function loadMetricoolScript(callback){var head=document.getElementsByTagName("head")[0],script=document.createElement("script");script.type="text/javascript";script.src="https://tracker.metricool.com/resources/be.js";script.onreadystatechange=callback;script.onload=callback;head.appendChild(script)}loadMetricoolScript(function(){beTracker.t({hash:"6bc3c920ec4af4d98567db2b4730282d"})});`}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
