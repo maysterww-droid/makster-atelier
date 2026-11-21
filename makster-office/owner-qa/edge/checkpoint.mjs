@@ -2,7 +2,7 @@
 export const ORG='3ac6478a-a986-451f-9425-ba383aaa4ceb';
 export const CHECKPOINT='60100000-0000-4000-a000-000000000001';
 export const SCOPE='MAKSTER_OFFICE_QA_601';
-const allowed=new Set(['creativeAssets','contentDraftSets','officeContent','publishJobs','contentPerformance','growthSyncSnapshots','growthAuditLog']);
+const allowed=new Set(['creativeAssets','contentDraftSets','officeContent','publishJobs','contentPerformance','growthSyncSnapshots','growthAuditLog','officeCampaigns','officeApprovals','officeAgentRuns','officeCycles','officeOwnerBriefs']);
 const owned=x=>x?.smm?.scope==='MAKSTER_SMM_6'&&x.smm.brandId==='makster-atelier';
 export class CheckpointStore {
  constructor({url,key,fetchImpl=fetch}){if(url!=='https://gkqntgfrbngspvrsqvmx.supabase.co'||!key)throw Error('QA_STAGING_CONFIGURATION_REQUIRED');this.url=url;this.key=key;this.fetch=fetchImpl;this.dirty=false;}
