@@ -1,0 +1,13 @@
+/* Responsive SMM workspace in the original Office shell; CAD is outside this QA. */
+.owner-qa-https .app-shell{grid-template-columns:minmax(0,1fr)}
+.owner-qa-https .left-rail,.owner-qa-https .right-rail,.owner-qa-https .view-switch,.owner-qa-https .canvas-toolbar,.owner-qa-https .header-center,.owner-qa-https #newProject{display:none}
+.owner-qa-https .app-header{grid-template-columns:1fr auto}
+.owner-qa-https .main-stage{min-width:0;display:flex;flex-direction:column}
+.owner-qa-https .stage-toolbar{display:none}
+.owner-qa-https .stage-content{flex:1;min-height:0}
+.owner-qa-https .bottom-tabs button:not([data-tab^="smm-"]){display:none}
+.owner-qa-https .smm-office{max-width:1500px;margin:auto}
+.owner-qa-https .smm-office h3{font-size:14px}
+.owner-qa-https .smm-office button,.owner-qa-https .smm-office select,.owner-qa-https .smm-office input,.owner-qa-https .smm-office textarea{font-size:16px;min-height:44px}
+.owner-qa-https .smm-office input[type=checkbox]{min-height:24px;min-width:24px;vertical-align:middle}
+@media(max-width:900px){.owner-qa-https .main-stage{height:auto;min-height:calc(100dvh - 70px);display:flex;flex-direction:column}.owner-qa-https .stage-content{overflow:visible}.owner-qa-https #htmlStage{position:static;height:auto;overflow:visible;padding:10px}.owner-qa-https .bottom-tabs{position:sticky;bottom:0;background:white;flex-wrap:nowrap;overflow-x:auto;min-height:52px}.owner-qa-https .smm-nav{display:grid;grid-template-columns:1fr 1fr}.owner-qa-https .smm-nav button{white-space:normal}.owner-qa-https .smm-media-grid{grid-template-columns:1fr}.owner-qa-https .smm-filters{grid-template-columns:1fr}.owner-qa-https .smm-office .card-body{padding:12px}.owner-qa-https .brand small{display:none}.owner-qa-https .smm-office p{overflow-wrap:anywhere}.owner-qa-https .smm-table-wrap{max-width:100%;overflow:auto}}

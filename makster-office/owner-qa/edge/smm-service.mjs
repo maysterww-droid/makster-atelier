@@ -1,0 +1,167 @@
+import { createHash, randomUUID } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
+const BRAND = 'makster-atelier', MC = '8158823', SCOPE = 'MAKSTER_SMM_6';
+export const smmId = (s) => { const h = createHash('sha256').update(SCOPE + ':' + s).digest('hex'); return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`; };
+const error = (code, status = 400) => Object.assign(new Error(code), { status });
+const owned = (r) => r?.smm?.brandId === BRAND && r.smm.scope === SCOPE;
+const smm = (kind, extra = {}) => ({ scope: SCOPE, brandId: BRAND, kind, ...extra });
+const clean = (v, max = 500) => { if (typeof v !== 'string' || !v.trim() || v.length > max)
+    throw error('INVALID_TEXT'); return v.trim(); };
+const https = (v) => { if (!v)
+    return ''; const u = new URL(String(v)); if (u.protocol !== 'https:' || u.username || u.password)
+    throw error('HTTPS_MEDIA_REQUIRED'); return u.href; };
+export class SmmService {
+    store;
+    env;
+    queue = Promise.resolve();
+    constructor(store, env = process.env) {
+        this.store = store;
+        this.env = env;
+    }
+    assertScope() { if ((this.env.SUPABASE_SECRET_KEY || this.env.SUPABASE_SERVICE_ROLE_KEY) && (this.env.SUPABASE_URL !== 'https://gkqntgfrbngspvrsqvmx.supabase.co' || this.env.DEMO_ORGANIZATION_ID !== '3ac6478a-a986-451f-9425-ba383aaa4ceb'))
+        throw error('SMM_MAKSTER_SUPABASE_ORGANIZATION_REQUIRED', 503); }
+    locked(fn) { const p = this.queue.then(fn); this.queue = p.catch(() => { }); return p; }
+    async audit(action, id, detail) { await this.store.addGrowthAuditLog({ id: randomUUID(), category: 'smm', action, entityType: 'content', entityId: id, actor: 'owner', status: 'info', createdAt: new Date().toISOString(), detail, smm: smm('audit') }); }
+    async import(input) {
+        this.assertScope();
+        return this.locked(async () => {
+            if (input?.schema !== 'makster.smm.snapshot.v1' || input.brandId !== BRAND || String(input.metricoolBrandId) !== MC || input.catalogId !== '1V_g57azZ2FI2S39eUVlTLkC1m_TvFl_DN141_yqKvhI')
+                throw error('BRAND_OR_SOURCE_MISMATCH');
+            if (!Array.isArray(input.media) || input.media.length > 2000 || !Array.isArray(input.scheduled) || input.scheduled.length > 2000 || !Number.isFinite(Date.parse(input.capturedAt)))
+                throw error('INVALID_SNAPSHOT');
+            const state = await this.store.get(), last = state.growthSyncSnapshots.filter(owned).sort((a, b) => a.capturedAt.localeCompare(b.capturedAt)).at(-1);
+            if (last && Date.parse(last.capturedAt) > Date.parse(input.capturedAt))
+                throw error('STALE_SNAPSHOT', 409);
+            const digest = createHash('sha256').update('normalizer-v2:' + JSON.stringify(input)).digest('hex');
+            if (state.growthSyncSnapshots.some((x) => owned(x) && x.smm.digest === digest))
+                return { ok: true, reused: true };
+            const photoIds = new Set(), records = [];
+            for (const m of input.media) {
+                if (photoIds.has(m.photoId) || !['REAL', 'CONCEPT', 'MATERIAL', 'PROCESS', 'BRAND'].includes(m.type) || !['NEW', 'RESERVED', 'PUBLISHED'].includes(m.status))
+                    throw error('DUPLICATE_OR_INVALID_CATALOG_ROW');
+                photoIds.add(m.photoId);
+                for (const f of ['photoId', 'projectId', 'projectName', 'descriptionRu', 'descriptionCs'])
+                    clean(m[f], 2000);
+                const originalUrl = https(m.originalUrl), socialUrl = https(m.socialUrl);
+                if (!originalUrl.includes('drive.google.com/'))
+                    throw error('ORIGINAL_DRIVE_ID_REQUIRED');
+                const driveId = new URL(originalUrl).pathname.match(/\/file\/d\/([^/]+)/)?.[1];
+                if (!driveId)
+                    throw error('ORIGINAL_DRIVE_ID_REQUIRED');
+                records.push({ table: 'creativeAssets', value: { id: smmId('asset:' + m.photoId), projectId: m.projectId, kind: m.type === 'CONCEPT' ? 'render' : 'photo', title: m.projectName, uri: originalUrl, tags: [m.category, m.type], materialTags: [], approvedForMarketing: true, hero: false, createdAt: input.capturedAt, updatedAt: input.capturedAt, smm: smm('media', { ...m, originalUrl, socialUrl, driveId, catalogId: input.catalogId, capturedAt: input.capturedAt }) } });
+            }
+            const seen = new Set();
+            for (const p of input.scheduled) {
+                if (!p.id || !Array.isArray(p.providers) || !p.publicationDate?.dateTime || p.publicationDate.timezone !== 'Europe/Prague')
+                    throw error('INVALID_METRICOOL_CALENDAR');
+                for (const provider of p.providers) {
+                    if (!['instagram', 'facebook'].includes(provider.network))
+                        continue;
+                    const key = `metricool:${MC}:planner:${p.id}:${provider.network}`;
+                    if (seen.has(key))
+                        continue;
+                    seen.add(key);
+                    const network = provider.network;
+                    const nativeType = p[network + 'Data']?.type;
+                    const format = nativeType === 'STORY' ? 'STORY' : nativeType === 'REEL' ? 'REEL' : (p.media?.length > 1 ? 'CAROUSEL' : 'POST');
+                    const value = { id: smmId(key), contentId: smmId('content:' + key), channel: network + '_organic', status: provider.status === 'PUBLISHED' ? 'published' : provider.status === 'ERROR' ? 'failed' : 'queued', providerPostId: String(p.id), providerStatus: provider.status, scheduledAt: p.publicationDate.dateTime, createdAt: p.creationDate?.dateTime || input.capturedAt, updatedAt: input.capturedAt, smm: smm('calendar', { canonicalKey: key, source: 'METRICOOL_READ_ONLY', text: String(p.text || ''), media: (p.media || []).map(https), format, timezone: 'Europe/Prague', metricoolBrandId: MC, providerPostId: String(p.id), providerUuid: p.uuid || null, network, capturedAt: input.capturedAt, publishedUrl: provider.publicUrl ? https(provider.publicUrl) : null, nativeProviderId: provider.id || null, detailedStatus: String(provider.detailedStatus || '') }) };
+                    records.push({ table: 'publishJobs', value });
+                }
+            }
+            const specs = [['instagram', 'instagram', 'POST'], ['facebook', 'facebook', 'POST'], ['instagramReels', 'instagram', 'REEL']];
+            for (const [source, network, format] of specs) {
+                for (const row of input.analytics?.[source]?.rows || []) {
+                    if (!row[2] || !row[4])
+                        continue;
+                    const key = `metricool:${MC}:published:${network}:${row[2]}`;
+                    const value = { id: smmId(key), contentId: smmId('content:' + key), channel: network + '_organic', status: 'published', providerPostId: String(row[2]), providerStatus: 'PUBLISHED', createdAt: input.capturedAt, updatedAt: input.capturedAt, smm: smm('calendar', { canonicalKey: key, source: 'METRICOOL_ANALYTICS_READ_ONLY', text: String(row[1] || ''), media: row[3] ? [https(row[3])] : [], format: format === 'POST' && /carousel|album/i.test(row[5] || '') ? 'CAROUSEL' : format, network, publishedUrl: https(row[4]), publishedTimestamp: String(row[0]), timezone: 'SOURCE_TIMESTAMP_TIMEZONE_NOT_PROVIDED', capturedAt: input.capturedAt, metrics: source === 'instagram' ? { engagement: row[6], interactions: row[7], reach: row[8], saved: row[9], views: row[10] } : source === 'facebook' ? { websiteClicks: row[6], engagement: row[7], reach: row[8], reactions: row[9], shares: row[10] } : { engagement: row[5], reach: row[6], saved: row[7], views: row[8] } }) };
+                    records.push({ table: 'publishJobs', value });
+                }
+            }
+            // A sync marker is written last. A retry safely fills incomplete upserts without publishing anything.
+            records.push({ table: 'growthSyncSnapshots', value: { id: smmId('snapshot:' + digest), capturedAt: input.capturedAt, smm: smm('snapshot', { digest, catalogId: input.catalogId, driveFolderId: input.driveFolderId, syncMode: input.syncMode || 'OWNER_IMPORT', analytics: input.analytics || {}, automation: input.automation || [], mediaIds: [...photoIds], scheduledKeys: [...seen] }) } });
+            await this.store.applySmmRecords(records);
+            await this.audit('smm.sync.read_only', digest, 'Google catalog + Metricool imported; no provider mutations');
+            return { ok: true, media: photoIds.size, scheduledPlatformEntries: seen.size };
+        });
+    }
+    async bootstrap() { const p = this.env.MAKSTER_SMM_IMPORT_FILE; if (p && existsSync(p))
+        await this.import(JSON.parse(readFileSync(p, 'utf8'))); }
+    async state() {
+        this.assertScope();
+        const s = await this.store.get(), snapshot = s.growthSyncSnapshots.filter(owned).sort((a, b) => a.capturedAt.localeCompare(b.capturedAt)).at(-1);
+        const drafts = s.contentDraftSets.filter(owned), media = s.creativeAssets.filter(owned).map((a) => ({ ...a.smm, id: a.id, usage: drafts.filter((d) => d.smm.photoIds?.includes(a.smm.photoId)).map((d) => ({ id: d.id, at: d.generatedAt, status: d.smm.kind === 'brief' ? 'VIDEO_BRIEF' : d.smm.kind })), effectiveStatus: a.smm.status === 'PUBLISHED' ? 'PUBLISHED' : drafts.some((d) => d.smm.photoIds?.includes(a.smm.photoId)) ? 'RESERVED' : a.smm.status }));
+        const calendarMap = new Map();
+        // Planner and analytics may return the SAME published post under different IDs.
+        // Join only on the provider's exact public URL and network, never on similar copy/photos.
+        const canonicalUrl = (v) => { const u = new URL(v); return u.hostname.replace(/^www\./, '') + u.pathname.replace(/\/$/, ''); };
+        for (const p of s.publishJobs.filter(owned).sort((a, b) => (a.smm.source === 'METRICOOL_READ_ONLY' ? 0 : 1) - (b.smm.source === 'METRICOOL_READ_ONLY' ? 0 : 1))) {
+            const ident = p.smm.publishedUrl ? p.smm.network + ':' + canonicalUrl(p.smm.publishedUrl) : p.smm.canonicalKey;
+            const old = calendarMap.get(ident);
+            if (old) {
+                old.smm = { ...old.smm, metrics: p.smm.metrics || old.smm.metrics, analyticsPublishedTimestamp: p.smm.publishedTimestamp || old.smm.analyticsPublishedTimestamp, analyticsCanonicalKey: p.smm.source === 'METRICOOL_ANALYTICS_READ_ONLY' ? p.smm.canonicalKey : old.smm.analyticsCanonicalKey, aliases: [...(old.smm.aliases || []), p.smm.canonicalKey] };
+                continue;
+            }
+            calendarMap.set(ident, { ...p, smm: { ...p.smm }, observedInLatest: p.smm.source !== 'METRICOOL_READ_ONLY' || snapshot?.smm.scheduledKeys.includes(p.smm.canonicalKey) });
+        }
+        return { version: '6.0.0-owner-qa', brandId: BRAND, persistence: this.env.SUPABASE_SECRET_KEY || this.env.SUPABASE_SERVICE_ROLE_KEY ? 'SUPABASE_EXISTING_TABLES' : 'ORIGINAL_FILE_STORE', snapshot: snapshot ? { capturedAt: snapshot.capturedAt, ...snapshot.smm } : null, media, drafts, calendar: [...calendarMap.values()], analytics: snapshot?.smm.analytics || null, externalExecution: 'OFF', publisher: 'EXISTING_CHATGPT_AUTOMATIONS_METRICOOL', publishingOwnershipTransferred: false, sync: this.env.MAKSTER_SMM_CONNECTOR_URL && this.env.MAKSTER_SMM_CONNECTOR_TOKEN ? 'READ_ONLY_BRIDGE_CONFIGURED' : 'REAL_SNAPSHOT_NO_BACKGROUND_SYNC', creativeStudio: 'HANDOFF_CONTRACT_ONLY', ai: 'NOT_USED', audit: s.growthAuditLog.filter(owned).slice(-30) };
+    }
+    async draft(input, key) {
+        return this.locked(async () => {
+            clean(key, 150);
+            const st = await this.state();
+            const photoIds = input.photoIds;
+            if (!Array.isArray(photoIds) || photoIds.length < 1 || photoIds.length > 5 || new Set(photoIds).size !== photoIds.length)
+                throw error('SELECT_ONE_TO_FIVE_DISTINCT_PHOTOS');
+            const selected = photoIds.map((id) => st.media.find((m) => m.photoId === id));
+            if (selected.some((m) => !m || m.type !== 'REAL'))
+                throw error('REAL_PROJECT_PHOTOS_REQUIRED');
+            if (new Set(selected.map((m) => m.projectId)).size !== 1)
+                throw error('ONE_PROJECT_REQUIRED');
+            const topic = clean(input.topic, 180), digest = createHash('sha256').update(JSON.stringify({ photoIds, topic })).digest('hex'), id = smmId('draft:' + key), old = st.drafts.find((x) => x.id === id);
+            if (old) {
+                if (old.smm.digest !== digest)
+                    throw error('IDEMPOTENCY_CONFLICT', 409);
+                return { ok: true, reused: true, draft: old };
+            }
+            const warnings = selected.flatMap((m) => { const wh = m.resolution.match(/(\d+)\D+(\d+)/); return [...(m.effectiveStatus !== 'NEW' ? [`${m.photoId}: ${m.effectiveStatus}, проверьте повторное использование`] : []), ...(!wh || Math.min(Number(wh[1]), Number(wh[2])) < 1080 ? [`${m.photoId}: разрешение требует проверки`] : [])]; });
+            if (warnings.length && input.acceptReuse !== true)
+                throw error('MEDIA_QA_REVIEW_REQUIRED', 409);
+            const first = selected[0], ru = first.descriptionRu, cs = first.descriptionCs;
+            const base = `🇷🇺 ${ru}\n\nПланируете мебель на заказ? Напишите в MAKSTER — обсудим ваш проект.\n\n🇨🇿 ${cs}\n\nPlánujete nábytek na míru? Napište nám do MAKSTER a probereme váš projekt.`;
+            const bodies = { instagram: base + '\n\nСсылка на сайт в профиле / Odkaz na web v profilu.\n#MAKSTER #NabytekNaMiru #Praha', facebook: base + '\n\nhttps://www.maksteratelier.com/' };
+            const now = new Date().toISOString(), content = Object.entries(bodies).map(([network, body]) => ({ id: smmId(id + ':' + network), channel: network + '_organic', format: 'post', title: topic, body, status: 'draft', createdByAgent: 'Growth Director · RULES_CATALOG_COPY', createdAt: now, updatedAt: now, smm: smm('photo_content', { photoIds, format: photoIds.length > 1 ? 'CAROUSEL' : 'POST', network, source: 'VERIFIED_CATALOG_COPY_NO_AI', media: selected.map((m) => m.socialUrl), publicationAllowed: false }) }));
+            const draft = { id, projectId: first.projectId, generatedAt: now, sourceAssetIds: selected.map((m) => m.id), items: content.map(c => c.id), strategy: { audience: 'Заказчики мебели в Праге', angle: topic, proofPoints: [ru, cs], channels: ['instagram_organic', 'facebook_organic'] }, smm: smm('PHOTO_DRAFT', { digest, photoIds, topic, bodies, media: selected.map((m) => m.socialUrl), qa: { status: warnings.length ? 'OWNER_REVIEW_REQUIRED' : 'METADATA_PASS_VISUAL_REVIEW_REQUIRED', warnings, visualReview: 'NOT_AUTOMATED' }, status: 'PREPARED_NOT_SCHEDULED', standingAutoPublishAuthorization: 'RETAINED', handoffOwner: 'EXISTING_CHATGPT_AUTOMATIONS_METRICOOL' }) };
+            await this.store.applySmmRecords([...content.map(value => ({ table: 'officeContent', value })), { table: 'contentDraftSets', value: draft }]);
+            await this.audit('smm.photo_draft.saved', id, 'Bilingual RU/CS draft only; no approval loop or publishing job created');
+            return { ok: true, draft };
+        });
+    }
+    async brief(input, key) {
+        return this.locked(async () => {
+            clean(key, 150);
+            const st = await this.state(), id = smmId('brief:' + key), topic = clean(input.topic, 500), photoIds = input.photoIds || [];
+            if (!['REEL', 'STORY', 'TIKTOK', 'MAKSTER_LAB'].includes(input.format))
+                throw error('INVALID_VIDEO_FORMAT');
+            if (!Array.isArray(photoIds) || photoIds.length > 5 || photoIds.some((x) => !st.media.some((m) => m.photoId === x)))
+                throw error('INVALID_REFERENCE_PHOTOS');
+            const digest = createHash('sha256').update(JSON.stringify(input)).digest('hex'), old = st.drafts.find((d) => d.id === id);
+            if (old) {
+                if (old.smm.digest !== digest)
+                    throw error('IDEMPOTENCY_CONFLICT', 409);
+                return { ok: true, reused: true, brief: old };
+            }
+            const contract = { schema: 'makster.creative-brief.v1', request_id: id, brand_id: 'MAKSTER_ATELIER', office_brand_id: BRAND, campaign_id: id, objective: topic, audience: 'MAKSTER ATELIER · CZ', channels: input.format === 'TIKTOK' ? ['tiktok'] : ['instagram', 'facebook'], locale: 'cs-CZ', format: input.format, series: input.format === 'MAKSTER_LAB' ? 'MAKSTER LAB — Nábytek pod lupou' : null, deliverables: [{ aspect_ratio: '9:16', width: 1080, height: 1920, fps: 30, duration_seconds: 20 }], references: photoIds.map((p) => st.media.find((m) => m.photoId === p)).map((m) => ({ photo_id: m.photoId, drive_id: m.driveId, uri: m.originalUrl, type: m.type })), qa: { require_realistic_mechanics: true, require_czech_captions: true, require_natural_voice: true, espeak_final_forbidden: true, human_media_qa_required: true }, external_providers: false, paid_generation_authorized: false, auto_publish: false };
+            const brief = { id, projectId: photoIds.length ? st.media.find((m) => m.photoId === photoIds[0]).projectId : 'MAKSTER_LAB', generatedAt: new Date().toISOString(), sourceAssetIds: [], items: [], strategy: { audience: contract.audience, angle: topic, proofPoints: [], channels: [] }, smm: smm('brief', { digest, photoIds, contract, status: 'BLOCKED_TECHNICAL', result: { code: 'STUDIO_VERTICAL_NATURAL_VOICE_NOT_CONNECTED', detail: 'Creative Studio 1.4 local renderer is 1920×1080; no connected 1080×1920 pipeline with natural Czech voice. Contract saved for separate Studio. Not sent to a live production service; no final MP4 claimed.', rendererCommit: 'ed7f09d667e60dbdc6fcd40f9c70b21a0c765d14', cost: 0 } }) };
+            await this.store.applySmmRecords([{ table: 'contentDraftSets', value: brief }]);
+            await this.audit('smm.creative_brief.blocked', id, 'Creative Brief persisted; explicit technical limitation; paid calls 0');
+            return { ok: true, brief };
+        });
+    }
+    async exportDraft(id) { const st = await this.store.get(), d = st.contentDraftSets.find((x) => owned(x) && x.id === id); if (!d)
+        throw error('DRAFT_NOT_FOUND', 404); return { schema: 'makster.metricool-preparation.v1', brandId: MC, canonicalId: d.id, status: 'PREPARED_NOT_SCHEDULED', publisher: 'EXISTING_CHATGPT_AUTOMATIONS', autoPublishAuthorization: 'OWNER_STANDING_PERMISSION_RETAINED', draft: d, content: st.officeContent.filter((c) => d.items.includes(c.id)), externalPublish: false }; }
+    async sync() { if (!this.env.MAKSTER_SMM_CONNECTOR_URL || !this.env.MAKSTER_SMM_CONNECTOR_TOKEN)
+        throw error('NO_BACKGROUND_SYNC_IMPORT_CONNECTED_APPS_SNAPSHOT', 503); const u = new URL(this.env.MAKSTER_SMM_CONNECTOR_URL); if (u.protocol !== 'https:')
+        throw error('HTTPS_BRIDGE_REQUIRED'); const r = await fetch(u, { method: 'GET', headers: { authorization: 'Bearer ' + this.env.MAKSTER_SMM_CONNECTOR_TOKEN, 'x-makster-read-only': '1' }, signal: AbortSignal.timeout(30000) }); if (!r.ok)
+        throw error('READ_ONLY_CONNECTOR_UNAVAILABLE', 502); return this.import(await r.json()); }
+}
