@@ -1,1 +1,1 @@
-{"name":"makster-office-owner-qa","private":true,"version":"6.1.0","type":"module","scripts":{"build":"node build.mjs"}}
+{"name":"makster-office-owner-qa","private":true,"version":"6.2.0","type":"module","scripts":{"build":"node build.mjs"}}

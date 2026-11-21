@@ -21,6 +21,8 @@ export class MarketingService{
   if(input.kind==='research'&&!sourceUrl)throw fail('RESEARCH_SOURCE_REQUIRED');
   if(input.projectId&&!base.media.some(m=>m.projectId===input.projectId))throw fail('UNKNOWN_MEDIA_PROJECT');
   const note={id:smmId(id+':note'),title,body,status:input.kind==='idea'?'idea':'owner_note',createdAt:now,updatedAt:now,smm:tag(input.kind,{sourceUrl,sourceMode:'OWNER_PROVIDED_UNVERIFIED',projectId:input.projectId||null,ai:'NOT_USED'})};put('officeContent',note);result.id=note.id;
+ }else if(input.kind==='verify_source'){
+  const note=s.officeContent.find(n=>owned(n)&&n.id===input.noteId&&n.smm.kind==='research');if(!note||!note.smm.sourceUrl)throw fail('RESEARCH_SOURCE_NOT_FOUND',404);put('officeContent',{...note,updatedAt:now,smm:{...note.smm,verificationStatus:'OWNER_CONFIRMED',verifiedAt:now,verificationMethod:'OWNER_MANUAL_REVIEW'}});result.id=note.id;
  }else if(input.kind==='campaign'){
   const name=text(input.title,180),goal=text(input.goal,1500);if(!channels.includes(input.channel))throw fail('INVALID_MARKETING_CHANNEL');
   const campaign=createOfficeCampaign({name,channel:input.channel,objective:'leads',market:'CZ',budgetMinor:cents(input.budgetEuro),currency:'EUR',createdBy:'owner'});
