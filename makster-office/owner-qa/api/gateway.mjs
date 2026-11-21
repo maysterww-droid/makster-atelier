@@ -6,7 +6,6 @@ export default async function handler(req,res){
  const u=new URL(req.url,'https://qa.invalid'),raw=req.query?.route??u.searchParams.get('route');
  const route=Array.isArray(raw)?raw.join('/'):String(raw||'');
  const full=route.startsWith('api/')?'/'+route:'/api/'+route;
- if(req.method==='GET'&&full==='/api/v1/projects')return send(200,[]);
  if(req.method==='GET'&&full==='/api/v1/health')return send(200,{version:'6.1.0 · Marketing Office',externalExecution:'OFF'});
  if(!full.startsWith('/api/v1/smm/'))return send(403,{error:'LEGACY_API_NOT_EXPOSED_IN_SMM_QA'});
  const path=full.slice('/api/v1/smm'.length);
