@@ -1,4 +1,5 @@
 import {createHash,timingSafeEqual} from 'node:crypto';
+import {Buffer} from 'node:buffer';
 import {CheckpointStore,ORG} from './checkpoint.mjs';
 import {SmmService} from './smm-service.mjs';
 const json=(d,status=200)=>new Response(JSON.stringify(d),{status,headers:{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'}});
