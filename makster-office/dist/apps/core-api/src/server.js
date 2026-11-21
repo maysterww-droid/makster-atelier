@@ -1,3 +1,4 @@
+import { SmmService } from './smm-service.js';
 import { createServer } from 'node:http';
 import { randomUUID, createHmac, timingSafeEqual, createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -146,6 +147,12 @@ function makeOwnerOperationsStore() {
     return new OwnerOperationsStore(process.env.MAKSTER_OWNER_OPERATIONS_FILE ?? join(process.cwd(), '.makster-owner-operations.json'));
 }
 const ownerOperationsStore = makeOwnerOperationsStore();
+const smmService = new SmmService(ownerOperationsStore);
+const smmReady = smmService.bootstrap();
+smmReady.catch(() => { });
+const smmSessions = new Map();
+const smmKey = process.env.MAKSTER_SMM_OWNER_KEY;
+let smmLoginAttempts = { at: Date.now(), count: 0 };
 function makeGmailConnectionStore() {
     const url = process.env.SUPABASE_URL;
     const secretKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -567,6 +574,69 @@ const server = createServer(async (req, res) => {
         const path = url.pathname;
         if (req.method === 'OPTIONS')
             return json(res, 204, {});
+        if (path.startsWith('/api/v1/smm')) {
+            res.setHeader('Cache-Control', 'no-store');
+            if (req.method === 'POST') {
+                const origin = req.headers.origin;
+                if (origin && new URL(origin).host !== req.headers.host)
+                    return json(res, 403, { error: 'SMM_SAME_ORIGIN_REQUIRED' });
+                if (req.headers['x-makster-smm'] !== '1')
+                    return json(res, 403, { error: 'SMM_CLIENT_HEADER_REQUIRED' });
+            }
+            const qaLocal = process.env.MAKSTER_SMM_PREVIEW === '1' && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress || '');
+            if (path === '/api/v1/smm/capabilities' && req.method === 'GET')
+                return json(res, 200, { isolatedLocalQA: qaLocal });
+            // This is a development-only session in the isolated local preview, with legacy
+            // mutations disabled and all paid/production credentials removed by its launcher.
+            // It is not available in normal Office/server deployments.
+            if (path === '/api/v1/smm/qa-session' && req.method === 'POST' && qaLocal) {
+                const token = randomUUID() + randomUUID();
+                smmSessions.set(token, Date.now() + 12 * 3600000);
+                res.setHeader('Set-Cookie', `makster_smm=${token}; HttpOnly; SameSite=Strict; Path=/api/v1/smm; Max-Age=43200`);
+                return json(res, 200, { ok: true, mode: 'ISOLATED_LOCAL_QA' });
+            }
+            if (path === '/api/v1/smm/login' && req.method === 'POST') {
+                if (!smmKey)
+                    return json(res, 503, { error: 'SMM_OWNER_KEY_NOT_CONFIGURED' });
+                if (Date.now() - smmLoginAttempts.at > 600000)
+                    smmLoginAttempts = { at: Date.now(), count: 0 };
+                if (++smmLoginAttempts.count > 10)
+                    return json(res, 429, { error: 'LOGIN_RATE_LIMIT' });
+                const b = await readJson(req), candidate = String(b.key || '');
+                if (candidate.length !== smmKey.length || !timingSafeEqual(Buffer.from(candidate), Buffer.from(smmKey)))
+                    return json(res, 401, { error: 'OWNER_KEY_INVALID' });
+                const token = randomUUID() + randomUUID();
+                smmSessions.set(token, Date.now() + 12 * 3600000);
+                res.setHeader('Set-Cookie', `makster_smm=${token}; HttpOnly; SameSite=Strict; Path=/api/v1/smm; Max-Age=43200`);
+                return json(res, 200, { ok: true });
+            }
+            const session = String(req.headers.cookie || '').match(/(?:^|; )makster_smm=([^;]+)/)?.[1];
+            const direct = req.headers['x-makster-smm-key'];
+            if (!smmKey || (!session || !smmSessions.has(session) || smmSessions.get(session) < Date.now()) && direct !== smmKey)
+                return json(res, 401, { error: 'SMM_OWNER_LOGIN_REQUIRED' });
+            try {
+                await smmReady;
+                if (path === '/api/v1/smm/state' && req.method === 'GET')
+                    return json(res, 200, await smmService.state());
+                if (path === '/api/v1/smm/import' && req.method === 'POST')
+                    return json(res, 200, await smmService.import(await readJson(req)));
+                if (path === '/api/v1/smm/sync' && req.method === 'POST')
+                    return json(res, 200, await smmService.sync());
+                if (path === '/api/v1/smm/drafts' && req.method === 'POST')
+                    return json(res, 201, await smmService.draft(await readJson(req), String(req.headers['idempotency-key'] || '')));
+                if (path === '/api/v1/smm/briefs' && req.method === 'POST')
+                    return json(res, 201, await smmService.brief(await readJson(req), String(req.headers['idempotency-key'] || '')));
+                const exp = path.match(/^\/api\/v1\/smm\/drafts\/([a-f0-9-]+)\/export$/);
+                if (exp && req.method === 'GET')
+                    return json(res, 200, await smmService.exportDraft(exp[1]));
+                return json(res, 404, { error: 'SMM_ROUTE_NOT_FOUND_PUBLISHING_DISABLED' });
+            }
+            catch (e) {
+                return json(res, e.status || 500, { error: e.status ? e.message : 'SMM_OPERATION_FAILED' });
+            }
+        }
+        if (process.env.MAKSTER_SMM_PREVIEW === '1' && req.method === 'POST')
+            return json(res, 403, { error: 'LEGACY_MUTATIONS_DISABLED_IN_SMM_OWNER_QA' });
         if (req.method === 'GET' && path === '/api/v1/system/observability') {
             return json(res, 200, observabilitySnapshot());
         }
@@ -3764,7 +3834,7 @@ Makster Procurement`;
     }
 });
 restorePromotedCatalogRegistry().catch(error => console.error('Catalog registry restore failed:', error));
-server.listen(PORT, () => {
+server.listen(PORT, process.env.MAKSTER_BIND_HOST || '127.0.0.1', () => {
     console.log(`Makster Core API + demo UI: http://localhost:${PORT}`);
     console.log(`Repository: ${process.env.SUPABASE_URL ? 'Supabase' : 'memory'}`);
     console.log(`AI Intake: ${process.env.OPENAI_API_KEY ? 'OpenAI Responses API' : 'deterministic fallback'}`);

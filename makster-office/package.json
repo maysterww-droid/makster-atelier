@@ -82,7 +82,10 @@
     "test:growth-autopilot-5.3": "node --test tests/makster-growth-autopilot-5.3.0.test.mjs",
     "test:growth-execution-5.4": "node --test tests/makster-growth-execution-5.4.0.test.mjs",
     "test:content-pilot-5.5": "node --test tests/makster-content-pilot-5.5.0.test.mjs",
-    "test:production-hardening-5.6": "node --test tests/makster-production-hardening-5.6.0.test.mjs"
+    "test:production-hardening-5.6": "node --test tests/makster-production-hardening-5.6.0.test.mjs",
+    "dev": "node scripts/smm-preview.mjs",
+    "build:smm": "node scripts/smm-build.mjs",
+    "test:smm": "npm run build:smm && node --test tests/smm-6.test.mjs tests/smm-http-6.test.mjs"
   },
   "devDependencies": {
     "@types/node": "25.1.0",

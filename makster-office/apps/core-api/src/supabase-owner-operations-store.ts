@@ -269,6 +269,15 @@ export class SupabaseOwnerOperationsStore{
     const rows=await this.request<any[]>(`${table}?id=eq.${encodeURIComponent(input.id)}&organization_id=eq.${encodeURIComponent(this.org())}`,{method:'PATCH',headers:{prefer:'return=representation'},body:JSON.stringify({data_json:input,updated_at:new Date().toISOString()})});
     if(!rows[0])throw new Error('office_entity_not_found');return input;
   }
+
+  async applySmmRecords(records:any[]){
+    const tables:Record<string,string>={creativeAssets:'makster_creative_assets',contentDraftSets:'makster_content_draft_sets',officeContent:'makster_office_content',publishJobs:'makster_publish_jobs',growthSyncSnapshots:'makster_growth_sync_snapshots',contentPerformance:'makster_content_performance'};
+    for(const {table,value} of records){const name=tables[table];if(!name||value?.smm?.brandId!=='makster-atelier'||value.smm.scope!=='MAKSTER_SMM_6')throw new Error('smm_scope_invalid');
+      const rows=await this.request<any[]>(`${name}?id=eq.${encodeURIComponent(value.id)}&organization_id=eq.${encodeURIComponent(this.org())}&select=data_json`,{method:'GET'});
+      if(rows.length){if(rows[0].data_json?.smm?.scope!=='MAKSTER_SMM_6')throw new Error('smm_record_collision');await this.officeUpdate(name,value)}else await this.officeInsert(name,value);
+    }
+  }
+
   async addOfficeLead(x:MaksterOfficeLead){return this.officeInsert('makster_office_leads',x)}
   async updateOfficeLead(x:MaksterOfficeLead){return this.officeUpdate('makster_office_leads',x)}
   async addOfficeCampaign(x:MaksterOfficeCampaign){return this.officeInsert('makster_office_campaigns',x)}

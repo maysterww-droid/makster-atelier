@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 const empty = () => ({ version: '5.6.0', warehouseItems: [], warehouseReservations: [], suppliers: [], supplierQuotes: [], materialRfqs: [], materialRfqCommunications: [], procurementAwards: [], productionWorkCenters: [], projectCapacityOverrides: [], productionTimeEntries: [], treasuryBalances: [], queuePriorityOverrides: [], decisionPlans: [], productionOperations: [], financeLedgerEntries: [], financeSettings: [], officeLeads: [], officeCampaigns: [], officeContent: [], officeApprovals: [], officeAgentRuns: [], officeCycles: [], officeOwnerBriefs: [], growthConnections: [], growthSyncSnapshots: [], officeAutopilotDecisions: [], officeAutopilotRuns: [], growthSpendGuardrails: [], growthProviderExecutions: [], growthAuditLog: [], growthInboundLeadEvents: [], creativeAssets: [], contentDraftSets: [], publishJobs: [], contentPerformance: [], pilotProjects: [], pilotRuns: [], rolePolicies: [], operationalIncidents: [], backupManifests: [], readinessSnapshots: [], cashEvents: [], fixedMonthlyCosts: [], updatedAt: new Date().toISOString() });
 export class OwnerOperationsStore {
@@ -48,6 +48,26 @@ export class OwnerOperationsStore {
         this.state.readinessSnapshots ??= [];
     }
     save() { this.state.updatedAt = new Date().toISOString(); writeFileSync(this.filePath, JSON.stringify(this.state, null, 2) + '\n', 'utf8'); }
+    applySmmRecords(records) {
+        const allowed = new Set(['creativeAssets', 'contentDraftSets', 'officeContent', 'publishJobs', 'growthSyncSnapshots', 'contentPerformance']);
+        const next = structuredClone(this.state);
+        for (const { table, value } of records) {
+            if (!allowed.has(table) || value?.smm?.brandId !== 'makster-atelier' || value.smm.scope !== 'MAKSTER_SMM_6')
+                throw new Error('smm_scope_invalid');
+            const list = next[table], i = list.findIndex((x) => x.id === value.id);
+            if (i >= 0) {
+                if (list[i].smm?.scope !== 'MAKSTER_SMM_6')
+                    throw new Error('smm_record_collision');
+                list[i] = value;
+            }
+            else
+                list.push(value);
+        }
+        const temp = this.filePath + '.smm-tmp';
+        writeFileSync(temp, JSON.stringify(next, null, 2) + '\n', { mode: 0o600 });
+        renameSync(temp, this.filePath);
+        this.state = next;
+    }
     get() { return structuredClone(this.state); }
     addWarehouseItem(input) {
         const item = { id: randomUUID(), ...input, updatedAt: new Date().toISOString() };

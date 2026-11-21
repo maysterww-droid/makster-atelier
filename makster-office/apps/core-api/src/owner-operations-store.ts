@@ -1,5 +1,5 @@
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import type { OwnerOperationsState, WarehouseItem, WarehouseReservation, SupplierProfile, SupplierQuote, MaterialProcurementRfq, MaterialRfqCommunication, ProcurementAward, ProductionWorkCenter, ProjectCapacityOverride, ProductionTimeEntry, TreasuryBalance, OwnerDecisionPlan, OwnerQueuePriorityOverride, ProductionOperation, FinanceLedgerEntry, FinanceSettings, MaksterOfficeLead, MaksterOfficeCampaign, MaksterOfficeContentItem, MaksterOfficeApproval, MaksterOfficeAgentRun, MaksterOfficeCycle, MaksterOfficeOwnerBrief, MaksterGrowthConnection, MaksterGrowthSyncSnapshot, MaksterAutopilotDecision, MaksterAutopilotRun, GrowthSpendGuardrail, GrowthProviderExecution, GrowthAuditLogEntry, GrowthInboundLeadEvent, MaksterCreativeAsset, MaksterContentDraftSet, MaksterPublishJob, MaksterContentPerformance, MaksterPilotProject, MaksterPilotRun, MaksterRolePolicy, MaksterOperationalIncident, MaksterBackupManifest, MaksterReadinessSnapshot, CashEvent, FixedMonthlyCost } from '../../../packages/owner-operations/src/types.js';
 
@@ -16,6 +16,13 @@ export class OwnerOperationsStore{
     this.state.queuePriorityOverrides??=[];this.state.decisionPlans??=[];this.state.productionOperations??=[];this.state.financeLedgerEntries??=[];this.state.financeSettings??=[];this.state.officeLeads??=[];this.state.officeCampaigns??=[];this.state.officeContent??=[];this.state.officeApprovals??=[];this.state.officeAgentRuns??=[];this.state.officeCycles??=[];this.state.officeOwnerBriefs??=[];this.state.growthConnections??=[];this.state.growthSyncSnapshots??=[];this.state.officeAutopilotDecisions??=[];this.state.officeAutopilotRuns??=[];this.state.growthSpendGuardrails??=[];this.state.growthProviderExecutions??=[];this.state.growthAuditLog??=[];this.state.growthInboundLeadEvents??=[];this.state.creativeAssets??=[];this.state.contentDraftSets??=[];this.state.publishJobs??=[];this.state.contentPerformance??=[];this.state.pilotProjects??=[];this.state.pilotRuns??=[];this.state.rolePolicies??=[];this.state.operationalIncidents??=[];this.state.backupManifests??=[];this.state.readinessSnapshots??=[];
   }
   private save(){this.state.updatedAt=new Date().toISOString();writeFileSync(this.filePath,JSON.stringify(this.state,null,2)+'\n','utf8')}
+
+  applySmmRecords(records:any[]){
+    const allowed=new Set(['creativeAssets','contentDraftSets','officeContent','publishJobs','growthSyncSnapshots','contentPerformance']);const next=structuredClone(this.state) as any;
+    for(const {table,value} of records){if(!allowed.has(table)||value?.smm?.brandId!=='makster-atelier'||value.smm.scope!=='MAKSTER_SMM_6')throw new Error('smm_scope_invalid');const list=next[table],i=list.findIndex((x:any)=>x.id===value.id);if(i>=0){if(list[i].smm?.scope!=='MAKSTER_SMM_6')throw new Error('smm_record_collision');list[i]=value}else list.push(value)}
+    const temp=this.filePath+'.smm-tmp';writeFileSync(temp,JSON.stringify(next,null,2)+'\n',{mode:0o600});renameSync(temp,this.filePath);this.state=next;
+  }
+
   get(){return structuredClone(this.state)}
   addWarehouseItem(input:Omit<WarehouseItem,'id'|'updatedAt'>){
     const item:WarehouseItem={id:randomUUID(),...input,updatedAt:new Date().toISOString()};this.state.warehouseItems.push(item);this.save();return item

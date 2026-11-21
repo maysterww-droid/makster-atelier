@@ -1,0 +1,6 @@
+node_modules/
+.smm/
+.makster*.json
+.env
+.env.local
+*.log
