@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://makster.ai/schema/gmail-connection-1.4.json",
+  "title":"Makster Gmail Connection 1.4",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["connectionVersion","connectionId","organizationId","provider","accountEmail","scopes","status","createdAt","updatedAt"],
+  "properties":{
+    "connectionVersion":{"const":"1.5.0"},
+    "connectionId":{"type":"string","minLength":1},
+    "organizationId":{"type":"string","minLength":1},
+    "provider":{"const":"gmail"},
+    "accountEmail":{"type":"string","format":"email"},
+    "scopes":{"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "status":{"enum":["pending","connected","reauth_required","revoked","error"]},
+    "createdAt":{"type":"string","format":"date-time"},
+    "connectedAt":{"type":"string","format":"date-time"},
+    "updatedAt":{"type":"string","format":"date-time"},
+    "lastError":{"type":"string"}
+  }
+}

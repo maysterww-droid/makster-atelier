@@ -1,0 +1,128 @@
+MAKSTER AI 4.9.0 RELEASE VERIFICATION
+======================================
+
+FINANCE INTELLIGENCE CORE
+PASS: strict TypeScript compile
+PASS: project lifetime profitability separated from monthly P&L
+PASS: monthly Actual vs Forecast
+PASS: explicit revenue recognition
+PASS: cash-receipt fallback
+PASS: no invented monthly revenue from cumulative contract value
+PASS: monthly project COGS
+PASS: fixed operating cost
+PASS: variable operating cost
+PASS: gross profit / gross margin
+PASS: operating profit / operating margin
+PASS: tax reserve
+PASS: net after tax reserve
+
+WORKING CAPITAL
+PASS: Accounts Receivable
+PASS: Accounts Payable
+PASS: overdue receivables
+PASS: supplier due 30 days
+PASS: PO / procurement-award cash commitment double-count protection
+
+BREAK-EVEN
+PASS: contribution margin
+PASS: break-even revenue
+PASS: contracted revenue for month
+PASS: break-even gap
+PASS: achieved flag
+
+LIQUIDITY
+Runtime scenario:
+- treasury EUR 6,000
+- supplier cash commitment EUR 3,000
+- expected client inflow EUR 2,500
+- fixed monthly cost EUR 2,000
+
+PASS: treasury input
+PASS: 30-day cash flow
+PASS: monthly burn
+PASS: runway calculation
+PASS: runway status
+
+RUNTIME PROJECT
+Contract = EUR 20,000
+Received cumulative = EUR 5,000
+Recognized revenue September = EUR 7,000
+Forecast project cost = EUR 8,000
+Fixed monthly cost = EUR 2,000
+
+PASS: Revenue Actual = EUR 7,000
+PASS: Revenue Forecast = EUR 20,000
+PASS: Gross Profit Forecast = EUR 12,000
+PASS: Operating Profit Forecast = EUR 10,000
+PASS: Accounts Receivable = EUR 15,000
+PASS: Break-even revenue ≈ EUR 3,333
+PASS: Break-even achieved
+PASS: Runway = 2.4 months / WATCH
+
+PROJECT PROFITABILITY
+PASS: ranking high vs low margin projects
+PASS: best margin project
+PASS: worst margin project
+PASS: highest receivable
+PASS: highest forecast profit
+PASS: low-margin alert
+
+FINANCE TREND
+PASS: 6-month trend
+PASS: configurable 1–24 month output
+PASS: current target month included
+
+4.9 REGRESSION
+5 tests
+5 passed
+0 failed
+
+CROSS-VERSION REGRESSION
+39 tests
+39 passed
+0 failed
+
+ACTUAL BUNDLED API
+PASS: health -> 4.9.0
+PASS: GET owner-finance -> 200 / 4.9.0
+PASS: GET owner-finance/trend -> 200
+PASS: POST owner-finance/ledger
+PASS: POST owner-finance/settings
+
+WEB UI
+PASS: Owner Finance · P&L Intelligence
+PASS: Actual / Forecast P&L
+PASS: Break-even
+PASS: Cash Runway
+PASS: Accounts Receivable / Payable
+PASS: Finance trend
+PASS: Project Profitability Ranking
+PASS: financial alerts
+PASS: revenue recognition action
+PASS: finance settings
+PASS: MAKSTER AI 4.9 branding
+
+4.8 PROCUREMENT LOAD FIX
+PASS: Procurement Automation is loaded from normal Owner load
+PASS: Procurement Automation is loaded from lazy Owner render path
+
+SUPABASE
+PASS: prepared 4.9 migration
+PASS: owner_finance_ledger
+PASS: owner_finance_settings
+PASS: RLS enabled
+PASS: owner/admin read
+PASS: service-role mutation
+PASS: staging schema smoke prepared
+
+NOT LIVE-APPLIED
+No production/staging Supabase credentials were used in this sandbox.
+
+ACCOUNTING BOUNDARY
+Makster Owner Finance is a management-finance system.
+It does not claim to replace statutory Czech/EU bookkeeping, VAT returns, payroll accounting or tax filing.
+
+CORE TYPESCRIPT
+PASS: Owner Operations strict compile
+PASS: zero new structural Core API TypeScript errors
+Known supplied-archive limitation remains: @types/node is absent.

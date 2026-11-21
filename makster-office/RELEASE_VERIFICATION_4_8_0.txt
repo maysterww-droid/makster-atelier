@@ -1,0 +1,106 @@
+MAKSTER AI 4.8.0 RELEASE VERIFICATION
+======================================
+
+PROCUREMENT AUTOMATION CORE
+PASS: strict Owner Operations TypeScript compile
+PASS: BOM shortage -> RFQ eligibility
+PASS: supplier email/category eligibility
+PASS: structured material RFQ draft
+PASS: RFQ response token validation
+PASS: sender-email validation
+PASS: structured quote import
+PASS: RFQ-specific quote lineage
+PASS: Optimal/Cheapest/Fastest comparison
+PASS: cross-RFQ quote isolation
+PASS: reminder candidate detection
+
+4.8 REGRESSION
+4 tests
+4 passed
+0 failed
+
+ACTUAL BUNDLED API SAFETY SMOKE
+PASS: health -> 4.8.0
+PASS: Procurement Automation Center -> 200 / 4.8.0
+PASS: RFQ draft -> 201
+
+SEND APPROVAL
+PASS: send without approval -> HTTP 403
+PASS: error = owner_approval_required_to_send_rfq
+PASS: approved memory-provider send -> sent
+
+SUPPLIER RESPONSE
+Runtime quote:
+20 × BLUM-X
+EUR 5.50 / pcs
+EUR 10 delivery
+4 day lead
+
+PASS: structured reply -> quote_candidate
+PASS: quote imported
+PASS: compare -> Blum Partner
+PASS: compared total = EUR 120.00
+
+WINNER APPROVAL
+PASS: winner selection without approval -> HTTP 403
+PASS: error = owner_approval_required_to_select_supplier
+PASS: approved winner selection -> winner_selected
+
+SPEND SAFETY
+After RFQ send + quote + comparison + approved winner selection:
+PASS: procurementAwards = 0
+PASS: cashEvents = 0
+
+Therefore choosing a winner does not create money movement or a supplier order.
+The existing separate Award step remains required.
+
+REMINDERS
+PASS: unanswered sent supplier becomes reminder candidate
+PASS: replied/declined supplier is excluded
+PASS: reminder API itself requires Owner approval
+
+UNIFIED PROCUREMENT
+PASS: existing Outsource Production RFQs retained
+PASS: existing Procurement Intelligence retained
+PASS: existing Supplier Communication/Gmail abstraction retained
+PASS: new Material/Hardware RFQ shown in same Owner Procurement Center
+
+CROSS-VERSION REGRESSION
+34 tests
+34 passed
+0 failed
+
+WEB UI
+PASS: Procurement Automation · RFQ Center
+PASS: RFQ from BOM shortage
+PASS: Send RFQ
+PASS: Import supplier reply
+PASS: Compare
+PASS: Send reminders
+PASS: Select winner
+PASS: Award -> PO
+PASS: existing outsource RFQ visibility
+PASS: MAKSTER AI 4.8 branding
+
+SUPABASE
+PASS: prepared 4.8 migration
+PASS: supplier email/language metadata
+PASS: supplier quote rfq_id
+PASS: owner_material_rfqs
+PASS: owner_material_rfq_communications
+PASS: RLS/service-role pattern retained
+PASS: staging schema smoke prepared
+
+NOT LIVE-APPLIED
+No production/staging Supabase credentials were used in this sandbox.
+No real supplier email was sent in release verification; outbound approval was verified with the memory email provider.
+
+CURRENT GMAIL BOUNDARY
+The material RFQ send endpoint can use an existing Gmail connection.
+The legacy Gmail inbox auto-sync/parser remains connected to the existing Outsource RFQ communication threads.
+Material RFQ structured replies are currently imported through the material reply endpoint/UI; automatic Gmail inbound routing for the new material thread type is a remaining integration step.
+
+CORE TYPESCRIPT
+PASS: Owner Operations strict compile
+PASS: zero new structural Core API TypeScript errors
+Known supplied-archive limitation remains: @types/node is absent.

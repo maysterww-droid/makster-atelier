@@ -1,0 +1,50 @@
+MAKSTER AI 5.3.0 RELEASE VERIFICATION
+====================================
+
+AUTOPILOT CORE
+PASS SCALE
+PASS HOLD
+PASS REDUCE
+PASS PAUSE
+PASS confidence scoring
+PASS real-project-profit evidence
+PASS attributed revenue / ROAS evidence
+PASS lead-quality evidence
+PASS weighted advertising economics
+
+OWNER SAFETY
+PASS non-HOLD decisions create approval path
+PASS execution without Owner approval rejected
+PASS approval changes internal Makster plan only
+PASS no fake Google/Meta/TikTok mutation
+PASS provider execution remains explicit pending state
+
+RUNTIME
+Health: 5.3.0
+Weak Meta:
+budget EUR 1,000
+spent EUR 500
+leads 6
+qualified 0
+decision PAUSE
+confidence 90
+proposed budget EUR 0
+
+Owner Approve:
+internal campaign status = PAUSED
+externalProviderMutation = false
+providerExecution = pending_provider_sync
+
+TESTS
+5.3: 5 / 5 passed
+Full regression: 59 / 59 passed
+0 failed
+
+COMPILE
+Owner/Office strict TypeScript: PASS
+Core API structural TypeScript: PASS
+Known archive limitation remains: @types/node absent.
+
+LIVE PROVIDER BOUNDARY
+Real Google Ads, Meta Ads and TikTok provider mutation still requires OAuth/account adapters.
+No autonomous external ad spend is enabled.

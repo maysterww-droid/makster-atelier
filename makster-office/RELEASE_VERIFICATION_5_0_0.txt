@@ -1,0 +1,100 @@
+MAKSTER AI 5.0.0 BUSINESS OPERATING SYSTEM RC
+==============================================
+
+BUSINESS OS CORE
+PASS: strict TypeScript compile
+PASS: explicit source-of-truth ownership map
+PASS: company operating snapshot
+PASS: end-to-end project state
+PASS: owner next-action queue
+PASS: Business Health Score
+
+BUSINESS TRUTH
+PASS: CLOSED + unpaid client balance -> CRITICAL
+PASS: handover/final-payment stage without signature -> HIGH
+PASS: CLOSED + unfinished production -> CRITICAL
+PASS: CLOSED furniture project without production history -> CRITICAL
+PASS: CLOSED + open material RFQ -> HIGH
+PASS: cash receipts > ProjectModel received -> HIGH
+PASS: orphan production operation detection
+PASS: orphan RFQ detection
+PASS: orphan project cash event detection
+
+GUARDED CLOSE
+PASS: final balance outstanding blocks close
+PASS: handover unsigned blocks close
+PASS: furniture production history missing blocks close
+PASS: unfinished operation blocks close
+PASS: open Material RFQ blocks close
+PASS: open Purchase Order blocks close
+PASS: open punch-list blocks close
+PASS: open installation issue blocks close
+
+BUNDLED API SMOKE
+PASS: health -> 5.0.0
+PASS: GET Business OS -> 200 / 5.0.0
+PASS: four parallel project states processed
+PASS: deliberately inconsistent CLOSED project detected
+PASS: clean-but-unsigned project close rejected
+PASS: close rejection -> HTTP 409
+PASS: close error -> business_close_gate_blocked
+PASS: exact blocker -> installation_handover_not_signed
+
+RUNTIME MULTI-PROJECT SNAPSHOT
+Projects = 4
+Active = 3
+Closed = 1
+Unpaid = 3
+Truth issues = 3
+Critical truth issues = 1
+Treasury = EUR 12,000
+Client outstanding = EUR 29,000
+Runway = 6 months
+
+Expected result:
+Business Health RED because deliberate inconsistent data was injected.
+PASS: Business Health = RED
+PASS: inconsistent CLOSED project exposes:
+- CLOSED_WITH_CLIENT_BALANCE
+- HANDOVER_STAGE_WITHOUT_SIGNATURE
+
+5.0 UNIT REGRESSION
+5 tests
+5 passed
+0 failed
+
+FULL CROSS-VERSION REGRESSION
+44 tests
+44 passed
+0 failed
+
+WEB UI
+PASS: Makster AI 5.0 Business Operating System
+PASS: Business Health
+PASS: Truth Issues
+PASS: Next Owner Actions
+PASS: End-to-End Project State
+PASS: Guarded Close action
+PASS: Owner Finance retained
+PASS: Procurement Automation retained
+PASS: Operations Control Tower retained
+PASS: MAKSTER AI 5.0 branding
+
+NO NEW DATABASE TABLE REQUIRED
+Business OS itself is a computed orchestration layer over existing ProjectModel and Owner Operations persistence.
+No 5.0 Supabase schema migration is required specifically for Business OS.
+
+IMPORTANT RC LIMITS
+NOT CLAIMED:
+- statutory Czech/EU accounting
+- real production Supabase migration execution
+- production auth/security certification
+- automatic Material RFQ Gmail inbox routing
+- production backup/DR verification
+- high-concurrency multi-user certification
+- real-world workshop pilot completion
+
+CORE TYPESCRIPT
+PASS: Owner/Business core strict compile
+PASS: zero new structural Core API TypeScript errors
+Known supplied-archive limitation: @types/node is absent.

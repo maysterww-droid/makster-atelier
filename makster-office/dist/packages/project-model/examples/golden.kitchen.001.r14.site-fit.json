@@ -1,0 +1,1250 @@
+{
+    "schemaVersion": "1.0.0",
+    "projectId": "26100001-0000-4000-8000-000000000001",
+    "revision": 14,
+    "title": "Golden Project #1 · R14 site-fit no-name appliances · GTV Modern Slide 18 mm / 500 mm",
+    "locale": "cs-CZ",
+    "currency": "EUR",
+    "unitSystem": "metric",
+    "geometryUnit": "0.1mm",
+    "coordinateSystem": {
+        "handedness": "right",
+        "x": "right",
+        "y": "forward",
+        "z": "up"
+    },
+    "projectType": "kitchen",
+    "site": {
+        "rooms": [
+            {
+                "id": "26100001-0000-4000-8000-000000000010",
+                "name": "Kitchen · room geometry not yet measured",
+                "origin": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "dimensions": {
+                    "width": {
+                        "value": null,
+                        "state": "unknown"
+                    },
+                    "height": {
+                        "value": null,
+                        "state": "unknown"
+                    },
+                    "depth": {
+                        "value": null,
+                        "state": "unknown"
+                    }
+                },
+                "walls": [],
+                "openings": [],
+                "obstacles": []
+            }
+        ]
+    },
+    "furniture": [
+        {
+            "id": "26100001-0000-4000-8000-000000000200",
+            "kind": "kitchen",
+            "name": "Lower run · confirmed 4190 mm",
+            "roomId": "26100001-0000-4000-8000-000000000010",
+            "transform": {
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "rotationZDeg": 0
+            },
+            "dimensions": {
+                "width": {
+                    "value": 41900,
+                    "state": "confirmed"
+                },
+                "height": {
+                    "value": 9000,
+                    "state": "observed"
+                },
+                "depth": {
+                    "value": 6000,
+                    "state": "observed"
+                }
+            },
+            "mounting": "base_supported",
+            "construction": {
+                "carcassThickness": {
+                    "value": 180,
+                    "state": "observed"
+                },
+                "backPanel": {
+                    "mode": "overlay",
+                    "thickness": {
+                        "value": 80,
+                        "state": "estimated"
+                    },
+                    "materialSelectionId": "26100001-0000-4000-8000-000000000103"
+                },
+                "plinth": {
+                    "mode": "separate",
+                    "height": {
+                        "value": 1000,
+                        "state": "estimated"
+                    },
+                    "setback": {
+                        "value": 700,
+                        "state": "estimated"
+                    },
+                    "materialSelectionId": "26100001-0000-4000-8000-000000000101"
+                },
+                "defaultCarcassMaterialSelectionId": "26100001-0000-4000-8000-000000000101",
+                "defaultFrontMaterialSelectionId": "26100001-0000-4000-8000-000000000102",
+                "defaultEdgeMaterialSelectionId": "26100001-0000-4000-8000-000000000104"
+            },
+            "modules": [
+                {
+                    "id": "26100001-0000-4000-8000-000000000001",
+                    "kind": "drawers",
+                    "name": "Drawers 3× · 600",
+                    "width": {
+                        "mode": "fixed",
+                        "value": {
+                            "value": 6000,
+                            "state": "confirmed"
+                        }
+                    },
+                    "height": {
+                        "value": 7200,
+                        "state": "estimated"
+                    },
+                    "depth": {
+                        "value": 6000,
+                        "state": "observed"
+                    },
+                    "contents": [
+                        {
+                            "id": "26100001-0000-4000-8100-000000000001",
+                            "kind": "drawer_stack",
+                            "count": 3,
+                            "frontMode": "external",
+                            "runnerHardwareSelectionId": "26100001-0000-4000-8400-000000000001",
+                            "drawerBox": {
+                                "sideThickness": {
+                                    "value": 180,
+                                    "state": "confirmed"
+                                },
+                                "bottomThickness": {
+                                    "value": 30,
+                                    "state": "confirmed"
+                                },
+                                "materialSelectionId": "26100001-0000-4000-8000-000000000106",
+                                "bottomMaterialSelectionId": "26100001-0000-4000-8000-000000000107",
+                                "bottomInstallation": {
+                                    "mode": "groove",
+                                    "machiningMethod": "manual_template",
+                                    "grooveWidth": {
+                                        "value": 30,
+                                        "state": "confirmed"
+                                    },
+                                    "grooveDepth": {
+                                        "value": 100,
+                                        "state": "confirmed"
+                                    },
+                                    "bottomRecessFromLowerEdge": {
+                                        "value": 130,
+                                        "state": "confirmed"
+                                    },
+                                    "boxJoint": "front_back_between_sides"
+                                }
+                            }
+                        }
+                    ],
+                    "kitchen": {
+                        "type": "base",
+                        "function": "drawers",
+                        "hasTop": true,
+                        "hasBottom": true,
+                        "hasBack": true,
+                        "opening": "handle",
+                        "worktop": {
+                            "enabled": true,
+                            "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                            "thickness": {
+                                "value": 380,
+                                "state": "confirmed"
+                            },
+                            "depth": {
+                                "value": 6000,
+                                "state": "observed"
+                            },
+                            "frontOverhang": {
+                                "value": null,
+                                "state": "unknown"
+                            },
+                            "cutouts": [],
+                            "wallTrim": {
+                                "enabled": true,
+                                "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                                "height": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                },
+                                "depth": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                }
+                            }
+                        },
+                        "plinth": {
+                            "enabled": true,
+                            "height": {
+                                "value": 1000,
+                                "state": "estimated"
+                            },
+                            "setback": {
+                                "value": 700,
+                                "state": "estimated"
+                            },
+                            "legCount": 4
+                        }
+                    },
+                    "tags": [
+                        "golden-project-1",
+                        "source-sheet"
+                    ],
+                    "libraryModuleId": "base.drawers"
+                },
+                {
+                    "id": "26100001-0000-4000-8000-000000000002",
+                    "kind": "sink",
+                    "name": "Sink base 2 doors · 1100",
+                    "width": {
+                        "mode": "fixed",
+                        "value": {
+                            "value": 11000,
+                            "state": "confirmed"
+                        }
+                    },
+                    "height": {
+                        "value": 7200,
+                        "state": "estimated"
+                    },
+                    "depth": {
+                        "value": 6000,
+                        "state": "observed"
+                    },
+                    "contents": [
+                        {
+                            "id": "26100001-0000-4000-8100-000000000002",
+                            "kind": "open_space",
+                            "label": "Sink/plumbing zone"
+                        }
+                    ],
+                    "kitchen": {
+                        "type": "base",
+                        "function": "sink",
+                        "hasTop": false,
+                        "hasBottom": true,
+                        "hasBack": false,
+                        "opening": "handle",
+                        "worktop": {
+                            "enabled": true,
+                            "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                            "thickness": {
+                                "value": 380,
+                                "state": "confirmed"
+                            },
+                            "depth": {
+                                "value": 6000,
+                                "state": "observed"
+                            },
+                            "frontOverhang": {
+                                "value": null,
+                                "state": "unknown"
+                            },
+                            "cutouts": [
+                                {
+                                    "id": "26100001-0000-4000-8600-000000000001",
+                                    "kind": "sink",
+                                    "execution": "on_site"
+                                }
+                            ],
+                            "wallTrim": {
+                                "enabled": true,
+                                "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                                "height": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                },
+                                "depth": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                }
+                            }
+                        },
+                        "plinth": {
+                            "enabled": true,
+                            "height": {
+                                "value": 1000,
+                                "state": "estimated"
+                            },
+                            "setback": {
+                                "value": 700,
+                                "state": "estimated"
+                            },
+                            "legCount": 4
+                        }
+                    },
+                    "tags": [
+                        "golden-project-1",
+                        "source-sheet"
+                    ],
+                    "libraryModuleId": "base.sink"
+                },
+                {
+                    "id": "26100001-0000-4000-8000-000000000003",
+                    "kind": "custom",
+                    "name": "Base cabinet 2 doors · 600",
+                    "width": {
+                        "mode": "fixed",
+                        "value": {
+                            "value": 6000,
+                            "state": "confirmed"
+                        }
+                    },
+                    "height": {
+                        "value": 7200,
+                        "state": "estimated"
+                    },
+                    "depth": {
+                        "value": 6000,
+                        "state": "observed"
+                    },
+                    "contents": [],
+                    "kitchen": {
+                        "type": "base",
+                        "function": "storage",
+                        "hasTop": true,
+                        "hasBottom": true,
+                        "hasBack": true,
+                        "opening": "handle",
+                        "worktop": {
+                            "enabled": true,
+                            "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                            "thickness": {
+                                "value": 380,
+                                "state": "confirmed"
+                            },
+                            "depth": {
+                                "value": 6000,
+                                "state": "observed"
+                            },
+                            "frontOverhang": {
+                                "value": null,
+                                "state": "unknown"
+                            },
+                            "cutouts": [],
+                            "wallTrim": {
+                                "enabled": true,
+                                "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                                "height": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                },
+                                "depth": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                }
+                            }
+                        },
+                        "plinth": {
+                            "enabled": true,
+                            "height": {
+                                "value": 1000,
+                                "state": "estimated"
+                            },
+                            "setback": {
+                                "value": 700,
+                                "state": "estimated"
+                            },
+                            "legCount": 4
+                        }
+                    },
+                    "tags": [
+                        "golden-project-1",
+                        "source-sheet"
+                    ],
+                    "libraryModuleId": "base.storage"
+                },
+                {
+                    "id": "26100001-0000-4000-8000-000000000004",
+                    "kind": "appliance",
+                    "name": "Oven + cooktop zone · 600",
+                    "width": {
+                        "mode": "fixed",
+                        "value": {
+                            "value": 6000,
+                            "state": "confirmed"
+                        }
+                    },
+                    "height": {
+                        "value": 7200,
+                        "state": "estimated"
+                    },
+                    "depth": {
+                        "value": 6000,
+                        "state": "observed"
+                    },
+                    "contents": [
+                        {
+                            "id": "26100001-0000-4000-8100-000000000004",
+                            "kind": "appliance_space",
+                            "applianceKind": "oven"
+                        },
+                        {
+                            "id": "26100001-0000-4000-8100-000000000014",
+                            "kind": "appliance_space",
+                            "applianceKind": "hob"
+                        }
+                    ],
+                    "kitchen": {
+                        "type": "base",
+                        "function": "oven",
+                        "hasTop": true,
+                        "hasBottom": true,
+                        "hasBack": true,
+                        "opening": "handle",
+                        "worktop": {
+                            "enabled": true,
+                            "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                            "thickness": {
+                                "value": 380,
+                                "state": "confirmed"
+                            },
+                            "depth": {
+                                "value": 6000,
+                                "state": "observed"
+                            },
+                            "frontOverhang": {
+                                "value": null,
+                                "state": "unknown"
+                            },
+                            "cutouts": [
+                                {
+                                    "id": "26100001-0000-4000-8600-000000000002",
+                                    "kind": "hob",
+                                    "execution": "on_site",
+                                    "width": {
+                                        "value": 5600,
+                                        "state": "confirmed"
+                                    },
+                                    "depth": {
+                                        "value": 4900,
+                                        "state": "confirmed"
+                                    }
+                                }
+                            ],
+                            "wallTrim": {
+                                "enabled": true,
+                                "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                                "height": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                },
+                                "depth": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                }
+                            }
+                        },
+                        "plinth": {
+                            "enabled": true,
+                            "height": {
+                                "value": 1000,
+                                "state": "estimated"
+                            },
+                            "setback": {
+                                "value": 700,
+                                "state": "estimated"
+                            },
+                            "legCount": 4
+                        },
+                        "appliance": {
+                            "kind": "oven",
+                            "manufacturer": "Unknown / non-branded",
+                            "installation": "cabinet",
+                            "requiredSpace": {
+                                "width": {
+                                    "value": 5600,
+                                    "state": "confirmed"
+                                },
+                                "height": {
+                                    "value": 5800,
+                                    "state": "confirmed"
+                                },
+                                "depth": {
+                                    "value": null,
+                                    "state": "unknown"
+                                }
+                            },
+                            "fitMode": "site_fit"
+                        },
+                        "appliances": [
+                            {
+                                "kind": "oven",
+                                "manufacturer": "Unknown / non-branded",
+                                "installation": "cabinet",
+                                "requiredSpace": {
+                                    "width": {
+                                        "value": 5600,
+                                        "state": "confirmed"
+                                    },
+                                    "height": {
+                                        "value": 5800,
+                                        "state": "confirmed"
+                                    },
+                                    "depth": {
+                                        "value": null,
+                                        "state": "unknown"
+                                    }
+                                },
+                                "fitMode": "site_fit"
+                            },
+                            {
+                                "kind": "hob",
+                                "manufacturer": "Unknown / non-branded",
+                                "installation": "worktop",
+                                "fitMode": "site_fit"
+                            }
+                        ]
+                    },
+                    "tags": [
+                        "golden-project-1",
+                        "source-sheet"
+                    ],
+                    "libraryModuleId": "base.oven_hob"
+                },
+                {
+                    "id": "26100001-0000-4000-8000-000000000005",
+                    "kind": "custom",
+                    "name": "Base cabinet 2 doors · 690",
+                    "width": {
+                        "mode": "fixed",
+                        "value": {
+                            "value": 6900,
+                            "state": "confirmed"
+                        }
+                    },
+                    "height": {
+                        "value": 7200,
+                        "state": "estimated"
+                    },
+                    "depth": {
+                        "value": 6000,
+                        "state": "observed"
+                    },
+                    "contents": [],
+                    "kitchen": {
+                        "type": "base",
+                        "function": "storage",
+                        "hasTop": true,
+                        "hasBottom": true,
+                        "hasBack": true,
+                        "opening": "handle",
+                        "worktop": {
+                            "enabled": true,
+                            "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                            "thickness": {
+                                "value": 380,
+                                "state": "confirmed"
+                            },
+                            "depth": {
+                                "value": 6000,
+                                "state": "observed"
+                            },
+                            "frontOverhang": {
+                                "value": null,
+                                "state": "unknown"
+                            },
+                            "cutouts": [],
+                            "wallTrim": {
+                                "enabled": true,
+                                "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                                "height": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                },
+                                "depth": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                }
+                            }
+                        },
+                        "plinth": {
+                            "enabled": true,
+                            "height": {
+                                "value": 1000,
+                                "state": "estimated"
+                            },
+                            "setback": {
+                                "value": 700,
+                                "state": "estimated"
+                            },
+                            "legCount": 4
+                        }
+                    },
+                    "tags": [
+                        "golden-project-1",
+                        "source-sheet"
+                    ],
+                    "libraryModuleId": "base.storage"
+                },
+                {
+                    "id": "26100001-0000-4000-8000-000000000006",
+                    "kind": "drawers",
+                    "name": "Drawers 3× · 600",
+                    "width": {
+                        "mode": "fixed",
+                        "value": {
+                            "value": 6000,
+                            "state": "confirmed"
+                        }
+                    },
+                    "height": {
+                        "value": 7200,
+                        "state": "estimated"
+                    },
+                    "depth": {
+                        "value": 6000,
+                        "state": "observed"
+                    },
+                    "contents": [
+                        {
+                            "id": "26100001-0000-4000-8100-000000000006",
+                            "kind": "drawer_stack",
+                            "count": 3,
+                            "frontMode": "external",
+                            "runnerHardwareSelectionId": "26100001-0000-4000-8400-000000000001",
+                            "drawerBox": {
+                                "sideThickness": {
+                                    "value": 180,
+                                    "state": "confirmed"
+                                },
+                                "bottomThickness": {
+                                    "value": 30,
+                                    "state": "confirmed"
+                                },
+                                "materialSelectionId": "26100001-0000-4000-8000-000000000106",
+                                "bottomMaterialSelectionId": "26100001-0000-4000-8000-000000000107",
+                                "bottomInstallation": {
+                                    "mode": "groove",
+                                    "machiningMethod": "manual_template",
+                                    "grooveWidth": {
+                                        "value": 30,
+                                        "state": "confirmed"
+                                    },
+                                    "grooveDepth": {
+                                        "value": 100,
+                                        "state": "confirmed"
+                                    },
+                                    "bottomRecessFromLowerEdge": {
+                                        "value": 130,
+                                        "state": "confirmed"
+                                    },
+                                    "boxJoint": "front_back_between_sides"
+                                }
+                            }
+                        }
+                    ],
+                    "kitchen": {
+                        "type": "base",
+                        "function": "drawers",
+                        "hasTop": true,
+                        "hasBottom": true,
+                        "hasBack": true,
+                        "opening": "handle",
+                        "worktop": {
+                            "enabled": true,
+                            "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                            "thickness": {
+                                "value": 380,
+                                "state": "confirmed"
+                            },
+                            "depth": {
+                                "value": 6000,
+                                "state": "observed"
+                            },
+                            "frontOverhang": {
+                                "value": null,
+                                "state": "unknown"
+                            },
+                            "cutouts": [],
+                            "wallTrim": {
+                                "enabled": true,
+                                "materialSelectionId": "26100001-0000-4000-8000-000000000105",
+                                "height": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                },
+                                "depth": {
+                                    "value": 150,
+                                    "state": "confirmed"
+                                }
+                            }
+                        },
+                        "plinth": {
+                            "enabled": true,
+                            "height": {
+                                "value": 1000,
+                                "state": "estimated"
+                            },
+                            "setback": {
+                                "value": 700,
+                                "state": "estimated"
+                            },
+                            "legCount": 4
+                        }
+                    },
+                    "tags": [
+                        "golden-project-1",
+                        "source-sheet"
+                    ],
+                    "libraryModuleId": "base.drawers"
+                }
+            ],
+            "fronts": [
+                {
+                    "id": "26100001-0000-4000-8200-000000000002",
+                    "moduleIds": [
+                        "26100001-0000-4000-8000-000000000002"
+                    ],
+                    "kind": "hinged",
+                    "count": 2,
+                    "split": "vertical",
+                    "opening": "paired",
+                    "hingeSides": [
+                        "left",
+                        "right"
+                    ],
+                    "materialSelectionId": "26100001-0000-4000-8000-000000000102",
+                    "handle": {
+                        "mode": "handle"
+                    },
+                    "note": "Owner confirmed GTV concealed soft-close hinges; hinge drilling/installation is performed manually with a physical template, so CNC hinge machining is intentionally omitted."
+                },
+                {
+                    "id": "26100001-0000-4000-8200-000000000003",
+                    "moduleIds": [
+                        "26100001-0000-4000-8000-000000000003"
+                    ],
+                    "kind": "hinged",
+                    "count": 2,
+                    "split": "vertical",
+                    "opening": "paired",
+                    "hingeSides": [
+                        "left",
+                        "right"
+                    ],
+                    "materialSelectionId": "26100001-0000-4000-8000-000000000102",
+                    "handle": {
+                        "mode": "handle"
+                    },
+                    "note": "Owner confirmed GTV concealed soft-close hinges; hinge drilling/installation is performed manually with a physical template, so CNC hinge machining is intentionally omitted."
+                },
+                {
+                    "id": "26100001-0000-4000-8200-000000000005",
+                    "moduleIds": [
+                        "26100001-0000-4000-8000-000000000005"
+                    ],
+                    "kind": "hinged",
+                    "count": 2,
+                    "split": "vertical",
+                    "opening": "paired",
+                    "hingeSides": [
+                        "left",
+                        "right"
+                    ],
+                    "materialSelectionId": "26100001-0000-4000-8000-000000000102",
+                    "handle": {
+                        "mode": "handle"
+                    },
+                    "note": "Owner confirmed GTV concealed soft-close hinges; hinge drilling/installation is performed manually with a physical template, so CNC hinge machining is intentionally omitted."
+                }
+            ],
+            "style": {
+                "colorNote": "White fronts/carcass; anthracite matte worktop; black handles",
+                "finishNote": "Source presentation"
+            },
+            "tags": [
+                "golden-project:GP001",
+                "lower-run-width-confirmed"
+            ]
+        }
+    ],
+    "selections": {
+        "materials": [
+            {
+                "id": "26100001-0000-4000-8000-000000000101",
+                "role": "carcass",
+                "source": "manual",
+                "name": "Kronospan white premium LDSP · source sheet",
+                "thickness": {
+                    "value": 180,
+                    "state": "observed"
+                },
+                "grainDirection": "none"
+            },
+            {
+                "id": "26100001-0000-4000-8000-000000000102",
+                "role": "front",
+                "source": "manual",
+                "name": "Kronospan white premium LDSP front · source sheet",
+                "thickness": {
+                    "value": 180,
+                    "state": "observed"
+                },
+                "grainDirection": "none"
+            },
+            {
+                "id": "26100001-0000-4000-8000-000000000103",
+                "role": "back",
+                "source": "manual",
+                "name": "Back panel · exact material/thickness not specified",
+                "thickness": {
+                    "value": 80,
+                    "state": "estimated"
+                },
+                "grainDirection": "none"
+            },
+            {
+                "id": "26100001-0000-4000-8000-000000000104",
+                "role": "edge",
+                "source": "manual",
+                "name": "White ABS edge · exact thickness not specified",
+                "thickness": {
+                    "value": 8,
+                    "state": "estimated"
+                },
+                "grainDirection": "none"
+            },
+            {
+                "id": "26100001-0000-4000-8000-000000000105",
+                "role": "worktop",
+                "source": "manual",
+                "name": "Anthracite matte worktop 38 mm",
+                "thickness": {
+                    "value": 380,
+                    "state": "confirmed"
+                },
+                "grainDirection": "horizontal"
+            },
+            {
+                "id": "26100001-0000-4000-8000-000000000106",
+                "role": "other",
+                "name": "Drawer box particleboard 18 mm · exact decor not separately specified",
+                "source": "manual",
+                "thickness": {
+                    "value": 180,
+                    "state": "confirmed"
+                },
+                "grainDirection": "none"
+            },
+            {
+                "id": "26100001-0000-4000-8000-000000000107",
+                "role": "other",
+                "name": "Drawer bottom HDF/DVP 3 mm",
+                "source": "manual",
+                "thickness": {
+                    "value": 30,
+                    "state": "confirmed"
+                },
+                "grainDirection": "none"
+            }
+        ],
+        "hardware": [
+            {
+                "id": "26100001-0000-4000-8400-000000000001",
+                "role": "runner",
+                "source": "manual",
+                "manufacturer": "GTV",
+                "name": "GTV Modern Slide 18 mm family · concealed full-extension runner · soft close · 500 mm",
+                "note": "Historical exact SKU is not confirmed. Dimensional profile is verified against GTV Modern Slide planning data for the 18 mm family: SKW = LW - 49, SKL = NL - 10, side-board thickness up to 19 mm, bottom recess max 13 mm. For this Golden Project the owner confirmed 18 mm drawer sides, 500 mm nominal length, 3 mm HDF bottom, 3 mm groove width, 10 mm groove depth, 13 mm bottom recess and manual-template installation. No GTV CNC drilling coordinates are generated.",
+                "machiningMethod": "manual_template",
+                "technical": {
+                    "kind": "gtv_modern_slide",
+                    "family": "modern_slide_18",
+                    "nominalLength": {
+                        "value": 5000,
+                        "state": "confirmed"
+                    },
+                    "motion": "soft_close",
+                    "drawerInternalWidthReduction": {
+                        "value": 490,
+                        "state": "confirmed"
+                    },
+                    "boxLengthReduction": {
+                        "value": 100,
+                        "state": "confirmed"
+                    },
+                    "maxSideThickness": {
+                        "value": 190,
+                        "state": "confirmed"
+                    },
+                    "maxBottomRecess": {
+                        "value": 130,
+                        "state": "confirmed"
+                    }
+                }
+            },
+            {
+                "id": "26100001-0000-4000-8400-000000000002",
+                "role": "hinge",
+                "source": "manual",
+                "manufacturer": "GTV",
+                "name": "GTV concealed hinge with soft close · exact model/SKU unknown",
+                "note": "Owner confirmed GTV concealed soft-close hinges are drilled/installed manually with a physical template. Exact model/SKU is unknown; Makster must not generate CNC cup/plate drilling or substitute Blum geometry.",
+                "machiningMethod": "manual_template"
+            },
+            {
+                "id": "26100001-0000-4000-8400-000000000003",
+                "role": "other",
+                "source": "manual",
+                "manufacturer": "GTV",
+                "name": "GTV standard wall-cabinet hanger · exact model/SKU unknown",
+                "note": "Owner confirmed ordinary GTV wall cabinet hangers. Exact SKU/load rating/mounting pattern not confirmed.",
+                "machiningMethod": "manual_template"
+            }
+        ]
+    },
+    "constraints": [],
+    "facts": [
+        {
+            "path": "/furniture/0/dimensions/width",
+            "source": "ai_image",
+            "confidence": 0.99,
+            "confirmed": false,
+            "note": "Source presentation labels 3590 mm; superseded by owner confirmation of 4190 mm in Revision 2."
+        },
+        {
+            "path": "/furniture/0/modules",
+            "source": "ai_image",
+            "confidence": 0.99,
+            "confirmed": false,
+            "note": "Module widths read from specification: 600+1100+600+600+690+600 = 4190 mm; conflicts with declared 3590 mm."
+        },
+        {
+            "path": "/selections/materials/0",
+            "source": "ai_image",
+            "confidence": 0.96,
+            "confirmed": false,
+            "note": "Presentation states carcass/fronts Kronospan white premium LDSP."
+        },
+        {
+            "path": "/selections/materials/4",
+            "source": "ai_image",
+            "confidence": 0.99,
+            "confirmed": false,
+            "note": "Presentation states anthracite matte worktop, thickness 38 mm."
+        },
+        {
+            "path": "/furniture/0/dimensions/width",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed lower-run overall width = 4190 mm on 2026-09-05."
+        },
+        {
+            "path": "/selections/hardware/0",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed GTV concealed drawer runners with soft close; exact model unknown."
+        },
+        {
+            "path": "/selections/hardware/1",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed GTV concealed hinges with soft close; exact model unknown."
+        },
+        {
+            "path": "/selections/hardware/2",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed ordinary GTV upper cabinet hangers; exact model unknown."
+        },
+        {
+            "path": "/furniture/0/modules/3/kitchen/appliance/manufacturer",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner remembers appliance as non-branded/unknown."
+        },
+        {
+            "path": "/furniture/0/modules/0/kitchen/worktop/wallTrim",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed wall-side worktop trim cross-section = 15×15 mm in Revision 5."
+        },
+        {
+            "path": "/furniture/0/modules/1/kitchen/worktop/cutouts/0/execution",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed the sink cutout was made on site during installation after fitting the actual sink."
+        },
+        {
+            "path": "/furniture/0/modules/3/kitchen/worktop/cutouts/0/execution",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed the hob/cooktop cutout was made on site during installation after fitting the actual appliance."
+        },
+        {
+            "path": "/selections/hardware/0/machiningMethod",
+            "source": "manual",
+            "confidence": 1,
+            "confirmed": true,
+            "note": "Owner confirmed hinges and runners are drilled/installed manually using a physical template."
+        },
+        {
+            "path": "/selections/hardware/1/machiningMethod",
+            "source": "manual",
+            "confidence": 1,
+            "confirmed": true,
+            "note": "Owner confirmed hinges and runners are drilled/installed manually using a physical template."
+        },
+        {
+            "path": "/furniture/0/modules/0/contents/0/drawerBox",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed timber drawer boxes: 18 mm particleboard sides/back and 3 mm HDF/DVP bottom."
+        },
+        {
+            "path": "/furniture/0/modules/5/contents/0/drawerBox",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed timber drawer boxes: 18 mm particleboard sides/back and 3 mm HDF/DVP bottom."
+        },
+        {
+            "path": "/selections/hardware/0/technical/nominalLength",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed GTV concealed runner nominal length = 500 mm."
+        },
+        {
+            "path": "/furniture/0/modules/3/kitchen/worktop/cutouts/0",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed hob cutout rectangle = 490 × 560 mm. Normalized in ProjectModel coordinates as width 560 mm × depth 490 mm; execution remains on_site."
+        },
+        {
+            "path": "/furniture/0/modules/3/kitchen/appliances/0/requiredSpace",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed oven front niche/opening = 560 × 580 mm (W×H). Depth was not supplied and remains unknown."
+        },
+        {
+            "path": "/selections/hardware/0/technical/drawerInternalWidthReduction",
+            "source": "engineering",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Superseded R11 Blum-equivalent assumption. GTV Modern Slide verified planning rule: SKW = LW - 49. For 564 mm clear cabinet width, inner drawer width = 515 mm."
+        },
+        {
+            "path": "/selections/hardware/0/technical/boxLengthReduction",
+            "source": "engineering",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "GTV Modern Slide verified planning rule: SKL = NL - 10. For 500 mm nominal slide length, drawer box depth = 490 mm."
+        },
+        {
+            "path": "/furniture/0/modules/0/contents/0/drawerBox/bottomInstallation",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed 3 mm HDF/DVP drawer bottom is inserted into grooves, not overlaid/nailed underneath."
+        },
+        {
+            "path": "/furniture/0/modules/5/contents/0/drawerBox/bottomInstallation",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner confirmed 3 mm HDF/DVP drawer bottom is inserted into grooves, not overlaid/nailed underneath."
+        },
+        {
+            "path": "/selections/hardware/0/technical",
+            "source": "engineering",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "R13 replaces temporary Blum-equivalent sizing with a dedicated GTV Modern Slide 18 mm family profile verified from GTV planning data."
+        },
+        {
+            "path": "/furniture/0/modules/0/contents/0/drawerBox/bottomInstallation",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner approved shop groove profile: 3 mm groove width, 10 mm groove depth, bottom lower-face recess 13 mm; front/back between sides."
+        },
+        {
+            "path": "/furniture/0/modules/5/contents/0/drawerBox/bottomInstallation",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner approved shop groove profile: 3 mm groove width, 10 mm groove depth, bottom lower-face recess 13 mm; front/back between sides."
+        },
+        {
+            "path": "/furniture/0/modules/3/kitchen/appliance/fitMode",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Historical no-name oven was fitted on site. Confirmed 560×580 mm opening is retained; unknown depth is intentionally verified against the actual appliance during installation rather than invented in Engineering."
+        },
+        {
+            "path": "/furniture/0/modules/3/kitchen/appliances/0/fitMode",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner workflow: no-name oven final fit was handled on site; exact model/body depth is unavailable and must not block cabinet production when known opening dimensions fit."
+        },
+        {
+            "path": "/furniture/0/modules/3/kitchen/appliances/1/fitMode",
+            "source": "manual",
+            "confidence": 1.0,
+            "confirmed": true,
+            "note": "Owner workflow: no-name hob final fit was handled on site; worktop cutout is already explicitly on_site, so an unknown appliance body envelope must not block cabinet/worktop production."
+        }
+    ],
+    "notes": [
+        {
+            "id": "26100001-0000-4000-8300-000000000001",
+            "text": "SOURCE CONFLICT: lower module sum is 4190 mm while clean presentation total says 3590 mm. Hand sketch appears to show about 4100 mm; must be confirmed from measurement before production.",
+            "authorType": "system",
+            "createdAt": "2026-09-05T18:58:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000002",
+            "text": "Upper units visible: three 800 mm cabinets and a 600 mm hood cabinet; their alignment/overall span conflicts visually with the lower run and is not yet production-confirmed.",
+            "authorType": "system",
+            "createdAt": "2026-09-05T18:58:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000003",
+            "text": "Source states black 160 mm handles, soft-close hinges, concealed soft-close runners, black sink and black matte tap. Exact manufacturer/SKU and sink/cooktop cutout dimensions are not specified.",
+            "authorType": "system",
+            "createdAt": "2026-09-05T18:58:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000004",
+            "text": "Oven and cooktop share the 600 mm zone in the source. Current KitchenModuleSpec models a single appliance role per module; combined oven+hob installation requires an explicit 2.6.1 model extension.",
+            "authorType": "system",
+            "createdAt": "2026-09-05T18:58:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000005",
+            "text": "REVISION 2: owner confirmed the lower run overall width is 4190 mm. The 3590 mm total shown on the presentation is treated as a document error and is no longer authoritative.",
+            "authorType": "owner",
+            "createdAt": "2026-09-05T20:00:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000006",
+            "text": "REVISION 3: owner confirmed concealed GTV soft-close runners in both 600 mm three-drawer units. Exact model/SKU and technical drilling profile are unknown, so CNC/manufacturing dimensions must remain HOLD until identified or measured.",
+            "authorType": "user",
+            "createdAt": "2026-09-05T20:45:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000007",
+            "text": "REVISION 3: owner confirmed GTV soft-close concealed hinges for hinged fronts. Exact model/SKU is unknown; Makster must not substitute Blum drilling data.",
+            "authorType": "user",
+            "createdAt": "2026-09-05T20:45:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000008",
+            "text": "REVISION 3: upper cabinets use ordinary GTV wall hangers and the upper back panels are installed in a groove. Upper cabinet geometry has not yet been promoted to production furniture objects; groove inset/depth/clearance and hanger SKU remain to be confirmed.",
+            "authorType": "user",
+            "createdAt": "2026-09-05T20:45:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000009",
+            "text": "REVISION 3: appliances were non-branded/unknown. Exact oven and hob installation envelopes and hob cutout dimensions are unavailable and must remain unresolved for production.",
+            "authorType": "user",
+            "createdAt": "2026-09-05T20:45:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000010",
+            "text": "REVISION 3: a narrow wall-side worktop plinth/upstand was installed along the wall. Current ProjectModel does not yet represent this as a first-class worktop accessory; add to Worktop Engineering 2.6.1.",
+            "authorType": "user",
+            "createdAt": "2026-09-05T20:45:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000011",
+            "text": "REVISION 4 / Makster 2.6.1: oven and hob are now represented as two separate appliances sharing the same 600 mm kitchen zone. Both installation envelopes remain unknown, so production stays HOLD.",
+            "authorType": "system",
+            "createdAt": "2026-09-05T21:15:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000012",
+            "text": "REVISION 4 / Makster 2.6.1: the narrow wall-side worktop plinth/upstand is now a first-class Worktop Engineering accessory. Its height/depth are unknown and intentionally block production until measured.",
+            "authorType": "system",
+            "createdAt": "2026-09-05T21:15:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000013",
+            "text": "Revision 5: wall trim confirmed 15 x 15 mm by owner.",
+            "authorType": "user",
+            "createdAt": "2026-09-05T21:43:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000014",
+            "text": "REVISION 6: sink cutout is intentionally executed on site after fitting the actual sink. No workshop/CNC cutout geometry is required in advance; the operation must remain in the installation checklist.",
+            "authorType": "user",
+            "createdAt": "2026-09-05T21:50:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8300-000000000015",
+            "authorType": "user",
+            "createdAt": "2026-09-05T21:55:00+02:00",
+            "text": "REVISION 7: hob/cooktop cutout is intentionally executed on site after fitting the actual appliance. No workshop/CNC cutout geometry is required in advance; the operation must remain in the installation checklist."
+        },
+        {
+            "id": "26100001-0000-4000-8a00-000000000008",
+            "text": "REVISION 8: owner confirmed GTV hinges and concealed drawer runners are installed manually using physical templates. Makster must keep GTV in BOM and workshop instructions, emit no CNC drilling for these items, and distinguish drilling execution from runner dimensional-envelope requirements.",
+            "authorType": "owner",
+            "createdAt": "2026-09-05T21:43:00+02:00"
+        },
+        "Revision 9: drawer construction confirmed as 18 mm particleboard box with 3 mm HDF/DVP bottom on GTV concealed soft-close runners; runner length and side clearance still require confirmation before drawer cut sizes can be released.",
+        "REVISION 10: owner confirmed hob cutout 490×560 mm, oven opening 560×580 mm, and GTV concealed runner nominal length 500 mm. Runner box-width reduction/box depth and oven depth remain unresolved; hob appliance body envelope remains unknown even though the on-site cutout is now exact.",
+        {
+            "id": "26100001-0000-4000-8a00-000000000011",
+            "text": "SUPERSEDED BY REVISION 13 — historical R11 assumption only. REVISION 11: owner confirmed the GTV concealed runners used the same drawer sizing geometry as the standard Blum concealed timber-drawer rule. For this historical project Makster records a shop-confirmed manual profile: 6 mm total reduction from 564 mm cabinet clear opening to 558 mm finished outer drawer width, and 490 mm finished box depth for the 500 mm nominal runner. GTV drilling remains manual-template and is not treated as manufacturer-verified Blum/GTV machining data.",
+            "authorType": "owner",
+            "createdAt": "2026-09-05T22:56:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8a00-000000000012",
+            "text": "REVISION 12: owner confirmed the 3 mm HDF/DVP bottoms of the timber drawers are inserted into grooves. Makster must not treat concealed-runner drawers as overlay-bottom construction. Groove mode is now explicit; exact HDF cut width/depth remain fail-closed until the historical groove/cut rule is confirmed.",
+            "authorType": "owner",
+            "createdAt": "2026-09-05T22:58:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8900-000000000013",
+            "text": "REVISION 13: temporary Blum-equivalent GTV drawer sizing removed. Dedicated GTV Modern Slide 18 mm / 500 mm dimensional profile added. 600 mm cabinet with 18 mm carcass => LW 564 mm; SKW 515 mm; 18 mm sides => finished outer box width 551 mm; SKL 490 mm. Shop groove profile: 3×10 mm, bottom recess 13 mm.",
+            "authorType": "system",
+            "createdAt": "2026-09-06T01:55:00+02:00"
+        },
+        {
+            "id": "26100001-0000-4000-8900-000000000014",
+            "text": "REVISION 14: no-name oven and hob use appliance fitMode=site_fit. Known dimensions remain validated; missing W/H/D values do not create a production blocker. Final physical fit against the actual appliances is an explicit installation responsibility. This does not waive any known dimension that exceeds the cabinet/worktop geometry.",
+            "authorType": "system",
+            "createdAt": "2026-09-06T01:55:00+02:00"
+        }
+    ]
+}

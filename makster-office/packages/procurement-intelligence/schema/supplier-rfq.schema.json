@@ -1,0 +1,10 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://makster.ai/schema/supplier-rfq-1.2.json",
+  "title":"Makster Supplier RFQ 1.2",
+  "type":"object",
+  "required":["procurementVersion","rfqId","projectId","revision","productionPackId","productionPackManifestSha256","outsourcePreset","services","currency","invitedSupplierIds","requestedAt","deliveryRequired"],
+  "properties":{
+    "procurementVersion":{"const":"1.2.0"},"rfqId":{"type":"string","minLength":1},"projectId":{"type":"string","minLength":1},"revision":{"type":"integer","minimum":1},"productionPackId":{"type":"string","minLength":1},"productionPackManifestSha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"outsourcePreset":{"enum":["cutting_only","cutting_edging","cutting_edging_drilling"]},"services":{"type":"array","minItems":1,"items":{"type":"string"},"uniqueItems":true},"currency":{"type":"string","minLength":3,"maxLength":3},"invitedSupplierIds":{"type":"array","minItems":1,"items":{"type":"string"},"uniqueItems":true},"requestedAt":{"type":"string"},"responseDeadline":{"type":"string"},"deliveryRequired":{"type":"boolean"},"notes":{"type":"string"}
+  },"additionalProperties":false
+}

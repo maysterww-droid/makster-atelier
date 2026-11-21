@@ -1,0 +1,59 @@
+MAKSTER AI 4.3.0 RELEASE VERIFICATION
+======================================
+
+CAPACITY LEARNING
+PASS: bounded historical ratio learning
+PASS: confidence ramps with sample count
+PASS: 8 samples -> trusted
+PASS: 10 planned / 15 actual x8 -> learned multiplier 1.5
+PASS: future Production Capacity uses learned multiplier
+PASS: manual project override remains authoritative
+
+CASH GAP
+Runtime scenario:
+Opening treasury = EUR 1,000
+Sep 10 outflow = EUR 600
+Sep 11 outflow = EUR 700
+PASS: first cash gap = 2026-09-11
+PASS: gap amount = EUR 300
+PASS: status = gap
+
+REPLENISHMENT
+PASS: min stock + active BOM shortage - free stock
+PASS: hard reservations reduce available stock
+PASS: missing warehouse SKU from BOM becomes replenishment line
+
+4.3 REGRESSION
+3 tests
+3 passed
+0 failed
+
+ACTUAL BUNDLED API
+PASS: health -> 4.3.0
+PASS: production-time entry API
+PASS: capacity-learning API
+PASS: treasury API
+PASS: cash-gap API
+PASS: replenishment API
+
+WEB UI
+PASS: Capacity Intelligence
+PASS: Cash Gap Forecast
+PASS: Replenishment Planning
+PASS: MAKSTER AI 4.3 branding
+
+SUPABASE
+PASS: prepared 4.3 migration
+PASS: production history table
+PASS: treasury balance table
+PASS: RLS / owner-admin reads / service mutation pattern retained
+NOT LIVE-APPLIED: no production/staging Supabase credentials used.
+
+CORE TYPESCRIPT
+PASS: Owner Operations strict compile
+Core API emission has zero new structural TypeScript errors; supplied archive still lacks @types/node.
+
+CROSS-VERSION REGRESSION SWEEP
+PASS: 15 tests
+PASS: 15 passed
+PASS: 0 failed

@@ -1,0 +1,32 @@
+MAKSTER AI 2.8.6 RELEASE VERIFICATION
+======================================
+PASS: Web application JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: actual bundled Core API startup
+PASS: GET /api/v1/health -> 2.8.6
+PASS: Kitchen generator runtime -> 16 generated / Top 3 returned
+PASS: selected variant -> Project Revision 2
+
+Vertical persistence smoke:
+- room height 2700 mm -> confirmed
+- all 4 wall heights -> confirmed 2700 mm
+- door Z 0 / H 2100 -> confirmed + hostWallId
+- window Z 900 / H 1200 -> confirmed + hostWallId
+- radiator Z 120 / H 600 -> confirmed + hostWallId
+- power point Z 1100 / H 80 -> confirmed + hostWallId
+- water with no vertical measurement -> height state UNKNOWN
+- MAKSTER_ROOM_SCENE_V1 retained
+PASS
+
+UI / model rules:
+- SOUTH/NORTH/WEST/EAST elevation tabs present
+- room height input supports UNKNOWN
+- Z / height fields support UNKNOWN
+- wall-mounted plan objects snap to nearest wall during drag
+- wall elevation reads the same object positions used by PLAN
+- no vertical dimensions are invented
+PASS
+
+Full historical npm test:
+NOT EXECUTED because the supplied archive still does not contain node_modules/@types/node.
+The changed UI and actual bundled runtime/apply persistence path were smoke-tested directly.

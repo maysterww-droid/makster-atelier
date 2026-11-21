@@ -1,0 +1,73 @@
+MAKSTER AI 4.0.0 RELEASE VERIFICATION
+======================================
+
+OWNER OPERATIONS CORE
+PASS: strict TypeScript compile
+PASS: Owner Command aggregation
+PASS: queue/risk ordering
+PASS: company financial roll-up
+PASS: break-even calculation
+PASS: 7/30/90-day cash forecast
+PASS: warehouse availability calculation
+PASS: supplier ranking
+
+WAREHOUSE HARD LOCK
+Scenario:
+- physical stock = 40 hinges
+- Project A reservation = 30
+- free stock = 10
+
+PASS: attempting Project B reservation of 15 -> HTTP 409
+PASS: error = warehouse_insufficient_available_stock
+PASS: attempting physical write-off of 15 -> HTTP 409
+PASS: error = warehouse_adjustment_would_consume_reserved_stock
+PASS: physical stock remains 40
+PASS: reserved remains 30
+PASS: available remains 10
+
+SUPPLIER INTELLIGENCE
+Test suppliers:
+- Fast
+- Cheap
+- Balanced
+
+PASS: Fastest -> Fast
+PASS: Cheapest -> Cheap
+PASS: Optimal -> Balanced
+
+OWNER COMMAND REGRESSION
+PASS: tests/owner-command-4.0.0.test.mjs
+3 tests
+3 passed
+0 failed
+
+ACTUAL BUNDLED API
+PASS: server startup
+PASS: health -> 4.0.0
+PASS: warehouse create
+PASS: warehouse reservation
+PASS: warehouse hard lock
+PASS: supplier ranking API
+PASS: owner-command-center API
+PASS: cash/fixed-cost API
+
+WEB UI
+PASS: Owner Command tab
+PASS: JavaScript syntax
+PASS: order queue UI
+PASS: warehouse/reservation UI
+PASS: supplier UI
+PASS: cash forecast/ledger UI
+PASS: MAKSTER AI 4.0.0 branding
+
+CORE TYPESCRIPT NOTE
+The supplied archive still lacks @types/node.
+Core API emission reports only missing Node declarations:
+- node:http / node:crypto / node:fs
+- Buffer / process / NodeJS namespace
+Verification found 0 additional structural TypeScript errors.
+Bundled emitted JS passes node --check and runtime smoke tests.
+
+PERSISTENCE NOTE
+Owner Operations is file-backed in 4.0 demo/runtime.
+Supabase-native multi-user persistence is not yet implemented.

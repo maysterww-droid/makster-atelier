@@ -1,0 +1,42 @@
+MAKSTER AI 3.0.0 RELEASE VERIFICATION
+======================================
+PASS: changed ProjectModel / Engineering Job Control core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: bundled Job Control module syntax
+PASS: bundled ProjectModel runtime syntax
+PASS: bundled Production Pack generator syntax
+PASS: actual bundled Core API startup
+PASS: health -> 3.0.0
+PASS: Job Control UI served and routed
+
+Actual API smoke:
+- new project Job Control stage -> lead
+- POST Job Control -> contract
+- Revision 1 -> 2
+- contract value = EUR 10,000
+- received = EUR 2,000
+- receivedPercent = 20%
+PASS
+
+Runtime lifecycle smoke:
+- production stage with 30% received payment
+- outstanding = EUR 8,400
+- Technical Production Readiness = HOLD surfaced as Job Control blocker
+PASS
+
+Production Pack:
+- actual MaksterEngineeringCompiler used
+- job-control.json generated
+- file stage = production
+PASS
+
+Authority separation:
+- business stage does not bypass Production Readiness
+- handover remains controlled by Installation Closeout
+- expectedRevision required on Job Control writes
+PASS
+
+Full historical npm test:
+NOT EXECUTED because supplied archive still does not contain node_modules/@types/node.
+Changed Job Control core compiled independently and actual bundled API/runtime were smoke-tested.

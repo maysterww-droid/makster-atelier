@@ -1,0 +1,12 @@
+begin;
+select plan(8);
+select has_table('public','production_packs','production_packs exists');
+select has_table('public','production_pack_files','production_pack_files exists');
+select has_table('public','outsource_production_orders','outsource_production_orders exists');
+select ok((select relrowsecurity from pg_class where oid='public.production_packs'::regclass),'production_packs RLS enabled');
+select ok((select relrowsecurity from pg_class where oid='public.production_pack_files'::regclass),'production_pack_files RLS enabled');
+select ok((select relrowsecurity from pg_class where oid='public.outsource_production_orders'::regclass),'outsource orders RLS enabled');
+select has_column('public','production_packs','manifest_sha256','pack manifest is hash-bound');
+select has_column('public','production_packs','route','pack route stored');
+select * from finish();
+rollback;

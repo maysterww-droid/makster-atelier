@@ -1,0 +1,1 @@
+export const BXF_INTELLIGENCE_VERSION = '0.7.0';

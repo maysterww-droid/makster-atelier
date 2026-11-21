@@ -1,0 +1,18 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://makster.ai/schema/receiving-summary-1.1.json",
+  "title":"Makster Receiving Summary 1.1",
+  "type":"object",
+  "required":["orderId","status","totalOrdered","totalAccepted","totalProblem","totalOutstanding","complete","balances"],
+  "properties":{
+    "orderId":{"type":"string"},
+    "status":{"enum":["draft","sent","accepted","in_production","ready","partially_received","received","cancelled"]},
+    "totalOrdered":{"type":"integer","minimum":0},
+    "totalAccepted":{"type":"integer","minimum":0},
+    "totalProblem":{"type":"integer","minimum":0},
+    "totalOutstanding":{"type":"integer","minimum":0},
+    "complete":{"type":"boolean"},
+    "balances":{"type":"array","items":{"type":"object","required":["partId","partName","ordered","accepted","damaged","missing","rejectedOther","outstanding","complete"],"properties":{"partId":{"type":"string"},"partName":{"type":"string"},"ordered":{"type":"integer","minimum":0},"accepted":{"type":"integer","minimum":0},"damaged":{"type":"integer","minimum":0},"missing":{"type":"integer","minimum":0},"rejectedOther":{"type":"integer","minimum":0},"outstanding":{"type":"integer","minimum":0},"complete":{"type":"boolean"}},"additionalProperties":false}}
+  },
+  "additionalProperties":false
+}

@@ -1,0 +1,19 @@
+Makster AI 2.6.6 — Kitchen Auto Layout Optimizer
+Release verification
+
+TypeScript strict typecheck: PASS
+Full npm test: PASS
+Tests: 200
+Passed: 200
+Failed: 0
+Cancelled: 0
+Skipped: 0
+
+New 2.6.6 checks include:
+- multiple feasible layout candidates + score breakdown
+- unsafe parallel aisle rejection
+- utility-affinity placement
+- obstacle rejection ordering
+- no fabricated work triangle without represented refrigerator footprint
+
+Verification environment supplied the exact declared @types/node 25.1.0 package from the local system cache because network npm install timed out. No application source behavior was substituted.

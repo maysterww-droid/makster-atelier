@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schema/commercial-estimate-1.6.json",
+  "type": "object",
+  "required": [
+    "commercialVersion",
+    "estimateId",
+    "estimateVersion",
+    "projectId",
+    "revision",
+    "currency",
+    "engineeringInputChecksum",
+    "pricingProfileFingerprint",
+    "ready",
+    "blockers",
+    "warnings",
+    "lines",
+    "totals",
+    "estimateFingerprint"
+  ],
+  "properties": {
+    "commercialVersion": {
+      "const": "1.6.0"
+    },
+    "estimateId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "estimateVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "projectId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "currency": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 8
+    },
+    "engineeringInputChecksum": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pricingProfileFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ready": {
+      "type": "boolean"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "targetId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "targetId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "category",
+          "label",
+          "quantity",
+          "unit",
+          "unitCostMinor",
+          "totalCostMinor",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "material",
+              "edge",
+              "hardware",
+              "external_service",
+              "labor",
+              "transport",
+              "installation",
+              "overhead",
+              "other"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitCostMinor": {
+            "type": "integer"
+          },
+          "totalCostMinor": {
+            "type": "integer"
+          },
+          "source": {
+            "enum": [
+              "price_catalog",
+              "supplier_quote",
+              "manual",
+              "derived",
+              "engineering"
+            ]
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "targetId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "totals": {
+      "type": "object",
+      "required": [
+        "directCostMinor",
+        "overheadMinor",
+        "totalCostMinor",
+        "sellBeforeDiscountMinor",
+        "discountMinor",
+        "netSalesMinor",
+        "taxMinor",
+        "grossSalesMinor",
+        "profitMinor",
+        "marginBps",
+        "markupBps",
+        "discountBps",
+        "taxBps"
+      ],
+      "properties": {
+        "directCostMinor": {
+          "type": "integer"
+        },
+        "overheadMinor": {
+          "type": "integer"
+        },
+        "totalCostMinor": {
+          "type": "integer"
+        },
+        "sellBeforeDiscountMinor": {
+          "type": "integer"
+        },
+        "discountMinor": {
+          "type": "integer"
+        },
+        "netSalesMinor": {
+          "type": "integer"
+        },
+        "taxMinor": {
+          "type": "integer"
+        },
+        "grossSalesMinor": {
+          "type": "integer"
+        },
+        "profitMinor": {
+          "type": "integer"
+        },
+        "marginBps": {
+          "type": "integer"
+        },
+        "markupBps": {
+          "type": "integer"
+        },
+        "discountBps": {
+          "type": "integer"
+        },
+        "taxBps": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "estimateFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": true
+}

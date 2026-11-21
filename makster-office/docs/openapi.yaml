@@ -1,0 +1,1084 @@
+openapi: 3.1.0
+info:
+  title: Makster Core API
+  version: 2.6.1
+  description: 'Makster Unified Core API 2.6: canonical Project Digital Twin, Visual/CAD, Kitchen Pro Engineering, deterministic Engineering, Production,
+    Procurement, persistent Commercial Quote Engine, Change Intelligence 1.7 and persistent Client Contract / Change Order Approval 1.8.'
+servers:
+- url: http://localhost:8787/api/v1
+paths:
+  /health:
+    get:
+      responses:
+        '200':
+          description: Core
+          AI: null
+          Engineering: null
+          Release and Production Control status: null
+  /projects:
+    get:
+      parameters:
+      - in: query
+        name: organizationId
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Organization projects
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                projectType:
+                  type: string
+                currency:
+                  type: string
+                  default: EUR
+                locale:
+                  type: string
+                  default: ru-CZ
+      responses:
+        '201':
+          description: Project and initial revision created atomically
+  /projects/{projectId}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Project with current snapshot
+        '404':
+          description: Project not found
+  /projects/{projectId}/visual-scene:
+    get:
+      summary: Build editor-ready visual scene from the current immutable Project Revision
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Room, furniture boxes, derived CAD panels, wall clearances, resolved module dimension chains and visual
+            warnings
+        '404':
+          description: Project not found
+  /projects/{projectId}/visual-command:
+    post:
+      summary: Apply a typed visual-editor command as a new immutable revision
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - expectedRevision
+              - command
+              properties:
+                expectedRevision:
+                  type: integer
+                  minimum: 1
+                command:
+                  type: object
+                  description: Typed VisualEditorCommand; arbitrary JSON Pointer paths are not accepted.
+      responses:
+        '201':
+          description: Project revision + visual scene + recalculated engineering
+        '409':
+          description: Revision conflict
+        '422':
+          description: Invalid visual command or geometry
+  /projects/{projectId}/visual-restore:
+    post:
+      summary: Restore a server-owned historical Project Revision as a new immutable revision
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - expectedRevision
+              - targetRevision
+              properties:
+                expectedRevision:
+                  type: integer
+                  minimum: 1
+                targetRevision:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: New immutable revision + visual scene + recalculated engineering
+        '404':
+          description: Project or target revision not found
+        '409':
+          description: Revision conflict
+        '422':
+          description: Invalid restore target
+  /projects/{projectId}/engineering:
+    get:
+      summary: Compile current revision through Makster Engineering Engine
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Deterministic engineering artifact
+  /projects/{projectId}/revisions:
+    post:
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - expectedRevision
+              - snapshot
+              properties:
+                expectedRevision:
+                  type: integer
+                  minimum: 1
+                snapshot:
+                  type: object
+                changeSet:
+                  type:
+                  - object
+                  - 'null'
+                source:
+                  type: string
+      responses:
+        '201':
+          description: Immutable revision created
+        '409':
+          description: Optimistic concurrency conflict
+  /ai/intake:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - projectId
+              - text
+              properties:
+                projectId:
+                  type: string
+                  format: uuid
+                text:
+                  type: string
+                imageUrls:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+      responses:
+        '200':
+          description: AI intent plus trusted ProjectChangeSet
+  /projects/{projectId}/apply-change:
+    post:
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '201':
+          description: Change applied as a new immutable revision
+        '409':
+          description: Revision conflict
+  /manufacturing/bxf/inspect:
+    post:
+      summary: Safely inspect BXF/XML without trusting unknown proprietary structure
+      responses:
+        '200':
+          description: Inspection or recognized adapter report
+        '422':
+          description: Rejected unsafe or malformed XML
+  /projects/{projectId}/engineering/with-bxf:
+    post:
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: BXF report plus engineering result
+  /projects/{projectId}/production-pack/preview:
+    post:
+      summary: Build machine-independent Manual Workshop or Outsource Supplier Production Pack
+      description: Manual/cutting/edging routes do not require CNC readiness. Outsourced drilling is blocked while any required
+        machining operation is estimated or reference-only.
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                route:
+                  enum:
+                  - manual_workshop
+                  - outsource
+                  default: manual_workshop
+                outsourcePreset:
+                  enum:
+                  - cutting_only
+                  - cutting_edging
+                  - cutting_edging_drilling
+                supplierName:
+                  type: string
+                orderReference:
+                  type: string
+                fileName:
+                  type: string
+                xml:
+                  type: string
+                  description: Optional recognized BXF/XML manufacturing data
+      responses:
+        '200':
+          description: Production Pack manifest and generated file names
+  /projects/{projectId}/supplier-orders:
+    post:
+      summary: Create an external supplier order from a READY outsource Production Pack
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '201':
+          description: Supplier order bound to exact Production Pack manifest and Revision
+        '409':
+          description: Requested outsource pack is not production-ready
+  /supplier-orders:
+    get:
+      responses:
+        '200':
+          description: External production orders visible to the current organization
+  /supplier-orders/{orderId}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Supplier order with frozen part lines
+  /supplier-orders/{orderId}/status:
+    post:
+      summary: Move supplier order through controlled lifecycle
+      parameters:
+      - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Updated supplier order
+        '409':
+          description: Invalid status transition
+  /supplier-orders/{orderId}/receipts:
+    post:
+      summary: Receive parts by part_id with accepted/damaged/missing/wrong-* disposition
+      parameters:
+      - $ref: '#/components/parameters/OrderId'
+      responses:
+        '201':
+          description: Receipt and recalculated completeness summary
+        '422':
+          description: Invalid part or accepted quantity exceeds ordered quantity
+  /supplier-orders/{orderId}/receiving-summary:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Per-part ordered/accepted/problem/outstanding balance
+  /supplier-orders/{orderId}/rework-pack:
+    post:
+      summary: Create a targeted replacement pack containing only outstanding parts
+      parameters:
+      - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Rework pack for missing/damaged/wrong parts only
+        '409':
+          description: Nothing needs rework
+  /procurement/suppliers:
+    get:
+      summary: List supplier capability profiles available to Procurement
+      responses:
+        '200':
+          description: Supplier capability profiles
+  /projects/{projectId}/procurement/rfqs:
+    post:
+      summary: Create RFQ from exact READY outsource Production Pack
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '201':
+          description: RFQ bound to Production Pack manifest SHA-256
+        '409':
+          description: Production Pack is not ready
+  /procurement/rfqs/{rfqId}:
+    get:
+      responses:
+        '200':
+          description: RFQ
+          submitted quotes and latest comparison: null
+  /connections/gmail:
+    get:
+      summary: List organization Gmail connections without secret material
+      parameters:
+      - in: query
+        name: organizationId
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Connection metadata and sync cursors; refresh/access tokens are never returned
+  /connections/gmail/oauth/start:
+    post:
+      summary: Start organization-scoped Google OAuth for Gmail
+      description: Generates a signed short-lived state and requests offline access with gmail.readonly + gmail.send.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                returnUrl:
+                  type: string
+                  example: /?gmail=connected
+                loginHint:
+                  type: string
+                  format: email
+                promptConsent:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Google authorization URL and OAuth-state expiry
+        '400':
+          description: Invalid return URL
+        '503':
+          description: OAuth/encryption configuration missing
+  /connections/gmail/callback:
+    get:
+      summary: Complete Google OAuth callback and persist encrypted refresh-token material server-side
+      parameters:
+      - in: query
+        name: code
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: state
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+      responses:
+        '200':
+          description: JSON connection result when format=json
+        '302':
+          description: Redirect to signed relative return URL
+        '400':
+          description: OAuth denied or invalid callback/state
+        '409':
+          description: Google did not return a refresh token and no existing refresh token is available
+  /connections/gmail/{connectionId}/watch:
+    post:
+      summary: Create or renew Gmail INBOX push watch
+      parameters:
+      - $ref: '#/components/parameters/ConnectionId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topicName:
+                  type: string
+                  example: projects/example/topics/makster-gmail
+      responses:
+        '200':
+          description: Updated history cursor and watch expiration
+        '404':
+          description: Connection not found
+        '409':
+          description: Pub/Sub topic not configured
+  /connections/gmail/{connectionId}/sync:
+    post:
+      summary: Incrementally sync Gmail replies using historyId, with bounded full-sync fallback on stale cursors
+      parameters:
+      - $ref: '#/components/parameters/ConnectionId'
+      responses:
+        '200':
+          description: Sync result plus imported Quote/Decline/Needs Review outcomes
+        '404':
+          description: Connection not found
+        '409':
+          description: Connection requires reauthorization
+  /connections/gmail/{connectionId}/disconnect:
+    post:
+      summary: Stop Gmail watch, revoke Google token when possible, and mark connection revoked
+      parameters:
+      - $ref: '#/components/parameters/ConnectionId'
+      responses:
+        '200':
+          description: Revoked connection metadata
+        '404':
+          description: Connection not found
+  /connections/gmail/push:
+    post:
+      summary: Receive Gmail Pub/Sub history notification and trigger sync
+      description: Current Makster application gate requires x-makster-pubsub-secret. Production deployment should additionally
+        validate authenticated Google Pub/Sub push identity at the gateway/service boundary.
+      parameters:
+      - in: header
+        name: x-makster-pubsub-secret
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Parsed history signal and sync results for matching connected account
+        '401':
+          description: Push endpoint authorization failed
+  /procurement/rfqs/{rfqId}/communications/send:
+    post:
+      summary: Send RFQ invitations to invited suppliers through the selected email provider
+      description: Memory provider is for tests. Gmail provider uses server-side OAuth and RFC2822 MIME/base64url.
+      responses:
+        '200':
+          description: Per-supplier communication thread/message send results
+  /procurement/rfqs/{rfqId}/communications:
+    get:
+      summary: Inspect supplier communication threads and messages for an RFQ
+      responses:
+        '200':
+          description: RFQ communication history
+  /procurement/rfqs/{rfqId}/communications/inbound:
+    post:
+      summary: Import a supplier reply into the RFQ thread
+      description: Only a validated structured Makster quote block can be auto-imported as SupplierQuote. Freeform replies
+        are Needs Review.
+      responses:
+        '200':
+          description: Parsed reply classification and optional imported quote
+        '409':
+          description: No matching communication thread
+  /procurement/communications/reminders/run:
+    post:
+      summary: Send due deterministic RFQ reminders for unanswered supplier threads
+      responses:
+        '200':
+          description: Due candidates and sent reminder messages
+  /procurement/rfqs/{rfqId}/quotes:
+    post:
+      summary: Submit supplier quote
+      responses:
+        '201':
+          description: Valid supplier quote recorded
+        '422':
+          description: Quote violates RFQ/capability/currency/logistics constraints
+  /procurement/rfqs/{rfqId}/compare:
+    post:
+      summary: Rank submitted quotes with transparent deterministic strategy
+      responses:
+        '200':
+          description: Price
+          lead-time: null
+          quality: null
+          service-fit and logistics score breakdown: null
+  /procurement/rfqs/{rfqId}/award/{quoteId}:
+    post:
+      summary: Award exact quote and create Supplier Order
+      responses:
+        '201':
+          description: Supplier Order created from awarded quote
+  /projects/{projectId}/manufacturing/release-preview:
+    post:
+      summary: Build technical Release Trust preview
+      description: Never signs. A trusted preview waits for an exact human approval fingerprint.
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Release manifest in blocked or awaiting_approval state
+  /projects/{projectId}/manufacturing/approval-request:
+    post:
+      summary: Request approval for one exact release fingerprint
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '201':
+          description: Approval request bound to revision/release/fingerprint
+        '409':
+          description: Release is not technically approvable
+  /manufacturing/approvals/{approvalId}/decision:
+    post:
+      summary: Approve or reject release
+      description: Production release approval roles are owner, admin, technologist. In production the server resolves the
+        authenticated organization role rather than trusting request text.
+      parameters:
+      - $ref: '#/components/parameters/ApprovalId'
+      responses:
+        '200':
+          description: Approval decision and authorization binding
+  /manufacturing/approvals/{approvalId}/sign-release:
+    post:
+      summary: Sign the exact approved release with server-side Ed25519 key
+      parameters:
+      - $ref: '#/components/parameters/ApprovalId'
+      responses:
+        '200':
+          description: Signed manifest with canReleaseToCnc=true
+        '503':
+          description: Signing key is not configured
+  /manufacturing/approvals/{approvalId}/machine-package-preview:
+    post:
+      summary: Run selected postprocessor without enqueuing
+      parameters:
+      - $ref: '#/components/parameters/ApprovalId'
+      responses:
+        '200':
+          description: Machine package metadata; preview postprocessors may be non-executable
+  /manufacturing/approvals/{approvalId}/enqueue:
+    post:
+      summary: Put signed approved release into Production Queue
+      description: Requires executable postprocessor and matching verified machine trust. TEST machines are only available
+        with an explicit local test flag.
+      parameters:
+      - $ref: '#/components/parameters/ApprovalId'
+      responses:
+        '201':
+          description: Durable production job created
+        '409':
+          description: Machine/postprocessor/release gate failed
+  /production/machines:
+    get:
+      responses:
+        '200':
+          description: Available machine profiles and trust status
+  /production/queue:
+    get:
+      responses:
+        '200':
+          description: Production job state; Postgres table is source of truth
+  /procurement/inbox:
+    get:
+      summary: Unified procurement work inbox
+      description: Returns New Quote, Needs Review, Decline and Gmail connection alerts in one deterministic owner-facing
+        feed.
+      parameters:
+      - in: query
+        name: organizationId
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Procurement inbox summary, items and connection health
+  /procurement/inbox/{itemId}/disposition:
+    post:
+      summary: Acknowledge, resolve, dismiss or reopen an inbox item
+      parameters:
+      - in: path
+        name: itemId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - disposition
+              properties:
+                disposition:
+                  enum:
+                  - new
+                  - acknowledged
+                  - resolved
+                  - dismissed
+                organizationId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Updated inbox item and refreshed summary
+        '404':
+          description: Inbox item not found
+  /operations/connections/gmail/health:
+    get:
+      summary: Evaluate Gmail connection health and daily operation due state
+      responses:
+        '200':
+          description: Per-connection health, sync due and watch renewal due state
+  /operations/connections/gmail/run:
+    post:
+      summary: Run daily Gmail connection operations
+      description: Runs safety sync before watch renewal to avoid advancing the watch cursor past unseen history. Intended
+        for trusted server scheduler / Edge Function invocation.
+      responses:
+        '200':
+          description: Per-connection sync/watch actions and resulting health
+  /owner/notifications:
+    get:
+      summary: List owner notifications derived from new procurement and critical connection events
+      responses:
+        '200':
+          description: Owner notifications
+  /owner/notifications/{notificationId}/read:
+    post:
+      summary: Mark owner notification read
+      parameters:
+      - in: path
+        name: notificationId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Updated notification
+        '404':
+          description: Notification not found
+  /projects/{projectId}/commercial/estimate-preview:
+    post:
+      summary: Build deterministic internal commercial estimate for the current Project Revision
+      description: Uses engineering BOM, price profile, labor/fixed costs and optional supplier quote. Missing prices block
+        readiness instead of being guessed. Money uses integer minor units.
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pricing:
+                  type: object
+                  description: CommercialPricingProfile with all monetary values in minor units
+                useDemoPricing:
+                  type: boolean
+                  description: TEST ONLY local demo profile; never use for live client pricing
+                selectedSupplierQuoteId:
+                  type: string
+                productionRoute:
+                  enum:
+                  - manual_workshop
+                  - outsource
+                outsourcePreset:
+                  enum:
+                  - cutting_only
+                  - cutting_edging
+                  - cutting_edging_drilling
+                markupBps:
+                  type: integer
+                discountBps:
+                  type: integer
+                taxBps:
+                  type: integer
+      responses:
+        '200':
+          description: Ready commercial estimate
+        '409':
+          description: Estimate contains blockers such as unresolved prices
+  /projects/{projectId}/commercial/quotes:
+    post:
+      summary: Create immutable quote version and commercial package from exact Project Revision
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - quoteTerms
+              properties:
+                pricing:
+                  type: object
+                useDemoPricing:
+                  type: boolean
+                selectedSupplierQuoteId:
+                  type: string
+                quoteTerms:
+                  type: object
+                  required:
+                  - clientName
+                  properties:
+                    clientName:
+                      type: string
+                    clientCompany:
+                      type: string
+                    validityDays:
+                      type: integer
+                    leadTimeText:
+                      type: string
+                    paymentTerms:
+                      type: array
+                      items:
+                        type: object
+                    inclusions:
+                      type: array
+                      items:
+                        type: string
+                    exclusions:
+                      type: array
+                      items:
+                        type: string
+                    notes:
+                      type: array
+                      items:
+                        type: string
+                    sellerName:
+                      type: string
+      responses:
+        '201':
+          description: Quote version, estimate and package manifest created
+        '409':
+          description: Commercial estimate is not ready
+        '422':
+          description: Pricing profile or client terms missing/invalid
+  /commercial/quotes/{quoteId}:
+    get:
+      summary: Get immutable client quote document and current lifecycle status
+      parameters:
+      - in: path
+        name: quoteId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Client quote document
+        '404':
+          description: Quote not found
+  /commercial/quotes/{quoteId}/status:
+    post:
+      summary: Record client quote lifecycle state without rewriting quote document
+      parameters:
+      - in: path
+        name: quoteId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - status
+              properties:
+                status:
+                  enum:
+                  - draft
+                  - approved
+                  - sent
+                  - accepted
+                  - rejected
+                  - expired
+                  - superseded
+      responses:
+        '200':
+          description: Lifecycle status updated
+  /commercial/quotes/{quoteId}/files/{fileName}:
+    get:
+      summary: Download generated commercial package file
+      parameters:
+      - in: path
+        name: quoteId
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: fileName
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Generated client/internal file with x-content-sha256 header
+        '404':
+          description: Quote or file not found
+  /projects/{projectId}/changes/compare:
+    post:
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fromRevision:
+                  type: integer
+                  minimum: 1
+                toRevision:
+                  type: integer
+                  minimum: 2
+                baseQuoteId:
+                  type: string
+                previewQuoteId:
+                  type: string
+                previewQuoteNumber:
+                  type: string
+      responses:
+        '200':
+          description: Immutable revision impact report with optional requote preview
+        '404':
+          description: Project/revision/base quote not found
+  /commercial/quotes/{quoteId}/requote:
+    post:
+      parameters:
+      - in: path
+        name: quoteId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                toRevision:
+                  type: integer
+                  minimum: 2
+                quoteId:
+                  type: string
+                quoteNumber:
+                  type: string
+      responses:
+        '201':
+          description: New draft quote linked to superseded quote plus Change Impact Report
+        '409':
+          description: Target revision or quote is not ready for deterministic requote
+  /changes/reports/{reportId}:
+    get:
+      parameters:
+      - in: path
+        name: reportId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Change Impact Report
+        '404':
+          description: Report not found
+  /commercial/quotes/{quoteId}/contract:
+    post:
+      summary: Create active commercial contract from an accepted quote
+      parameters:
+      - in: path
+        name: quoteId
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Commercial contract with payment schedule
+        '409':
+          description: Quote is not accepted or a contract already exists
+  /projects/{projectId}/commercial-contract:
+    get:
+      summary: Get current contractual revision, payment schedule and production commercial gate
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Current commercial contract
+        '404':
+          description: Contract not found
+  /commercial/contracts/{contractId}/payments/{installmentId}/mark-paid:
+    post:
+      summary: Mark one exact contract installment paid
+      parameters:
+      - in: path
+        name: contractId
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: installmentId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Updated contract; paid installment becomes frozen for rebalancing
+  /commercial/quotes/{quoteId}/change-order:
+    post:
+      summary: Create customer-safe Change Order from requote lineage
+      parameters:
+      - in: path
+        name: quoteId
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Draft Change Order bound to revision
+          quote and change report fingerprints: null
+        '409':
+          description: Missing contract or requote lineage/binding mismatch
+  /client/change-orders/{changeOrderId}/send:
+    post:
+      summary: Issue one-time client approval token and mark Change Order sent
+      parameters:
+      - in: path
+        name: changeOrderId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Sent Change Order; token is returned once while only its hash is persisted
+  /client/change-orders/{changeOrderId}:
+    get:
+      summary: Read organization-side Change Order state
+      parameters:
+      - in: path
+        name: changeOrderId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Change Order
+  /public/change-orders/{changeOrderId}:
+    get:
+      summary: Customer view of Change Order using approval token
+      parameters:
+      - in: path
+        name: changeOrderId
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Customer-safe Change Order view
+        '403':
+          description: Invalid or expired token
+  /public/change-orders/{changeOrderId}/decision:
+    post:
+      summary: Customer accepts or declines exact Change Order binding
+      parameters:
+      - in: path
+        name: changeOrderId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Decision recorded; acceptance updates contract and Client Revision Authorization
+        '403':
+          description: Invalid/expired token or invalid decision state
+  /projects/{projectId}/change-orders:
+    get:
+      summary: List customer-safe Change Orders for project
+      parameters:
+      - in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Change Orders bound to exact project revisions
+        '404':
+          description: Project not found
+  /commercial/contracts/{contractId}/document:
+    get:
+      summary: Open customer-safe Commercial Contract Record HTML
+      parameters:
+      - in: path
+        name: contractId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTML contract record with agreed revision, amount and payment schedule
+        '404':
+          description: Contract not found
+  /client/change-orders/{changeOrderId}/document:
+    get:
+      summary: Open customer-safe Change Order HTML
+      parameters:
+      - in: path
+        name: changeOrderId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Customer-safe Change Order HTML
+        '404':
+          description: Change Order not found
+components:
+  parameters:
+    ProjectId:
+      in: path
+      name: projectId
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrderId:
+      in: path
+      name: orderId
+      required: true
+      schema:
+        type: string
+    ConnectionId:
+      in: path
+      name: connectionId
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ApprovalId:
+      in: path
+      name: approvalId
+      required: true
+      schema:
+        type: string
+        format: uuid

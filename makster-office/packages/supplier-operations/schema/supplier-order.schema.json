@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schema/supplier-order-1.1.json",
+  "title": "Makster Supplier Order 1.1",
+  "type": "object",
+  "required": ["orderVersion","orderId","projectId","revision","productionPackId","productionPackManifestSha256","outsourcePreset","supplier","currency","status","createdAt","lines"],
+  "properties": {
+    "orderVersion": {"const":"1.1.0"},
+    "orderId": {"type":"string","minLength":1},
+    "projectId": {"type":"string","minLength":1},
+    "revision": {"type":"integer","minimum":1},
+    "productionPackId": {"type":"string","minLength":1},
+    "productionPackManifestSha256": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+    "outsourcePreset": {"enum":["cutting_only","cutting_edging","cutting_edging_drilling"]},
+    "supplier": {
+      "type":"object","required":["name"],
+      "properties":{"id":{"type":"string"},"name":{"type":"string","minLength":1},"email":{"type":"string"},"phone":{"type":"string"},"address":{"type":"string"},"externalReference":{"type":"string"}},
+      "additionalProperties":false
+    },
+    "currency":{"type":"string","minLength":3,"maxLength":3},
+    "quotedPrice":{"type":"number","minimum":0},
+    "promisedAt":{"type":"string","format":"date-time"},
+    "supplierReference":{"type":"string"},
+    "status":{"enum":["draft","sent","accepted","in_production","ready","partially_received","received","cancelled"]},
+    "createdAt":{"type":"string","format":"date-time"},
+    "sentAt":{"type":"string","format":"date-time"},
+    "acceptedAt":{"type":"string","format":"date-time"},
+    "readyAt":{"type":"string","format":"date-time"},
+    "receivedAt":{"type":"string","format":"date-time"},
+    "notes":{"type":"string"},
+    "lines":{"type":"array","minItems":1,"items":{"type":"object","required":["lineId","partId","partName","quantity","lengthMm","widthMm","thicknessMm","material","services","labelPrefix"],"properties":{"lineId":{"type":"string"},"partId":{"type":"string"},"partName":{"type":"string"},"quantity":{"type":"integer","minimum":1},"lengthMm":{"type":"number","minimum":0},"widthMm":{"type":"number","minimum":0},"thicknessMm":{"type":"number","minimum":0},"material":{"type":"string"},"services":{"type":"array","items":{"enum":["cutting","edging","drilling"]},"uniqueItems":true},"labelPrefix":{"type":"string"}},"additionalProperties":false}}
+  },
+  "additionalProperties":false
+}

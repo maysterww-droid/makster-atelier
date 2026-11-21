@@ -1,0 +1,18 @@
+Makster AI 2.6.9 — Kitchen Design Generator & Variant Ranking
+Verification date: 2026-09-06
+
+PASS — strict TypeScript compilation of ProjectModel + Engineering Engine kitchen contour using TypeScript 5.8.3 and a minimal local node:crypto declaration shim because @types/node is absent from the supplied archive.
+PASS — 2.6.9 functional runtime verification on compiled JS.
+PASS — generated 14 unique variants for a 4200 x 3200 mm verification room (4 selected layout kinds, real strategy/tall-position deduplication).
+PASS — Top 3 shortlist produced from READY designs.
+PASS — recommended design is rank 1.
+PASS — READY candidates sort before rejected candidates.
+PASS — tall refrigerator START and END placement variants generated when position is not fixed.
+PASS — hard maxGeneratedVariants cap verified at 4.
+PASS — score breakdown exposes Engineering / Ergonomics / Manufacturing / Utilities / Prep Surface / Appliance Access / Total.
+PASS — package ruleset updated to kitchen-pro-engineering-v2.6.9.
+
+Important environment limitation:
+The archive does not contain node_modules/@types/node. Therefore the repository-wide npm test command was not re-run in this environment. The new kitchen contour was strictly compiled with a temporary local node:crypto type shim, and the 2.6.9 runtime scenarios were executed against emitted JavaScript.
+
+No claim is made that the entire historical test suite was re-executed for this release.

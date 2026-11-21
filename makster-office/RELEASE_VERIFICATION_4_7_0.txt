@@ -1,0 +1,88 @@
+MAKSTER AI 4.7.0 RELEASE VERIFICATION
+======================================
+
+OPERATIONS CONTROL TOWER
+PASS: strict TypeScript compile
+PASS: 5-operation project workflow
+PASS: dependency ordering
+PASS: first operation becomes READY
+PASS: downstream PLANNED operation cannot be started early
+PASS: assign / start / block / unblock / complete transitions
+PASS: blocker reason required
+PASS: assignee persisted
+PASS: actual hours persisted
+
+PLAN RESYNC SAFETY
+PASS: BLOCKED status survives sync
+PASS: blocker reason survives sync
+PASS: assignee survives sync
+PASS: actual execution facts survive sync
+PASS: planning dates can refresh without erasing execution history
+
+ACTUAL TIME LEARNING
+Runtime:
+- Cutting completed with 2.5 actual hours
+PASS: Production Time Entry automatically created
+PASS: next Edging operation automatically becomes READY
+PASS: Capacity Intelligence can consume the same completion fact
+
+SHARED-RESOURCE CASCADE
+Runtime:
+- queue #1 Cutting blocked
+- queue #2 Cutting planned for Sep 8
+
+PASS: queue #2 Cutting recalculated to Sep 9
+PASS: cascade delay = 1 day
+PASS: blockedOperations = 1
+PASS: cascadeDelayedOperations = 9
+PASS: downstream shared-center/project dependencies recalculate
+
+ACTUAL BUNDLED API
+PASS: health -> 4.7.0
+PASS: production-operations sync -> 200
+PASS: assign -> 200
+PASS: start -> in_progress
+PASS: block -> blocked
+PASS: tower reports blocker
+PASS: unblock -> in_progress
+PASS: complete -> completed
+PASS: next operation -> ready
+PASS: actual-time history entry -> 1
+
+4.7 REGRESSION
+5 tests
+5 passed
+0 failed
+
+CROSS-VERSION REGRESSION
+30 tests
+30 passed
+0 failed
+
+WEB UI
+PASS: Operations Control Tower
+PASS: Production Board
+PASS: Today / Tomorrow / This Week counters
+PASS: blocked / in-progress / ready metrics
+PASS: cascade delayed metric
+PASS: Assign / Start / Complete / Block / Unblock controls
+PASS: baseline vs recalculated dates shown
+PASS: MAKSTER AI 4.7 branding
+
+SUPABASE
+PASS: prepared migration
+PASS: owner_production_operations
+PASS: JSON operational snapshot
+PASS: project/work-center uniqueness
+PASS: RLS enabled
+PASS: owner/admin read policy
+PASS: service-role mutation
+PASS: staging smoke SQL
+
+NOT LIVE-APPLIED
+No production/staging Supabase credentials were used in this sandbox.
+
+CORE TYPESCRIPT
+PASS: Owner Operations strict compile
+PASS: zero new structural Core API TypeScript errors
+Known supplied-archive limitation remains: @types/node is absent.

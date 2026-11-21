@@ -1,0 +1,43 @@
+MAKSTER AI 2.9.0 RELEASE VERIFICATION
+======================================
+PASS: ProjectModel + conflict/decision core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: bundled Production Pack generator syntax
+PASS: bundled ProjectModel runtime syntax
+PASS: actual bundled Core API startup
+PASS: health -> 2.9.0
+
+Site-task runtime scenario:
+- confirmed socket behind furniture -> WARNING = 1
+- Conflict Resolution policy -> record_site_task
+- approved decision -> new Revision 2
+- decision kind -> site_task
+- matching installation warning -> INFO
+- warning count -> 0
+- installation-decisions.csv generated
+- site-installation-checklist.txt generated
+- manifest openSiteTaskRows -> 1
+- task marked completed -> status completed
+- completion creates Revision 3
+PASS
+
+Safety:
+- physical BLOCKING conflicts cannot be waived through decision workflow
+- server reconstructs the current suggestion
+- expectedRevision required
+- explicit approval required
+- only record_site_task / record_design_decision policies can be recorded
+- site-task approval downgrades only its matching WARNING; blockers remain blockers
+PASS
+
+Production Pack:
+- structured decision file included
+- site checklist included
+- decision/open-task counts added to manifest
+PASS
+
+Full historical npm test:
+NOT EXECUTED because the supplied archive does not contain node_modules/@types/node.
+Changed ProjectModel/Engineering core was compiled independently.
+Production Pack and Core API were exercised through bundled runtime smoke tests.

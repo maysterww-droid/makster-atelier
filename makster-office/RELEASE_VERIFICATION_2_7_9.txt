@@ -1,0 +1,32 @@
+MAKSTER AI 2.7.9 RELEASE VERIFICATION
+======================================
+PASS: master-catalog + compatibility + auto-selection + import-pipeline isolated strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API syntax
+PASS: bundled catalog import module syntax
+PASS: bundled runtime import smoke
+
+CSV smoke:
+- parsedCount = 1
+- staging trust = imported_unverified
+- productionEligible = false
+- manufacturer_verified promotion without evidence confirmation = BLOCKED
+- reviewed/evidence-confirmed promotion = accepted
+- promoted record immediately searchable in runtime master catalog
+- drillingProfile remains not_imported
+
+API smoke:
+- bundled Core API starts
+- health -> 2.7.9
+- POST /api/v1/catalogs/import -> parsed candidate
+- requiresReview = true
+
+Safety:
+- imported data never starts as production trusted
+- PDF/XLSX raw document parsing is adapter-driven, not guessed in core
+- drilling trust is never upgraded merely by catalog promotion
+- UNKNOWN/unmapped fields stay unresolved
+
+Full historical npm test:
+NOT EXECUTED because the supplied source archive does not contain node_modules/@types/node.
+Changed catalog/import core compiled independently and bundled runtime/API were smoke-tested.

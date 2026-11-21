@@ -1,0 +1,43 @@
+MAKSTER AI 2.9.1 RELEASE VERIFICATION
+======================================
+PASS: ProjectModel + Installer Mode + Readiness core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API syntax
+PASS: bundled Installer Mode module syntax
+PASS: bundled Production Pack generator syntax
+PASS: actual bundled Core API startup
+PASS: health -> 2.9.1
+PASS: Installer tab served and routed
+
+Runtime site-execution scenario:
+- one approved site task -> INSTALL_IN_PROGRESS
+- blocking issue reported from site -> Revision 2
+- Installer Mode -> BLOCKED
+- blockingIssueCount -> 1
+- Production Readiness -> HOLD
+- blocker code INSTALLATION_SITE_ISSUE present
+- Production Pack includes:
+  site-installation-checklist.txt
+  site-issues.csv
+  installer-execution.json
+- manifest openSiteIssueRows -> 1
+- site issue resolved -> Revision 3
+- openSiteIssues -> 0
+- remaining approved site task keeps status INSTALL_IN_PROGRESS
+PASS
+
+Revision discipline:
+- reporting issue creates Revision
+- resolving issue creates Revision
+- site task completion uses existing revision-safe completion endpoint
+PASS
+
+Production Pack:
+- installer execution state is revision-specific
+- structured site issues included
+- structured task/decision files retained
+PASS
+
+Full historical npm test:
+NOT EXECUTED because supplied archive does not contain node_modules/@types/node.
+Changed Installer/Readiness core compiled independently and bundled runtime/server/UI/Production Pack were smoke-tested.

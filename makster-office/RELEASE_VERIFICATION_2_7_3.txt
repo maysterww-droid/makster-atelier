@@ -1,0 +1,26 @@
+MAKSTER AI 2.7.3 RELEASE VERIFICATION
+======================================
+PASS: catalog-compatibility.ts + master-catalog.ts isolated strict TypeScript compile
+PASS: web app JavaScript syntax check
+PASS: dist Core API JavaScript syntax check
+PASS: compiled catalog module runtime smoke test
+PASS: actual dist server started on local test port
+PASS: GET /api/v1/health -> version 2.7.3
+PASS: GET /api/v1/catalogs/hardware?productionReadyOnly=true
+PASS: POST /api/v1/catalogs/appliances/compatibility
+PASS: Liebherr insufficient ventilation -> INCOMPATIBLE / VENTILATION_TOO_SMALL
+PASS: Blum 18 mm front -> compatible
+PASS: Blum 25 mm front -> incompatible
+PASS: MOVENTO SKU-only + requireProductionDrilling -> blocked
+PASS: Bosch verified niche -> compatible
+PASS: Siemens non-normalized niche -> UNKNOWN
+PASS: ZIP integrity
+
+Full historical npm test:
+NOT EXECUTED because the provided source archive contains no node_modules/@types/node.
+The new compatibility core was compiled and runtime-tested independently, and the actual bundled dist server was smoke-tested.
+Do not claim a full historic suite pass for 2.7.3 until dependencies are installed and npm test is run.
+
+Trust rule:
+A catalog SKU, brand name, marketing specification, or approximate dimension is never enough to authorize drilling/CNC.
+Only explicit trusted drilling profiles can do that.

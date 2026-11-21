@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Makster AI 2.7 · Kitchen Design Studio</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<header class="app-header">
+  <div class="brand"><span class="mark">M</span><div><strong>MAKSTER AI</strong><small>Kitchen Design Studio 2.7 · Generate → compare → select → manufacture.</small></div></div>
+  <div class="header-center"><span id="projectTitle">Нет проекта</span><span id="revisionPill" class="pill neutral">Revision —</span></div>
+  <div class="top-actions"><span id="health" class="pill">Core…</span><button id="newProject" class="secondary">＋ Новый проект</button></div>
+</header>
+
+<main class="app-shell">
+  <aside class="left-rail">
+    <section class="projects-section">
+      <div class="section-head"><strong>PROJECTS</strong><button id="refreshProjects" class="icon-button" title="Обновить">↻</button></div>
+      <div id="projectList" class="project-list"></div>
+    </section>
+
+    <section class="ai-section">
+      <div class="section-head"><strong>MAKSTER AI</strong><span class="muted">Design Agent</span></div>
+      <div id="messages" class="messages">
+        <div class="message ai">Создайте проект, задайте комнату и опишите мебель. Я превращу разговор в редактируемый Project Digital Twin.</div>
+      </div>
+      <div class="composer">
+        <textarea id="prompt" rows="3" placeholder="Шкаф 3360×2650×600, 6 секций, по краям одежда, в центре ящики и полки…"></textarea>
+        <button id="send">Применить AI →</button>
+        <small>Ctrl/Cmd + Enter</small>
+      </div>
+    </section>
+  </aside>
+
+  <section class="main-stage">
+    <div class="stage-toolbar">
+      <div class="view-switch" id="viewSwitch">
+        <button data-view="plan">PLAN</button>
+        <button data-view="front" class="active">FRONT</button>
+        <button data-view="3d">3D</button>
+      </div>
+      <div class="stage-meta"><span id="stageStatus">Создайте проект</span><span id="engineeringBadge" class="pill neutral">Engineering —</span></div>
+      <div class="stage-actions"><button id="undoVisual" class="secondary small" title="Undo">↶ Undo</button><button id="redoVisual" class="secondary small" title="Redo">↷ Redo</button><button id="fitView" class="secondary small">Fit</button></div>
+    </div>
+
+    <div id="stageContent" class="stage-content">
+      <canvas id="visualCanvas"></canvas>
+      <div id="emptyStage" class="empty-stage">
+        <div class="empty-symbol">◇</div><h2>Makster AI 5.6 Production Hardening</h2><p>Комната → Kitchen/Storage CAD → Engineering → Quote → Contract → Change Order → Production.</p>
+      </div>
+      <div id="htmlStage" class="html-stage hidden"></div>
+    </div>
+
+    <nav class="bottom-tabs">
+      <button class="active" data-tab="design">Design</button>
+      <button data-tab="kitchen-studio">Kitchen Studio</button>
+      <button data-tab="hardware-studio">Hardware Studio</button>
+      <button data-tab="appliance-studio">Appliance Studio</button>
+      <button data-tab="auto-complete">Auto Complete</button>
+      <button data-tab="measurements">Measurements</button>
+      <button data-tab="installation-check">Install Check</button>
+      <button data-tab="conflict-resolution">Resolve</button>
+      <button data-tab="owner-command">Owner Command</button>
+      <button data-tab="ai-office">AI Office</button>
+      <button data-tab="content-studio">Content Studio</button>
+      <button data-tab="system-readiness">System</button>
+      <button data-tab="job-control">Job Control</button>
+      <button data-tab="purchasing">Purchasing</button>
+      <button data-tab="costing">Costing</button>
+      <button data-tab="client-portal">Client Portal</button>
+      <button data-tab="release-gate">Release Gate</button>
+      <button data-tab="installer">Installer</button>
+      <button data-tab="catalog">Catalog Admin</button>
+      <button data-tab="engineering">Engineering</button>
+      <button data-tab="quote">Quote</button>
+      <button data-tab="business">Business</button>
+      <button data-tab="production">Production</button>
+    </nav>
+  </section>
+
+  <aside class="right-rail">
+    <div class="inspector-head"><strong>INSPECTOR</strong><span id="selectionLabel" class="muted">Project</span></div>
+    <div id="inspector" class="inspector"></div>
+    <div class="status-stack">
+      <div><span>AI confidence</span><strong id="confidence">—</strong></div>
+      <div><span>Missing info</span><strong id="missing">—</strong></div>
+      <div><span>Visual warnings</span><strong id="visualWarnings">—</strong></div>
+    </div>
+  </aside>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

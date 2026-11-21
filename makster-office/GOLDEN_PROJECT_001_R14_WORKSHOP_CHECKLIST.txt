@@ -1,0 +1,39 @@
+MAKSTER MANUAL WORKSHOP PACK
+Project: Golden Project #1 · R14 site-fit no-name appliances · GTV Modern Slide 18 mm / 500 mm
+Revision: 14
+Engineering: 0.7.0 / kitchen-pro-engineering-v2.6.1
+
+PRE-CUT CHECK
+[ ] Сверить материал, толщину и направление текстуры
+[ ] Сверить количество деталей: 88
+[ ] Проверить детали со статусом CHECK
+
+EDGE CHECK
+[ ] Кромка нанесена только на стороны из edging.csv
+[ ] Проверить направление детали до кромления
+
+DRILLING / MACHINING
+[ ] Перед сверлением проверить локальную систему координат детали
+[ ] Операции CHECK/REFERENCE не переносить механически без проверки
+[ ] Неопределённых/референсных операций: 0
+
+MANUAL / ON-SITE OPERATIONS
+[ ] GTV_RUNNER_MANUAL_TEMPLATE: Module 1: GTV runner installation is manual-template; Makster releases cut sizing but intentionally emits no CNC runner drilling
+[ ] HINGE_MANUAL_TEMPLATE: Selected GTV system is installed manually with a physical template; Makster intentionally emits no CNC hinge drilling
+[ ] KITCHEN_CUTOUT_ON_SITE: sink cutout is intentionally executed on site; no workshop/CNC cutout is emitted.
+[ ] HINGE_MANUAL_TEMPLATE: Selected GTV system is installed manually with a physical template; Makster intentionally emits no CNC hinge drilling
+[ ] KITCHEN_APPLIANCE_SITE_FIT: Kitchen oven is intentionally site-fit; known dimensions are checked now and missing envelope dimensions must be verified against the actual appliance during installation.
+[ ] KITCHEN_APPLIANCE_SITE_FIT: Kitchen hob is intentionally site-fit; known dimensions are checked now and missing envelope dimensions must be verified against the actual appliance during installation.
+[ ] KITCHEN_CUTOUT_ON_SITE: hob cutout 560×490 mm is intentionally executed on site; no workshop/CNC cutout is emitted.
+[ ] HINGE_MANUAL_TEMPLATE: Selected GTV system is installed manually with a physical template; Makster intentionally emits no CNC hinge drilling
+[ ] GTV_RUNNER_MANUAL_TEMPLATE: Module 1: GTV runner installation is manual-template; Makster releases cut sizing but intentionally emits no CNC runner drilling
+
+ASSEMBLY
+[ ] Собирать по assembly-sequence.csv
+[ ] Проверять диагонали каждого корпуса до установки задней стенки
+[ ] Регулировку фасадов делать после выставления корпусов
+
+FINAL
+[ ] Все детали промаркированы
+[ ] Фурнитура комплектна
+[ ] Замечания Engineering просмотрены

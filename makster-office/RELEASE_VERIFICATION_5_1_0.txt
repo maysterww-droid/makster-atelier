@@ -1,0 +1,85 @@
+MAKSTER AI 5.1.0 — INTEGRATED AI OFFICE VERIFICATION
+=====================================================
+
+INTEGRATION
+PASS: AI Office is a tab inside Makster AI
+PASS: no separate app required
+PASS: shared Owner Operations persistence
+PASS: lead can convert into a real Makster Project
+PASS: Project then appears in normal Makster project workflows
+
+AI OFFICE CORE
+PASS: 12 agents
+PASS: Growth Director orchestration
+PASS: Analytics → Audience → Creative → Content → Ads → Sales Bridge → Owner Brief
+PASS: Owner Brief generation
+PASS: campaign model
+PASS: channel model
+PASS: lead pipeline
+PASS: Approval Center
+
+CHANNELS
+PASS: Google Ads
+PASS: Facebook Ads
+PASS: Instagram Ads as separate business channel
+PASS: TikTok Ads
+PASS: Organic social/email/web channel model
+
+APPROVAL SAFETY
+PASS: new campaign creates budget approval
+PASS: campaign budget approval starts PENDING
+PASS: approval must be explicitly accepted/rejected
+PASS: approving budget does not spend money
+PASS: weak live campaign becomes an Owner Approval recommendation
+
+RUNTIME
+PASS: health -> 5.1.0
+PASS: create Instagram campaign -> 201
+PASS: campaign budget approval -> approved
+PASS: Growth Cycle -> 12 agent runs
+PASS: Owner Brief -> generated
+PASS: lead creation -> 201
+PASS: lead qualification
+PASS: qualified lead -> real Makster Project
+PASS: AI Office dashboard -> 5.1.0
+PASS: convertedProjects = 1
+PASS: agents = 12
+PASS: AI Office navigation tab present
+
+5.1 TESTS
+4 tests
+4 passed
+0 failed
+
+FULL CROSS-VERSION REGRESSION
+48 tests
+48 passed
+0 failed
+
+WEB UI
+PASS: separate AI Office tab
+PASS: Growth Department dashboard
+PASS: Campaigns
+PASS: Advertising channels
+PASS: Approval Center
+PASS: Owner Brief
+PASS: Lead Pipeline
+PASS: Lead → Project
+PASS: 12-agent team view
+
+SUPABASE
+PASS: 5.1 migration prepared
+PASS: 7 AI Office tables
+PASS: RLS prepared
+PASS: owner/admin read policy
+PASS: service-role writes
+PASS: staging smoke SQL prepared
+
+LIVE PROVIDER LIMIT
+NOT CLAIMED:
+- live Google Ads campaign creation
+- live Meta/Facebook/Instagram ad spend
+- live TikTok Ads spend
+- automatic social publishing
+
+These remain provider-adapter integrations requiring real connected accounts and Owner-authorized execution.

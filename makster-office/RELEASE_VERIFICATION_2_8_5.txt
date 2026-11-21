@@ -1,0 +1,41 @@
+MAKSTER AI 2.8.5 RELEASE VERIFICATION
+======================================
+PASS: Web application JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: actual bundled Core API startup
+PASS: GET /api/v1/health -> 2.8.5
+
+Kitchen Design Studio runtime:
+- room 4200 × 3200
+- 16 candidates generated
+- 14 READY
+- Top 3 returned
+PASS
+
+Room Scene -> Project Revision:
+- selected Top variant applied
+- Revision 1 -> 2
+- ProjectModel.site.rooms = 1
+- 1 door opening persisted
+- radiator + utility points persisted as room obstacles
+- furniture roomId linked to persisted room
+- MAKSTER_ROOM_SCENE_V1 lossless scene note persisted
+PASS
+
+Safety:
+- room/opening/utility data is sent through existing Constraint / Utility engines
+- `hood_vent` uses the exact engineering utility kind
+- no vertical dimensions are guessed
+- unknown vertical dimensions remain state='unknown'
+
+UI:
+PASS: JSON room setup fields removed from Kitchen Studio
+PASS: visual room canvas present
+PASS: room feature palette present
+PASS: utility palette present
+PASS: exact numeric object inspector present
+PASS: drag/select handlers present
+
+Full historical npm test:
+NOT EXECUTED because the supplied archive does not contain node_modules/@types/node.
+2.8.5 primarily changes the web Room Editor and Studio->Project persistence path; actual bundled API/generator/apply runtime was smoke-tested.

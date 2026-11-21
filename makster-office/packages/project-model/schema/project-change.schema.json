@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schemas/project-change/1.0.0.json",
+  "title": "Makster ProjectChangeSet v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "changeId",
+    "projectId",
+    "basedOnRevision",
+    "source",
+    "patches"
+  ],
+  "properties": {
+    "changeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "projectId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "basedOnRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source": {
+      "enum": [
+        "user",
+        "ai",
+        "client",
+        "import",
+        "engineering"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "patches": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "op",
+          "path"
+        ],
+        "properties": {
+          "op": {
+            "enum": [
+              "set",
+              "add",
+              "remove",
+              "replace"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/"
+          },
+          "value": {}
+        }
+      }
+    }
+  }
+}

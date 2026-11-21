@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://makster.ai/schema/gmail-sync-result-1.4.json",
+  "title":"Makster Gmail Sync Result 1.4",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["connectionVersion","connectionId","mode","endHistoryId","fetchedMessageCount","matchedInbound","ignoredMessageIds","duplicateMessageIds","syncedAt"],
+  "properties":{
+    "connectionVersion":{"const":"1.5.0"},
+    "connectionId":{"type":"string"},
+    "mode":{"enum":["history","full"]},
+    "startHistoryId":{"type":"string"},
+    "endHistoryId":{"type":"string"},
+    "fetchedMessageCount":{"type":"integer","minimum":0},
+    "matchedInbound":{"type":"array"},
+    "ignoredMessageIds":{"type":"array","items":{"type":"string"}},
+    "duplicateMessageIds":{"type":"array","items":{"type":"string"}},
+    "fullSyncReason":{"enum":["initial_sync","stale_history"]},
+    "syncedAt":{"type":"string","format":"date-time"}
+  }
+}

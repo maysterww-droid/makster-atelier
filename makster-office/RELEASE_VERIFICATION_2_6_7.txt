@@ -1,0 +1,22 @@
+Makster AI 2.6.7 — Release Verification
+=======================================
+
+TypeScript strict project typecheck: PASS
+Full npm regression: PASS
+Tests: 205
+Passed: 205
+Failed: 0
+
+New 2.6.7 checks include:
+- mixed floor base/tall geometry
+- elevated wall layer Z geometry
+- hood/hob horizontal alignment
+- refrigerator-backed work triangle
+- configurable hood vertical clearance blocker
+- ProjectModel -> Engineering Engine width invariant
+
+Kitchen Engineering ruleset:
+kitchen-pro-engineering-v2.6.7
+
+Important truth rule:
+No universal hood clearance or missing appliance envelope is invented. Manufacturer/project values can be supplied explicitly; site-fit remains explicit where allowed.

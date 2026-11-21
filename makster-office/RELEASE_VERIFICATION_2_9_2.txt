@@ -1,0 +1,14 @@
+MAKSTER AI 2.9.2 RELEASE VERIFICATION
+PASS strict TypeScript compile: changed ProjectModel/Engineering core
+PASS Web UI syntax
+PASS bundled Core API syntax/startup
+PASS health 2.9.2
+PASS Site Change Request UI
+PASS propose -> Revision 2, geometry unchanged
+PASS approve -> Revision 3
+PASS apply -> Revision 4
+PASS applied X = 120 mm
+PASS As-Built record created
+PASS resulting blocking collisions = 0
+PASS Production Pack generator syntax
+PASS archive integrity

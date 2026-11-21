@@ -1,0 +1,39 @@
+# Makster AI 2.6.1 — BUILD STATUS
+
+Release: Golden Project Hardening 2.6.1
+Status: RELEASED
+
+## Core versions
+- Core API: 2.6.1
+- Visual Product / Kitchen Inspector: 2.6.1
+- Kitchen ruleset: kitchen-pro-engineering-v2.6.1
+- Engineering Engine core: 0.7.0
+- Production Pack: 1.0.0
+- Persistent Unified Business: 2.6 (unchanged)
+
+## Implemented
+- GTV third-party hardware remains explicit BOM truth and never inherits Blum drilling.
+- Unknown/partially-known appliance envelopes block Production.
+- Multiple appliances can share a module (oven + hob).
+- Hob requires independent worktop cutout geometry.
+- Wall-side worktop plinth/upstand is first-class ProjectModel + BOM data.
+- Wall modules support per-module grooved-back construction.
+- Wall-hanger hardware is selected/counted in BOM; unverified mounting profile remains HOLD.
+- Visual CAD exposes all new 2.6.1 controls through typed revisioned commands.
+- Golden Project #1 R4 is included as a regression fixture.
+
+## Golden Project #1
+- confirmed lower width: 4190 mm
+- 3590 mm source-document error no longer enters production geometry
+- panel parts: 46
+- Production READY: false (expected)
+- blocking checks: 10 real unresolved production facts
+- CNC/drilling operations: 0 for unresolved GTV/cutout data; fail-closed behavior
+
+## Persistence
+Makster-Staging real acceptance already passed before this hardening:
+Contract / Change Order / Authorization survived independent process reads and Core restarts.
+2.6.1 adds no database schema changes.
+
+## Verification
+Final release verification: 170/170 automated tests PASS; clean dist smoke PASS. Details: `RELEASE_VERIFICATION_2_6_1.txt`.

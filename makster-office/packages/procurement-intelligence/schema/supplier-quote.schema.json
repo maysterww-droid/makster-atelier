@@ -1,0 +1,10 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://makster.ai/schema/supplier-quote-1.2.json",
+  "title":"Makster Supplier Quote 1.2",
+  "type":"object",
+  "required":["procurementVersion","quoteId","rfqId","supplierId","status","currency","basePrice","deliveryPrice","totalPrice","leadDays","services","deliveryMode","submittedAt"],
+  "properties":{
+    "procurementVersion":{"const":"1.2.0"},"quoteId":{"type":"string"},"rfqId":{"type":"string"},"supplierId":{"type":"string"},"status":{"enum":["draft","submitted","declined","expired","awarded","not_selected"]},"currency":{"type":"string","minLength":3,"maxLength":3},"basePrice":{"type":"number","minimum":0},"deliveryPrice":{"type":"number","minimum":0},"totalPrice":{"type":"number","minimum":0},"leadDays":{"type":"number","exclusiveMinimum":0},"promisedAt":{"type":"string"},"validUntil":{"type":"string"},"services":{"type":"array","items":{"type":"string"},"uniqueItems":true},"deliveryMode":{"enum":["pickup","supplier_delivery","carrier"]},"exclusions":{"type":"array","items":{"type":"string"}},"note":{"type":"string"},"submittedAt":{"type":"string"}
+  },"additionalProperties":false
+}

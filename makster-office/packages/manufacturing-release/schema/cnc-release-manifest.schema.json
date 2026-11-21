@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schema/cnc-release-manifest-v1.json",
+  "title": "Makster CNC Release Manifest v1",
+  "type": "object",
+  "required": ["manifestVersion","releaseSoftwareVersion","releasePolicyVersion","releaseId","projectId","revision","createdAt","status","readyForProduction","engineeringCncReady","releaseTrustReady","approvalReady","canReleaseToCnc","engineering","manufacturingSources","trust","approvalFingerprint","files"],
+  "properties": {
+    "manifestVersion": {"const":"1.0.0"},
+    "releaseSoftwareVersion": {"const":"0.8.0"},
+    "releasePolicyVersion": {"const":"release-trust-v0.8"},
+    "releaseId": {"type":"string","minLength":1},
+    "projectId": {"type":"string","minLength":1},
+    "revision": {"type":"integer","minimum":1},
+    "createdAt": {"type":"string"},
+    "status": {"enum":["blocked","awaiting_approval","ready_to_sign","signed"]},
+    "readyForProduction": {"type":"boolean"},
+    "engineeringCncReady": {"type":"boolean"},
+    "releaseTrustReady": {"type":"boolean"},
+    "approvalReady": {"type":"boolean"},
+    "canReleaseToCnc": {"type":"boolean"},
+    "engineering": {"type":"object"},
+    "bxf": {"type":"object"},
+    "manufacturingSources": {"type":"array"},
+    "trust": {"type":"object","required":["ready","blockers","sourceCounts"]},
+    "approvalFingerprint": {"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "approval": {
+      "type":"object",
+      "required":["approvalId","decision","approvalFingerprint","approvedBy","approvedRole","approvedAt"],
+      "properties": {
+        "approvalId":{"type":"string","minLength":1},
+        "decision":{"const":"approved"},
+        "approvalFingerprint":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+        "approvedBy":{"type":"string","minLength":1},
+        "approvedRole":{"enum":["owner","admin","technologist"]},
+        "approvedAt":{"type":"string"}
+      },
+      "additionalProperties": false
+    },
+    "files": {"type":"array"},
+    "signature": {"type":"object"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,546 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "25252525-2525-4252-8252-252525252525",
+  "revision": 1,
+  "title": "Makster Pro Kitchen 1800 · Engineering Merge 2.5",
+  "locale": "cs-CZ",
+  "currency": "EUR",
+  "unitSystem": "metric",
+  "geometryUnit": "0.1mm",
+  "coordinateSystem": {
+    "handedness": "right",
+    "x": "right",
+    "y": "forward",
+    "z": "up"
+  },
+  "projectType": "kitchen",
+  "site": {
+    "rooms": [
+      {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "name": "Bedroom",
+        "origin": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dimensions": {
+          "width": {
+            "value": 42000,
+            "state": "confirmed"
+          },
+          "height": {
+            "value": 27000,
+            "state": "confirmed"
+          },
+          "depth": {
+            "value": 36000,
+            "state": "confirmed"
+          }
+        },
+        "walls": [],
+        "openings": [],
+        "obstacles": []
+      }
+    ]
+  },
+  "furniture": [
+    {
+      "id": "33333333-3333-4333-8333-333333333353",
+      "kind": "kitchen",
+      "name": "Base kitchen run 1800",
+      "roomId": "22222222-2222-4222-8222-222222222222",
+      "transform": {
+        "position": {
+          "x": 4500,
+          "y": 1200,
+          "z": 0
+        },
+        "rotationZDeg": 0
+      },
+      "dimensions": {
+        "width": {
+          "value": 18000,
+          "state": "confirmed"
+        },
+        "height": {
+          "value": 8200,
+          "state": "confirmed"
+        },
+        "depth": {
+          "value": 5600,
+          "state": "confirmed"
+        }
+      },
+      "mounting": "base_supported",
+      "construction": {
+        "carcassThickness": {
+          "value": 180,
+          "state": "confirmed"
+        },
+        "backPanel": {
+          "mode": "overlay",
+          "thickness": {
+            "value": 80,
+            "state": "confirmed"
+          },
+          "materialSelectionId": "44444444-4444-4444-8444-444444444443"
+        },
+        "plinth": {
+          "mode": "separate",
+          "height": {
+            "value": 1000,
+            "state": "confirmed"
+          },
+          "setback": {
+            "value": 700,
+            "state": "confirmed"
+          },
+          "materialSelectionId": "44444444-4444-4444-8444-444444444441"
+        },
+        "defaultCarcassMaterialSelectionId": "44444444-4444-4444-8444-444444444441",
+        "defaultFrontMaterialSelectionId": "44444444-4444-4444-8444-444444444442",
+        "defaultEdgeMaterialSelectionId": "44444444-4444-4444-8444-444444444444"
+      },
+      "modules": [
+        {
+          "id": "55555555-5555-4555-8555-555555555571",
+          "kind": "sink",
+          "name": "Sink base 600",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 6000,
+              "state": "confirmed"
+            }
+          },
+          "height": {
+            "value": 7200,
+            "state": "confirmed"
+          },
+          "depth": {
+            "value": 5600,
+            "state": "confirmed"
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666671",
+              "kind": "open_space",
+              "label": "Sink plumbing"
+            }
+          ],
+          "kitchen": {
+            "type": "base",
+            "function": "sink",
+            "hasTop": false,
+            "hasBottom": true,
+            "hasBack": false,
+            "opening": "gola",
+            "worktop": {
+              "enabled": true,
+              "materialSelectionId": "44444444-4444-4444-8444-444444444445",
+              "thickness": {
+                "value": 380,
+                "state": "confirmed"
+              },
+              "depth": {
+                "value": 6000,
+                "state": "confirmed"
+              },
+              "frontOverhang": {
+                "value": 400,
+                "state": "confirmed"
+              },
+              "cutouts": [
+                {
+                  "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+                  "kind": "sink",
+                  "width": {
+                    "value": 5000,
+                    "state": "confirmed"
+                  },
+                  "depth": {
+                    "value": 4000,
+                    "state": "confirmed"
+                  },
+                  "offsetX": {
+                    "value": 500,
+                    "state": "confirmed"
+                  },
+                  "offsetY": {
+                    "value": 1000,
+                    "state": "confirmed"
+                  },
+                  "verifiedForCnc": false
+                }
+              ]
+            },
+            "plinth": {
+              "enabled": true,
+              "height": {
+                "value": 1000,
+                "state": "confirmed"
+              },
+              "setback": {
+                "value": 700,
+                "state": "confirmed"
+              },
+              "legHardwareSelectionId": "88888888-8888-4888-8888-888888888884",
+              "legCount": 4
+            }
+          },
+          "tags": [
+            "kitchen-module"
+          ]
+        },
+        {
+          "id": "55555555-5555-4555-8555-555555555572",
+          "kind": "drawers",
+          "name": "LEGRABOX drawers 600",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 6000,
+              "state": "confirmed"
+            }
+          },
+          "height": {
+            "value": 7200,
+            "state": "confirmed"
+          },
+          "depth": {
+            "value": 5600,
+            "state": "confirmed"
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666672",
+              "kind": "drawer_stack",
+              "count": 3,
+              "frontMode": "external",
+              "runnerHardwareSelectionId": "88888888-8888-4888-8888-888888888883",
+              "drawerBox": {
+                "bottomThickness": {
+                  "value": 160,
+                  "state": "confirmed"
+                },
+                "frontHeight": {
+                  "value": 1800,
+                  "state": "confirmed"
+                },
+                "materialSelectionId": "44444444-4444-4444-8444-444444444441",
+                "bottomMaterialSelectionId": "44444444-4444-4444-8444-444444444441",
+                "sideThickness": {
+                  "value": 160,
+                  "state": "confirmed"
+                }
+              }
+            }
+          ],
+          "kitchen": {
+            "type": "base",
+            "function": "drawers",
+            "hasTop": true,
+            "hasBottom": true,
+            "hasBack": true,
+            "opening": "gola",
+            "worktop": {
+              "enabled": true,
+              "materialSelectionId": "44444444-4444-4444-8444-444444444445",
+              "thickness": {
+                "value": 380,
+                "state": "confirmed"
+              },
+              "depth": {
+                "value": 6000,
+                "state": "confirmed"
+              },
+              "frontOverhang": {
+                "value": 400,
+                "state": "confirmed"
+              },
+              "cutouts": []
+            },
+            "plinth": {
+              "enabled": true,
+              "height": {
+                "value": 1000,
+                "state": "confirmed"
+              },
+              "setback": {
+                "value": 700,
+                "state": "confirmed"
+              },
+              "legHardwareSelectionId": "88888888-8888-4888-8888-888888888884",
+              "legCount": 4
+            }
+          },
+          "tags": [
+            "kitchen-module"
+          ]
+        },
+        {
+          "id": "55555555-5555-4555-8555-555555555573",
+          "kind": "appliance",
+          "name": "Oven base 600",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 6000,
+              "state": "confirmed"
+            }
+          },
+          "height": {
+            "value": 7200,
+            "state": "confirmed"
+          },
+          "depth": {
+            "value": 5600,
+            "state": "confirmed"
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666673",
+              "kind": "appliance_space",
+              "applianceKind": "oven",
+              "requiredSpace": {
+                "width": {
+                  "value": 5600,
+                  "state": "confirmed"
+                },
+                "height": {
+                  "value": 6000,
+                  "state": "confirmed"
+                },
+                "depth": {
+                  "value": 5500,
+                  "state": "confirmed"
+                }
+              }
+            }
+          ],
+          "kitchen": {
+            "type": "base",
+            "function": "oven",
+            "hasTop": true,
+            "hasBottom": true,
+            "hasBack": true,
+            "opening": "gola",
+            "worktop": {
+              "enabled": true,
+              "materialSelectionId": "44444444-4444-4444-8444-444444444445",
+              "thickness": {
+                "value": 380,
+                "state": "confirmed"
+              },
+              "depth": {
+                "value": 6000,
+                "state": "confirmed"
+              },
+              "frontOverhang": {
+                "value": 400,
+                "state": "confirmed"
+              },
+              "cutouts": []
+            },
+            "plinth": {
+              "enabled": true,
+              "height": {
+                "value": 1000,
+                "state": "confirmed"
+              },
+              "setback": {
+                "value": 700,
+                "state": "confirmed"
+              },
+              "legHardwareSelectionId": "88888888-8888-4888-8888-888888888884",
+              "legCount": 4
+            },
+            "appliance": {
+              "kind": "oven",
+              "manufacturer": "Bosch",
+              "model": "HBG-demo-600",
+              "requiredSpace": {
+                "width": {
+                  "value": 5600,
+                  "state": "confirmed"
+                },
+                "height": {
+                  "value": 6000,
+                  "state": "confirmed"
+                },
+                "depth": {
+                  "value": 5500,
+                  "state": "confirmed"
+                }
+              }
+            }
+          },
+          "tags": [
+            "kitchen-module"
+          ]
+        }
+      ],
+      "fronts": [
+        {
+          "id": "77777777-7777-4777-8777-777777777791",
+          "moduleIds": [
+            "55555555-5555-4555-8555-555555555571"
+          ],
+          "kind": "hinged",
+          "count": 2,
+          "split": "vertical",
+          "opening": "paired",
+          "hingeSides": [
+            "left",
+            "right"
+          ],
+          "materialSelectionId": "44444444-4444-4444-8444-444444444442",
+          "handle": {
+            "mode": "gola"
+          },
+          "note": "Sink base paired fronts"
+        }
+      ],
+      "style": {
+        "colorNote": "light oak / graphite",
+        "finishNote": "Gola"
+      },
+      "tags": [
+        "pro-merge:kitchen"
+      ]
+    }
+  ],
+  "selections": {
+    "materials": [
+      {
+        "id": "44444444-4444-4444-8444-444444444441",
+        "role": "carcass",
+        "source": "manual",
+        "name": "Light oak board",
+        "thickness": {
+          "value": 180,
+          "state": "confirmed"
+        },
+        "grainDirection": "vertical"
+      },
+      {
+        "id": "44444444-4444-4444-8444-444444444442",
+        "role": "front",
+        "source": "manual",
+        "name": "Graphite front",
+        "thickness": {
+          "value": 180,
+          "state": "estimated"
+        },
+        "grainDirection": "none",
+        "densityKgM3": 700
+      },
+      {
+        "id": "44444444-4444-4444-8444-444444444443",
+        "role": "back",
+        "source": "manual",
+        "name": "HDF back panel",
+        "thickness": {
+          "value": 80,
+          "state": "confirmed"
+        },
+        "grainDirection": "none"
+      },
+      {
+        "id": "44444444-4444-4444-8444-444444444444",
+        "role": "edge",
+        "source": "manual",
+        "name": "Matching ABS edge 0.8 mm",
+        "thickness": {
+          "value": 8,
+          "state": "confirmed"
+        },
+        "grainDirection": "none"
+      },
+      {
+        "id": "44444444-4444-4444-8444-444444444445",
+        "role": "worktop",
+        "source": "manual",
+        "name": "Compact worktop 38",
+        "thickness": {
+          "value": 380,
+          "state": "confirmed"
+        },
+        "grainDirection": "horizontal"
+      }
+    ],
+    "hardware": [
+      {
+        "id": "88888888-8888-4888-8888-888888888881",
+        "role": "hinge",
+        "source": "manual",
+        "manufacturer": "Blum",
+        "code": "CLIP-TOP-BLUMOTION-110",
+        "name": "Blum CLIP top BLUMOTION 110°",
+        "technical": {
+          "kind": "blum_hinge",
+          "system": "clip_top_blumotion",
+          "application": "overlay",
+          "openingAngleDeg": 110,
+          "drillingDistance": {
+            "value": 50,
+            "state": "confirmed"
+          },
+          "mountingPlateSpacing": {
+            "value": 0,
+            "state": "confirmed"
+          }
+        }
+      },
+      {
+        "id": "88888888-8888-4888-8888-888888888882",
+        "role": "runner",
+        "source": "manual",
+        "manufacturer": "Blum",
+        "code": "760H5500S",
+        "name": "Blum MOVENTO 760H 550 BLUMOTION",
+        "technical": {
+          "kind": "blum_runner",
+          "system": "movento",
+          "nominalLength": {
+            "value": 5500,
+            "state": "confirmed"
+          },
+          "motion": "blumotion",
+          "capacityKg": 40
+        }
+      },
+      {
+        "id": "88888888-8888-4888-8888-888888888883",
+        "role": "runner",
+        "source": "manual",
+        "manufacturer": "Blum",
+        "code": "750.5501S",
+        "name": "Blum LEGRABOX cabinet profile 750 550 BLUMOTION",
+        "technical": {
+          "kind": "blum_runner",
+          "system": "legrabox",
+          "nominalLength": {
+            "value": 5500,
+            "state": "confirmed"
+          },
+          "motion": "blumotion",
+          "capacityKg": 40,
+          "legraboxHeightCode": "C"
+        }
+      },
+      {
+        "id": "88888888-8888-4888-8888-888888888884",
+        "role": "leg",
+        "source": "manual",
+        "manufacturer": "Hafele",
+        "code": "LEG100",
+        "name": "Adjustable kitchen leg 100 mm"
+      }
+    ]
+  },
+  "constraints": [],
+  "facts": [],
+  "notes": []
+}

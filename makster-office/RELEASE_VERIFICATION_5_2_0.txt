@@ -1,0 +1,17 @@
+MAKSTER AI 5.2.0
+54 tests / 54 passed / 0 failed
+
+RUNTIME PASS
+health 5.2.0
+campaign provider map 200
+growth connection 201 CONFIGURED
+provider metric sync 201
+CRM measurement_booked probability 50%
+AI Office dashboard 5.2.0
+weighted pipeline verified
+
+LIVE ACCOUNT STATUS
+Google Ads: adapter boundary ready; real account OAuth not configured
+Meta/Facebook/Instagram: adapter boundary ready; real account OAuth not configured
+TikTok Ads: adapter boundary ready; real account OAuth not configured
+No autonomous spend.

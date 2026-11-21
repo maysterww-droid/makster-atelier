@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schema/procurement-inbox-1.5.json",
+  "type": "object",
+  "required": [
+    "inboxVersion",
+    "generatedAt",
+    "total",
+    "newCount",
+    "quoteCount",
+    "needsReviewCount",
+    "declineCount",
+    "criticalCount",
+    "items",
+    "connectionHealth"
+  ],
+  "properties": {
+    "inboxVersion": {
+      "const": "1.5.0"
+    },
+    "generatedAt": {
+      "type": "string"
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "newCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "quoteCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "needsReviewCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "declineCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "criticalCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "itemId",
+          "organizationId",
+          "kind",
+          "severity",
+          "disposition",
+          "title",
+          "summary",
+          "createdAt",
+          "sourceKey"
+        ],
+        "properties": {
+          "itemId": {
+            "type": "string"
+          },
+          "organizationId": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "new_quote",
+              "needs_review",
+              "decline",
+              "connection_alert"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "critical"
+            ]
+          },
+          "disposition": {
+            "enum": [
+              "new",
+              "acknowledged",
+              "resolved",
+              "dismissed"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "connectionHealth": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "connectionId",
+          "organizationId",
+          "accountEmail",
+          "state",
+          "severity",
+          "syncDue",
+          "watchRenewDue",
+          "reason",
+          "evaluatedAt"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

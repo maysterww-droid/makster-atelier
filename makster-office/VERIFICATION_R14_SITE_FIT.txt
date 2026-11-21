@@ -1,0 +1,17 @@
+MAKSTER AI 2.6.1 — R14 SITE FIT PATCH VERIFICATION
+
+Automated regression: 179/179 PASS
+Golden Project #1 R14 ProjectModel: VALID
+Engineering readyForProduction: TRUE
+Engineering blockers: 0
+Engineering cncBlockers: 0
+Panel rows: 88
+Machining operations: 0 (manual-template / on-site workflow intentionally emits no fake CNC operations)
+Manual Production Pack ready: FALSE
+Manual Production Pack blocker: ESTIMATED_PANEL_PARTS (18 rows) — historical drawer height geometry is incomplete; fail-closed retained.
+Workshop checklist: includes GTV manual-template + sink/hob on-site + oven/hob site-fit operations.
+Clean patch copy without node_modules: launches from dist.
+HTTP /api/v1/health: 200, ok=true, version=2.6.1
+HTTP /: 200
+
+Safety invariant: site_fit never invents missing appliance dimensions and never waives a known dimension that fails geometry.

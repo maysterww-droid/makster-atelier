@@ -1,0 +1,74 @@
+MAKSTER AI 4.1.0 RELEASE VERIFICATION
+======================================
+
+OWNER OPERATIONS 4.1 CORE
+PASS: strict TypeScript compile
+PASS: BOM demand aggregation by project/SKU/unit
+PASS: queue-priority allocation
+PASS: existing reservation protection
+PASS: explicit shortage output
+PASS: real supplier quote comparison
+PASS: payment calendar aggregation
+
+REGRESSION
+PASS: tests/owner-operations-4.1.0.test.mjs
+4 tests
+4 passed
+0 failed
+
+BOM PRIORITY TEST
+PASS: earlier queue project receives available stock first
+PASS: later project receives shortage
+PASS: no double allocation
+PASS: project fully-allocatable / blocked classification
+
+EXISTING RESERVATION TEST
+PASS: existing project reservation is counted first
+PASS: only remaining free stock can be auto-allocated
+PASS: no shortage when reservation + free stock covers BOM
+
+SUPPLIER QUOTE TEST
+PASS: Cheapest -> lowest real quoted total
+PASS: Fastest -> shortest real quote lead time
+PASS: Optimal -> balanced quote using price/speed/reliability
+
+PAYMENT CALENDAR TEST
+PASS: manual rent outflow
+PASS: supplier Purchase Order balance
+PASS: client receivable
+PASS: chronological order
+PASS: cumulative running net
+
+ACTUAL BUNDLED CORE API
+PASS: startup
+PASS: health -> 4.1.0
+PASS: POST supplier quote -> 201
+PASS: compare supplier quote -> 200
+PASS: Payment Calendar -> 200
+PASS: BOM Allocation Plan -> 200 / version 4.1.0
+
+WEB UI
+PASS: JavaScript syntax
+PASS: BOM -> Warehouse Allocation panel
+PASS: Auto Allocate action
+PASS: Supplier Quote action
+PASS: Payment Calendar
+PASS: MAKSTER AI 4.1 branding
+
+SUPABASE PERSISTENCE
+PASS: SupabaseOwnerOperationsStore implemented
+PASS: server automatically selects Supabase Owner Operations when URL + server secret exist
+PASS: explicit file-store fallback supported
+PASS: prepared migration created
+PASS: RLS enabled on all Owner Operations tables
+PASS: service-only atomic warehouse RPCs defined
+PASS: staging schema smoke test prepared
+
+NOT LIVE-APPLIED:
+No user Supabase production/staging credentials were used in this sandbox, so the migration was prepared and the TypeScript Supabase adapter compiled but was not executed against a live database.
+
+CORE TYPESCRIPT NOTE
+The supplied archive still lacks @types/node.
+Core API emission reports only missing Node declaration types.
+Verification found 0 additional structural TypeScript errors.
+Bundled emitted JavaScript passes node --check and runtime smoke tests.

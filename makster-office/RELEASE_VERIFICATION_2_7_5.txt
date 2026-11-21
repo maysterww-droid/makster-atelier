@@ -1,0 +1,22 @@
+MAKSTER AI 2.7.5 RELEASE VERIFICATION
+======================================
+PASS: project-aware-auto-selection.ts + catalog core isolated strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled dist Core API syntax
+PASS: bundled project-aware module runtime smoke
+PASS: project front material thickness 18 mm read from ProjectModel
+PASS: hinge recommendation returned Blum CLIP top BLUMOTION profile
+PASS: bundled Core API startup
+PASS: GET /api/v1/health -> 2.7.5
+PASS: archive integrity
+
+Safety / trust:
+- Runner nominal length is never inferred from cabinet depth.
+- Missing front material thickness stays unknown.
+- Missing appliance requiredSpace stays unknown.
+- Project-aware selection produces recommendations only; it does not silently mutate the approved project revision.
+- Production drilling remains subject to the existing trusted drilling-profile gate.
+
+Full historical npm test:
+NOT EXECUTED because the source archive does not contain node_modules/@types/node.
+The changed core was compiled independently and bundled runtime was smoke-tested.

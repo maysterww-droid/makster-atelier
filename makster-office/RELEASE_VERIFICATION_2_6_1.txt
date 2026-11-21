@@ -1,0 +1,40 @@
+Makster AI 2.6.1 — RELEASE VERIFICATION
+
+RESULT: PASS
+
+Core / build
+- TypeScript typecheck: PASS
+- TypeScript build: PASS
+- Automated regression: 170/170 PASS
+- JSON schemas: 26/26 parse PASS
+- OpenAPI: 2.6.1 / 70 paths PASS
+- Frontend JavaScript syntax: PASS
+
+Compatibility
+- Existing Kitchen Pro fixture: Production READY = true
+- Existing Kitchen Pro fixture: blocking = 0
+- Visual demo: Engineering READY = true
+- Commercial demo: READY = true
+
+Golden Project #1 R4
+- Confirmed lower run: 4190 mm
+- Production READY = false (EXPECTED)
+- Blocking checks = 10 real unresolved production facts
+- Panel parts = 46
+- Machining operations = 0
+- No Blum machining substituted for GTV
+- Oven + hob modeled separately
+- Wall-side worktop trim modeled explicitly
+
+Clean release smoke test
+- node_modules directories: 0
+- Core API start from compiled dist: PASS
+- GET /api/v1/health: HTTP 200, version 2.6.1
+- businessPersistence: memory in local smoke mode
+- visualProduct: 2.6.1
+- GET /: HTTP 200
+- GET /app.js: HTTP 200
+
+Supabase
+- Persistent Unified Core 2.6 staging acceptance passed previously against Makster-Staging.
+- 2.6.1 introduces no new database migration.

@@ -1,0 +1,90 @@
+MAKSTER AI 4.2.0 RELEASE VERIFICATION
+======================================
+
+OWNER OPERATIONS CORE
+PASS: strict TypeScript compile
+PASS: Production Capacity engine
+PASS: Engineering-derived workload
+PASS: ProjectCapacityOverride
+PASS: queue-serialized work centers
+PASS: custom center overrides default matching center without deleting other centers
+PASS: deadline buffer / NORMAL-TIGHT-LATE risk
+
+REGRESSION SUITE
+PASS: tests/owner-operations-4.2.0.test.mjs
+5 tests
+5 passed
+0 failed
+
+CAPACITY TESTS
+PASS: queue #1 Cutting slot precedes queue #2 Cutting slot
+PASS: Assembly override replaces formula workload
+PASS: impossible installation target becomes LATE
+PASS: daysBuffer < 0 for late plan
+
+PROCUREMENT AWARD RUNTIME
+Scenario:
+- supplier quote: BLUM-X, 20 pcs x EUR 5.00
+- delivery: EUR 10.00
+- total award: EUR 110.00
+- payment terms: 30 days
+
+PASS: quote award -> HTTP 201
+PASS: award status -> ordered
+PASS: Project PO status -> ordered
+PASS: Project PO total -> 11,000 minor units
+PASS: Job Control committedPurchaseMinor -> 11,000
+PASS: Cash Commitment -> 11,000
+PASS: Owner Command committedCashOutMinor -> 11,000
+PASS: Payment Calendar contains exactly one supplier obligation
+PASS: supplier obligation source -> cash_event
+PASS: no PO + cash-event double count
+PASS: duplicate active award -> HTTP 409 supplier_quote_already_awarded
+
+PAYMENT CALENDAR LINEAGE
+PASS: procurement-award cash event sourceId points to Purchase Order
+PASS: matching Purchase Order is skipped as duplicate calendar source
+
+AWARD FAILURE SAFETY
+PASS: award is created pending_project_order before Project PO mutation
+PASS: API marks award failed on downstream project-order failure path
+PASS: successful award stores purchaseOrderId + cashEventId
+
+OWNER COMMAND
+PASS: separate committedPurchasesMinor
+PASS: separate committedCashOutMinor
+PASS: Capacity panel
+PASS: Procurement Award panel
+PASS: quote -> award action
+PASS: UI JavaScript syntax
+PASS: MAKSTER AI 4.2 branding
+
+SUPABASE
+PASS: 4.2 prepared migration
+PASS: work-center table
+PASS: project capacity override table
+PASS: procurement award ledger
+PASS: cash source/source_id lineage
+PASS: RLS enabled
+PASS: owner/admin read policies
+PASS: service-role mutation grants
+PASS: staging smoke SQL prepared
+
+NOT LIVE-APPLIED
+No production/staging Supabase credentials were used in this sandbox.
+Migration and Supabase adapter compile paths are prepared but were not applied to a live database.
+
+CORE TYPESCRIPT NOTE
+The supplied archive still lacks @types/node.
+Core API emission reports only the known missing Node declaration types.
+Verification found zero additional structural TypeScript errors.
+Bundled emitted JavaScript passes node --check and runtime smoke tests.
+
+
+CROSS-VERSION REGRESSION SWEEP
+PASS: Golden Project 3.5 regressions
+PASS: Owner Operations 4.1 regressions
+PASS: Owner Operations 4.2 regressions
+12 tests
+12 passed
+0 failed

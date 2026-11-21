@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schema/production-queue-job-v1.json",
+  "title": "Makster Production Queue Job v1",
+  "type": "object",
+  "required": [
+    "id","organizationId","projectId","revision","releaseId","approvalId","machineId","machineProfileSha256",
+    "postprocessorId","postprocessorVersion","postprocessorArtifactSha256","status","createdAt","releaseManifestSha256",
+    "machinePackageSha256","attemptCount","maxAttempts","message"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "organizationId": { "type": "string", "minLength": 1 },
+    "projectId": { "type": "string", "minLength": 1 },
+    "revision": { "type": "integer", "minimum": 1 },
+    "releaseId": { "type": "string", "minLength": 1 },
+    "approvalId": { "type": "string", "minLength": 1 },
+    "machineId": { "type": "string", "minLength": 1 },
+    "machineProfileSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "postprocessorId": { "type": "string", "minLength": 1 },
+    "postprocessorVersion": { "type": "string", "minLength": 1 },
+    "postprocessorArtifactSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "status": { "enum": ["queued","claimed","processing","completed","failed","cancelled"] },
+    "createdAt": { "type": "string" },
+    "releaseManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "machinePackageSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "attemptCount": { "type": "integer", "minimum": 0 },
+    "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 20 },
+    "workerId": { "type": "string", "minLength": 1 },
+    "leaseToken": { "type": "string", "minLength": 1 },
+    "leaseExpiresAt": { "type": "string" },
+    "lastHeartbeatAt": { "type": "string" },
+    "processingStartedAt": { "type": "string" },
+    "completedAt": { "type": "string" },
+    "nextRetryAt": { "type": "string" },
+    "failureCode": { "type": "string" },
+    "lastError": { "type": "string" },
+    "message": {
+      "type": "object",
+      "required": ["queue","jobId","releaseId","machineId"],
+      "properties": {
+        "queue": { "const": "makster-production" },
+        "jobId": { "type": "string", "minLength": 1 },
+        "releaseId": { "type": "string", "minLength": 1 },
+        "machineId": { "type": "string", "minLength": 1 },
+        "messageId": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,56 @@
+MAKSTER AI 3.5.0 RELEASE VERIFICATION
+======================================
+
+RELEASE GATE ENGINE
+PASS: strict TypeScript compile
+PASS: 10 lifecycle gates
+PASS: GREEN / AMBER / RED status
+PASS: DRAFT -> DESIGN_APPROVED -> PRODUCTION_READY -> INSTALLATION_READY -> HANDOVER_READY -> CLOSED release-state model
+
+GOLDEN PROJECT #1
+PASS: end-to-end lifecycle regression
+PASS: final Revision = 17
+PASS: Production Readiness = READY
+PASS: Installation Closeout before signature = READY_TO_SIGN
+PASS: signed handover
+PASS: full client payment
+PASS: Job Control = CLOSED
+PASS: Lifecycle Release State = CLOSED
+PASS: Overall Status = GREEN
+PASS: passCount = 10
+PASS: warningCount = 0
+PASS: failCount = 0
+
+GOLDEN PROJECT NEGATIVE REGRESSIONS
+PASS: technical furniture geometry change after client approval -> approval STALE
+PASS: stale design approval -> Release Gate RED
+PASS: blocking site issue after otherwise closed project -> Release Gate RED
+PASS: site blocker affects ENGINEERING and INSTALLATION gates
+
+TEST RUN
+PASS: node --test tests/golden-project-3.5.0.test.mjs
+3 tests
+3 passed
+0 failed
+
+PRODUCTION PACK
+PASS: lifecycle-release-gate.json generated
+PASS: packed gate belongs to exact Project Revision
+PASS: packed Golden Project gate = GREEN / CLOSED
+
+CORE API
+PASS: actual bundled Core API startup
+PASS: health -> 3.5.0
+PASS: GET lifecycle-release-gate -> 200
+PASS: empty project correctly returns RED / DRAFT rather than false GREEN
+
+WEB UI
+PASS: Release Gate tab served
+PASS: Release Gate route active
+PASS: JavaScript syntax
+
+CORE TYPESCRIPT NOTE
+The supplied archive still lacks @types/node.
+Core API tsc emission therefore reports Node declaration errors (node:http, node:crypto, Buffer, process, NodeJS).
+Verification found ZERO other structural/type errors.
+Emitted bundled Core API JavaScript passes node --check and runtime smoke tests.

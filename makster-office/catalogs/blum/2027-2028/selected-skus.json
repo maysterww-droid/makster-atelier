@@ -1,0 +1,27 @@
+{
+  "catalog": "Blum catalogue and technical manual 2027/2028",
+  "normalizedBy": "Makster Engineering 0.5",
+  "warning": "SKU identity and planning geometry only. Exact cabinet drilling is intentionally absent until manufacturer BXF/CAD-CAM data is imported.",
+  "items": [
+    {
+      "manufacturer": "Blum",
+      "code": "760H5500S",
+      "family": "MOVENTO 760H",
+      "role": "runner",
+      "nominalLengthMm": 550,
+      "dynamicCapacityKg": 40,
+      "source": "https://publications.blum.com/2026/catalogue/en/420/",
+      "cabinetDrillingProfile": null
+    },
+    {
+      "manufacturer": "Blum",
+      "code": "750.5501S",
+      "family": "LEGRABOX cabinet profile 750",
+      "role": "runner",
+      "nominalLengthMm": 550,
+      "dynamicCapacityKg": 40,
+      "source": "https://publications.blum.com/2026/catalogue/en/212/",
+      "cabinetDrillingProfile": null
+    }
+  ]
+}

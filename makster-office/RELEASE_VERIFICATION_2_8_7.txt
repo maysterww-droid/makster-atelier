@@ -1,0 +1,38 @@
+MAKSTER AI 2.8.7 RELEASE VERIFICATION
+======================================
+PASS: Room Measurement Completeness core strict TypeScript compile
+PASS: Production Readiness integration strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: bundled measurement module syntax
+PASS: actual bundled Core API startup
+PASS: health -> 2.8.7
+PASS: Measurements tab served by actual web runtime
+
+Runtime measurement scenario:
+- room 4200 × 3200 × 2700 CONFIRMED
+- 4 wall heights CONFIRMED
+- door Z=0 / H=2100 CONFIRMED
+- window sill Z=900 / H=1200 CONFIRMED
+- radiator Z=120 / H=600 CONFIRMED
+- power Z=1100 CONFIRMED
+- water Z=UNKNOWN
+
+Result:
+- completeness = 94%
+- complete = 17
+- missing = 1
+- missing item = “Вода — высота”
+
+Production Readiness:
+- status = HOLD
+- blocker = ROOM_MEASUREMENT_MISSING
+- exact message identifies missing water vertical Z
+
+PASS: UNKNOWN measurement is not interpreted as zero.
+PASS: REVIEW items do not silently become confirmed facts.
+PASS: archive integrity
+
+Full historical npm test:
+NOT EXECUTED because the supplied archive does not contain node_modules/@types/node.
+Changed measurement/readiness core was compiled independently and bundled runtime was smoke-tested.

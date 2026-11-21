@@ -1,0 +1,7 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://makster.ai/schema/commercial-package-manifest-1.6.json",
+  "type":"object",
+  "required":["commercialVersion","packageId","estimateId","estimateFingerprint","quoteId","quoteFingerprint","projectId","revision","generatedAt","files"],
+  "properties":{"commercialVersion":{"const":"1.6.0"},"packageId":{"type":"string"},"estimateId":{"type":"string"},"estimateFingerprint":{"type":"string","pattern":"^[a-f0-9]{64}$"},"quoteId":{"type":"string"},"quoteFingerprint":{"type":"string","pattern":"^[a-f0-9]{64}$"},"projectId":{"type":"string"},"revision":{"type":"integer"},"generatedAt":{"type":"string"},"files":{"type":"array","items":{"type":"object","required":["name","mediaType","purpose","sha256","byteLength"],"properties":{"name":{"type":"string"},"mediaType":{"type":"string"},"purpose":{"type":"string"},"sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"byteLength":{"type":"integer","minimum":1}},"additionalProperties":false}}},"additionalProperties":false
+}

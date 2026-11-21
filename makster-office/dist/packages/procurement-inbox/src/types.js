@@ -1,0 +1,1 @@
+export const PROCUREMENT_INBOX_VERSION = '1.5.0';

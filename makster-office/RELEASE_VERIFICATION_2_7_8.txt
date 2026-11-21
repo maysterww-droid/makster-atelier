@@ -1,0 +1,29 @@
+MAKSTER AI 2.7.8 RELEASE VERIFICATION
+======================================
+PASS: production-intelligence/catalog/assignment core isolated strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled compiler syntax
+PASS: bundled Core API syntax
+PASS: bundled Core API startup
+PASS: GET /api/v1/health -> 2.7.8
+PASS: runtime Engineering ruleset -> kitchen-pro-engineering-v2.7.8
+
+Hardware production smoke:
+- assigned Blum CLIP top BLUMOTION trusted profile -> action READY
+- Catalog Traceability -> productionDrillingAuthorized=true
+- assigned Blum MOVENTO 760H SKU without imported drilling profile/manual method:
+  CATALOG_DRILLING_PROFILE_REQUIRED
+  CNC blocker CATALOG_DRILLING_PROFILE_REQUIRED
+
+Appliance production smoke:
+- Liebherr IRBd 5120 with confirmed installation envelope but no verified ventilation:
+  CATALOG_APPLIANCE_VENTILATION_REQUIRED
+- after verifiedVentilationAreaCm2=220:
+  blocker removed
+  production action READY
+
+PASS: archive integrity
+
+Full historical npm test:
+NOT EXECUTED because the supplied source archive does not contain node_modules/@types/node.
+Changed core was compiled independently and actual bundled runtime behavior was smoke-tested.

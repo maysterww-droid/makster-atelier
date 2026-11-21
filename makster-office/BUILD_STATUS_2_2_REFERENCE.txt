@@ -1,0 +1,101 @@
+MAKSTER AI 2.2 — VISUAL EDITING
+Build date: 2026-09-04
+
+STATUS: PASS — multi-object room-level Visual Editing 2.2 assembled on top of green 2.1.
+
+VERSION MATRIX
+- Core API: 2.2.0
+- Visual Product: 2.2.0
+- Commercial Engine: 1.6.0
+- Procurement Inbox / Gmail operations: 1.5.0
+- Production Pack: 1.0.0
+- Engineering Engine: 0.7.0
+
+VERIFICATION
+- TypeScript strict typecheck: PASS
+- Build: PASS
+- Node regression tests: 100 / 100 PASS
+- JSON Schema files parse: 24 / 24 PASS
+- OpenAPI YAML parse: PASS
+- OpenAPI version: 2.2.0
+- OpenAPI paths: 56
+- Frontend JavaScript syntax: PASS
+- Core health HTTP: 200 / version 2.2.0
+- Visual Product health: 2.2.0
+- UI index HTTP: 200
+- app.js HTTP: 200
+- styles.css HTTP: 200
+- Full HTTP visual-editing regression: PASS
+
+NEW 2.2 ROOM / MULTI-OBJECT LAYER
+- Multiple ProjectModel furniture objects in one room: PASS
+- Plan renders and selects all furniture objects: PASS
+- Front / 3D render selected furniture object: PASS
+- Duplicate furniture creates fresh furniture/module/interior/front IDs: PASS
+- Front moduleIds remapped on duplicate: PASS
+- 90-degree L-layout helper creates a real second furniture object: PASS
+- Engineering compiles every project.furniture[] object: PASS
+- HTTP Engineering result with 2 furniture objects: PASS
+
+FOUR-EDGE RESIZE
+- Left edge resize: PASS
+- Right edge resize: PASS
+- Top edge resize: PASS
+- Bottom edge resize: PASS
+- Opposite edge remains anchored: PASS
+- Left/bottom position change is atomic with dimension change: PASS
+- Width change redistributes fixed modules in canonical 0.1 mm units: PASS
+- Module 100–4000 mm safety bounds preserved: PASS
+- Room width/depth/height server validation preserved: PASS
+
+ROOM FEATURES
+- add/move/remove room opening typed commands: PASS
+- add/move/remove room obstacle typed commands: PASS
+- Visual Scene projects openings and obstacles: PASS
+- Plan renders/drags doors/windows/obstacles: PASS
+- UI preview does not persist per-pixel revisions: PASS
+- Server rejects room feature outside room: PASS
+- Room shrink cannot clip existing room feature: PASS
+- Rectangular room resize preserves wall IDs for hosted openings: PASS
+
+DIMENSIONS / UX
+- Room width/depth dimension lines: PASS
+- Selected furniture footprint dimension lines: PASS
+- Selected furniture X/Y offsets: PASS
+- Furniture selection list in Inspector: PASS
+- Room feature controls in Inspector: PASS
+
+HTTP E2E 2.2
+- Revision 1: project create
+- Revision 2: room 4200×3600×2700
+- Revision 3: AI wardrobe 1200×2400×600
+- Revision 4: duplicate furniture + rotate 90°
+- Revision 5: add door
+- Revision 6: add column
+- Revision 7: move first furniture X=100
+- Revision 8: left-edge resize -> width 1150 / X=150
+- Engineering at Revision 8: furnitureCount=2, moduleCount=4, panelPartCount=20
+- Revision 9: Undo restores Revision 7 as a new immutable revision
+- Revision 10: Redo restores Revision 8 as a new immutable revision
+- Invalid obstacle move outside room -> HTTP 422: PASS
+- Evidence: engineering-output/http-visual-editing-e2e-2.2.json
+
+TRUST
+- Visual API accepts typed domain commands, not arbitrary browser JSON Pointer paths: PASS
+- expectedRevision optimistic concurrency: PASS
+- Duplicate identity regeneration: PASS
+- Room/furniture/feature bounds validated server-side: PASS
+- Historical revisions remain immutable: PASS
+- Engineering / Release / Production trust gates preserved: PASS
+
+SUPABASE
+- New migration required: NO
+- Reason: furniture[], Room.openings[], Room.obstacles[] and geometry already live in immutable ProjectModel JSON snapshots; project_revisions already stores history.
+
+IMPORTANT CORNER BOUNDARY
+- L-layout of two rectangular furniture objects: SUPPORTED
+- True one-piece corner cabinet engineering rule pack: NOT YET IMPLEMENTED
+- Makster 2.2 does not fake a corner carcass as a visualization-only object.
+
+KNOWN LIMITS
+See KNOWN_LIMITS_2_2.md.

@@ -1,0 +1,26 @@
+MAKSTER AI 2.6.0 — RELEASE VERIFICATION
+
+Result: PASS
+
+Checks
+- npm run typecheck: PASS
+- npm test: 155/155 PASS
+- frontend JS syntax: PASS
+- OpenAPI info.version: 2.6.0
+- OpenAPI path count: 70
+- Supabase business adapter restart tests: PASS
+- raw client token persistence test: PASS
+- atomic/idempotent accepted Change Order store test: PASS
+- HTTP client Accept replay: 6/6 PASS
+- clean release start without node_modules: PASS
+
+HTTP replay invariants
+- first Accept applies change exactly once
+- second identical Accept => idempotentReplay=true
+- same contractId
+- same authorizationFingerprintSha256
+- one Change Order record
+- accepted status preserved
+
+Live database mutation: NONE
+Next deployment action: apply 2.6 migration to staging Supabase and run real restart persistence acceptance.

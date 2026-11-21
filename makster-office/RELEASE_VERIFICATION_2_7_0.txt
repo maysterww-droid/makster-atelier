@@ -1,0 +1,34 @@
+Makster AI 2.7.0 — RELEASE VERIFICATION
+========================================
+
+Build / TypeScript:
+  PASS — npm run build
+
+Full regression:
+  PASS — 219 / 219 tests
+  FAIL — 0
+
+Kitchen Design Studio API smoke test:
+  Core version: 2.7.0
+  Generated variants: 16
+  Ready variants: 14
+  Top designs: 3
+  Recommended smoke candidate score: 94.4 / 100
+
+Selected-variant materialization smoke test:
+  Project revision after apply: 2
+  Canonical furniture items: 2
+  Visual Scene furniture items: 2
+  Engineering parts: 57
+  Engineering ruleset: kitchen-pro-engineering-v2.7.0
+  API error: none
+
+Production readiness in smoke project:
+  HOLD (expected)
+  Reason: Design Studio does not invent missing material / hardware / exact downstream manufacturing selections.
+
+Web UI syntax:
+  PASS — node --check apps/web-demo/public/app.js
+
+Architecture assertion:
+  PASS — selected Studio variant becomes normal ProjectModel and is compiled by existing MaksterEngineeringCompiler.

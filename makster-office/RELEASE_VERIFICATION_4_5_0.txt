@@ -1,0 +1,64 @@
+MAKSTER AI 4.5.0 RELEASE VERIFICATION
+======================================
+
+SCENARIO ENGINE
+PASS: strict TypeScript compile
+PASS: non-destructive scenario cloning
+PASS: Baseline
+PASS: Cash Protection
+PASS: Capacity Relief
+PASS: Priority Rescue
+PASS: Balanced Rescue
+PASS: Custom What-If
+
+CASH TIMING
+Runtime:
+- opening cash = EUR 500
+- supplier outflow = EUR 1,000
+- baseline gap = EUR 500
+PASS: Cash Protection moves collection before first gap date
+PASS: accelerated payment reduces later receivable
+PASS: no duplicate simulated revenue
+PASS: scenario cash gap = EUR 0
+PASS: source ProjectModel remains unchanged
+
+CUSTOM SCENARIO
+PASS: cash injection
+PASS: extra Assembly capacity
+PASS: extra Installation capacity
+PASS: queue reorder
+PASS: custom evaluation API
+
+ACTUAL BUNDLED API
+PASS: health -> 4.5.0
+PASS: GET owner-scenario-planner -> 200
+PASS: baseline gap = 50,000 minor units
+PASS: Cash Protection gap = 0
+PASS: recommended scenario = cash-protection in runtime smoke
+PASS: POST custom evaluate -> 200
+
+4.5 REGRESSION
+4 tests
+4 passed
+0 failed
+
+CROSS-VERSION REGRESSION
+22 tests
+22 passed
+0 failed
+
+WEB UI
+PASS: Owner Scenario Planner · What-If
+PASS: five standard scenario rows
+PASS: recommended scenario marker
+PASS: custom scenario action
+PASS: MAKSTER AI 4.5 branding
+
+PERSISTENCE
+No new database schema is required for 4.5.
+Scenarios are calculations and do not persist mutations to live company/project data.
+
+CORE TYPESCRIPT
+PASS: Owner Operations strict compile
+PASS: 0 new structural Core API TypeScript errors
+Known supplied-archive limitation remains: @types/node is absent.

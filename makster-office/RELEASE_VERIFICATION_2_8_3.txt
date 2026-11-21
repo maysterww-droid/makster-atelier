@@ -1,0 +1,25 @@
+MAKSTER AI 2.8.3 RELEASE VERIFICATION
+======================================
+PASS: Project Auto-Complete core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API syntax
+PASS: bundled Project Auto-Complete runtime syntax
+PASS: actual bundled Core API startup
+PASS: GET /api/v1/health -> 2.8.3
+PASS: Auto Complete UI served in actual web runtime
+
+Runtime scenario:
+- hinged front, confirmed 18 mm material:
+  NEEDS_APPROVAL
+  candidate = blum-clip-top-blumotion-110-overlay
+- drawer stack without confirmed runner nominal length:
+  NEEDS_MEASUREMENT
+  no invented candidate assignment
+- summary readiness = 23% for the deliberately incomplete smoke project
+
+PASS: apply path reuses existing server-side catalog assignment/approval engine and creates a new Revision
+PASS: archive integrity
+
+Full historical npm test:
+NOT EXECUTED because the supplied archive does not contain node_modules/@types/node.
+Changed core compiled independently and bundled runtime/API were smoke-tested.

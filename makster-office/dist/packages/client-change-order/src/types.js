@@ -1,0 +1,1 @@
+export const CLIENT_CHANGE_ORDER_VERSION = '1.8.0';

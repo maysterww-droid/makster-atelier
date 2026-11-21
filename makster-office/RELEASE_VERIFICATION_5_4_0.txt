@@ -1,0 +1,87 @@
+MAKSTER AI 5.4.0 RELEASE VERIFICATION
+======================================
+
+PROVIDER EXECUTION
+PASS: Owner Approval required
+PASS: guardrails re-checked after approval
+PASS: daily projected spend limit
+PASS: monthly spend limit
+PASS: max increase %
+PASS: max decrease %
+PASS: PAUSE policy
+PASS: idempotency-shaped execution key
+PASS: duplicate active provider execution blocked at API
+PASS: provider-not-connected explicit state
+PASS: connected executor confirmation -> EXECUTED
+PASS: provider failure path -> FAILED
+
+RUNTIME EXTERNAL EXECUTOR CONTRACT
+Campaign: Meta Weak Runtime
+Budget plan: EUR 1,000/month
+Spend: EUR 500
+Leads: 6
+Qualified leads: 0
+
+Autopilot:
+PAUSE
+Confidence: 90%
+
+Owner Approval:
+PASS
+
+Provider executor:
+calls received = 1
+providerStatus = confirmed
+Makster execution status = EXECUTED
+
+LEAD INGESTION
+PASS: HMAC signed normalized event
+PASS: valid Meta event -> 201 INGESTED
+PASS: CRM lead created
+PASS: provider campaign attribution retained
+PASS: repeated providerLeadId -> 200 DUPLICATE
+PASS: duplicate creates no second lead
+PASS: invalid HMAC -> 403 REJECTED
+PASS: invalid event creates no CRM lead
+
+AUDIT
+PASS: guardrail update logged
+PASS: connection activation logged
+PASS: provider execution logged
+PASS: lead ingestion logged
+PASS: duplicate logged
+PASS: rejection logged
+Runtime audit entries: 6
+
+UI
+PASS: Provider Execution panel
+PASS: Spend Guardrails
+PASS: Inbound Lead Gateway
+PASS: Audit Log
+PASS: Execute Provider action
+PASS: provider execution status
+PASS: duplicate/rejected lead counters
+
+TESTS
+5.4 tests: 6 / 6 passed
+Full regression: 65 / 65 passed
+0 failed
+
+COMPILE
+Owner/Growth strict TypeScript: PASS
+Core API structural TypeScript: PASS
+Known archive limitation remains: @types/node absent.
+
+SUPABASE
+PASS: 5.4 migration prepared
+PASS: growth guardrails
+PASS: provider executions
+PASS: growth audit log
+PASS: inbound lead events
+PASS: RLS prepared
+PASS: service-role writes
+
+LIVE ACCOUNT BOUNDARY
+No real Meta/Google/TikTok OAuth credentials were supplied.
+No real advertising account was mutated during verification.
+The provider executor contract is ready for an authorized provider adapter/service.

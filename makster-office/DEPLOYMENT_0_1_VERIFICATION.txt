@@ -1,0 +1,63 @@
+MAKSTER DEPLOYMENT 0.1 — VERIFICATION
+======================================
+Target: real Supabase project Makster-Staging
+Project ref: gkqntgfrbngspvrsqvmx
+Region: eu-central-1
+Status observed: ACTIVE_HEALTHY
+
+DATABASE CATCH-UP
+PASS Core/Engineering/Commercial existing base
+PASS Blum 0.4
+PASS Hardware Drilling 0.5
+PASS BXF 0.6
+PASS Verified Release 0.7
+PASS Owner Warehouse / Reservations
+PASS Supplier Profiles / Quotes
+PASS Cash / Treasury
+PASS Capacity
+PASS Decision Plans
+PASS Production Operations
+PASS Material RFQ
+PASS Owner Finance
+PASS AI Office
+PASS Growth / CRM / Autopilot persistence
+PASS Provider Execution persistence
+PASS Content / Pilot persistence
+PASS Production Hardening persistence
+PASS Supplier Receiving
+PASS Procurement Intelligence
+PASS Supplier Communication
+PASS Gmail Connections
+PASS Procurement Inbox
+PASS Catalog Registry
+
+LIVE TABLE PROBES
+PASS owner_warehouse_items
+PASS owner_finance_ledger
+PASS procurement_rfqs
+PASS organization_connections
+PASS makster_office_leads
+PASS makster_role_policies
+PENDING production_queue_jobs
+
+PRODUCTION CONTROL
+PENDING Production Control 0.8
+PENDING Production Worker 0.9
+Reason: deployment connector safety blocked the large SECURITY DEFINER/trigger/PGMQ migration.
+No bypass was used.
+
+AUTH
+auth.users: 0 at inspection
+organization_members: 0
+BLOCKER: first real Owner must be created through normal Supabase Auth.
+
+SECURITY
+RLS enabled on all inspected public tables.
+Explicit Data API grants used for new tables.
+Secret/service-role key not included in build.
+Security Advisor: no exposed critical vulnerability; final INFO notices are deny-by-default service-only tables.
+
+PILOT
+Existing staging project is test/acceptance data.
+Real Pilot count: 0.
+Production Release Gate must remain CLOSED.

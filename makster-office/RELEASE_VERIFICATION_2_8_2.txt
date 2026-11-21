@@ -1,0 +1,26 @@
+MAKSTER AI 2.8.2 RELEASE VERIFICATION
+======================================
+PASS: appliance/catalog/project assignment core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API syntax
+PASS: bundled Core API startup
+PASS: health -> 2.8.2
+PASS: Appliance catalog API
+PASS: 4 currently normalized appliance models
+PASS: 11 appliance brands in registry
+PASS: dishwasher niche auto-selection -> READY
+PASS: Appliance Studio served by actual web runtime
+PASS: procurement modes present in actual web runtime
+PASS: sink/hob default on-site cutout rule present in source + bundled kitchen engine
+PASS: explicit workshop sink/hob cutout requires verifiedForCnc=true
+PASS: procurementMode/priceTier passed through approved assignment into a new Revision
+PASS: archive integrity
+
+Important:
+- 2.8.2 does NOT invent current appliance prices.
+- price tiers/guidance are optional reviewed data.
+- Appliance Studio is primarily an engineering workspace, not an online appliance shop.
+
+Full historical npm test:
+NOT EXECUTED because supplied archive does not contain node_modules/@types/node.
+Changed core was compiled independently and bundled runtime/API were smoke-tested.

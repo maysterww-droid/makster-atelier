@@ -1,0 +1,135 @@
+{
+  "catalogVersion": "2.7.3",
+  "policy": {
+    "productionDrillingRule": "Only manufacturer_verified records with an explicit verified drillingProfile may authorize automatic drilling/CNC.",
+    "fallback": "planning_only and imported_unverified records may be used for BOM/search/fit planning but never invent drilling."
+  },
+  "manufacturers": [
+    {
+      "id": "blum",
+      "name": "Blum",
+      "status": "active",
+      "coverage": "selected_verified_profiles",
+      "homepage": "https://www.blum.com/"
+    },
+    {
+      "id": "hettich",
+      "name": "Hettich",
+      "status": "registry_only",
+      "coverage": "planning_only",
+      "homepage": "https://www.hettich.com/"
+    },
+    {
+      "id": "hafele",
+      "name": "Häfele",
+      "status": "registry_only",
+      "coverage": "planning_only",
+      "homepage": "https://www.hafele.com/"
+    },
+    {
+      "id": "gtv",
+      "name": "GTV",
+      "status": "active",
+      "coverage": "existing_project_profiles",
+      "homepage": "https://www.gtv.com.pl/"
+    },
+    {
+      "id": "grass",
+      "name": "GRASS",
+      "status": "registry_only",
+      "coverage": "planning_only",
+      "homepage": "https://www.grass.eu/"
+    },
+    {
+      "id": "salice",
+      "name": "Salice",
+      "status": "registry_only",
+      "coverage": "planning_only",
+      "homepage": "https://www.salice.com/"
+    }
+  ],
+  "items": [
+    {
+      "id": "blum-clip-top-blumotion-110-overlay",
+      "manufacturer": "Blum",
+      "family": "CLIP top BLUMOTION",
+      "role": "hinge",
+      "code": null,
+      "trust": "manufacturer_verified",
+      "source": "https://www.blum.com/eu/en/products/hingesystems/clip-top-blumotion/",
+      "planning": {
+        "openingAngleDeg": 110,
+        "cupDiameterMm": 35
+      },
+      "drillingProfile": {
+        "status": "verified_profile_reference",
+        "profileId": "blum-clip-top-blumotion-110-overlay"
+      },
+      "notes": "Detailed geometry remains sourced from existing Blum planning profile; exact SKU must be resolved before procurement.",
+      "compatibility": {
+        "maxFrontThicknessMm": 24
+      }
+    },
+    {
+      "id": "blum-movento-760h-550",
+      "manufacturer": "Blum",
+      "family": "MOVENTO 760H",
+      "role": "runner",
+      "code": "760H5500S",
+      "trust": "manufacturer_verified",
+      "source": "https://publications.blum.com/2026/catalogue/en/420/",
+      "planning": {
+        "nominalLengthMm": 550,
+        "dynamicCapacityKg": 40
+      },
+      "drillingProfile": {
+        "status": "not_imported",
+        "profileId": null
+      },
+      "notes": "SKU identity/planning only for drilling until manufacturer CAD/BXF profile is imported.",
+      "compatibility": {
+        "nominalLengthMm": 550,
+        "maxDynamicLoadKg": 40
+      }
+    },
+    {
+      "id": "blum-legrabox-750-550",
+      "manufacturer": "Blum",
+      "family": "LEGRABOX cabinet profile 750",
+      "role": "runner",
+      "code": "750.5501S",
+      "trust": "manufacturer_verified",
+      "source": "https://publications.blum.com/2026/catalogue/en/212/",
+      "planning": {
+        "nominalLengthMm": 550,
+        "dynamicCapacityKg": 40
+      },
+      "drillingProfile": {
+        "status": "not_imported",
+        "profileId": null
+      },
+      "notes": "SKU identity/planning only for drilling until manufacturer CAD/BXF profile is imported.",
+      "compatibility": {
+        "nominalLengthMm": 550,
+        "maxDynamicLoadKg": 40
+      }
+    },
+    {
+      "id": "gtv-modern-slide-existing",
+      "manufacturer": "GTV",
+      "family": "Modern Slide",
+      "role": "runner",
+      "code": null,
+      "trust": "project_verified",
+      "source": "internal:R13_GTV_MODERN_SLIDE",
+      "planning": {
+        "usesExistingMaksterProfile": true
+      },
+      "drillingProfile": {
+        "status": "existing_project_profile",
+        "profileId": "gtv-modern-slide"
+      },
+      "notes": "Uses existing Makster R13/R14 technical profile; no Blum substitution."
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+MAKSTER AI 2.8.1 RELEASE VERIFICATION
+======================================
+PASS: Web application JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: actual bundled Core API startup
+PASS: GET /api/v1/health -> 2.8.1
+PASS: GET /api/v1/catalogs/hardware
+PASS: hardware manufacturer registry -> 6 brands
+PASS: bundled normalized hardware records -> 4
+PASS: POST /api/v1/catalogs/hardware/auto-select
+PASS: hinge / front 18 mm -> READY
+PASS: recommended record -> blum-clip-top-blumotion-110-overlay
+PASS: Hardware Studio function served by actual web runtime
+PASS: Catalog state initialized
+PASS: Hardware Studio tab routed
+PASS: Catalog Admin tab routed
+PASS: archive integrity
+
+Important data statement:
+2.8.1 is a Hardware Studio UI/workflow release.
+It does NOT claim that complete Hettich/Häfele/GRASS/Salice world catalogs are already imported.
+Brand registry coverage remains visible in the UI.
+
+Full historical npm test:
+NOT EXECUTED because the supplied archive does not contain node_modules/@types/node.
+No new engineering calculation engine was introduced in 2.8.1; Hardware Studio uses the existing catalog, compatibility, auto-selection and assignment APIs.

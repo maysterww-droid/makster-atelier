@@ -1,0 +1,62 @@
+MAKSTER AI 2.5 — PRO ENGINEERING MERGE
+======================================
+Release: 2.5.0
+Status: PASS
+
+CORE CHAIN
+- ProjectModel / immutable Revision: PASS
+- Visual/CAD 2.5: PASS
+- Engineering 0.7 + Kitchen Pro ruleset: PASS
+- Production Pack 1.0: PASS
+- Procurement / Gmail 1.1–1.5: preserved
+- Commercial 1.6: PASS
+- Change Intelligence 1.7: preserved
+- Contract / Payment / Change Order 1.8: preserved
+
+KITCHEN PRO 2.5
+- base / wall / tall modules: PASS
+- storage/drawers/sink/hob/oven/dishwasher/fridge/hood/microwave/pantry/open: PASS
+- per-module H/D and construction flags: PASS
+- worktop physical parts + cutouts: PASS
+- plinth + explicit kitchen legs: PASS
+- appliance W×H×D fit gate: PASS
+- missing appliance spec gate: PASS
+- missing sink/hob cutout gate: PASS
+- LEGRABOX/MOVENTO current Engineering reuse: PASS
+- paired double kitchen fronts: PASS
+- material/runner/leg role validation: PASS
+- Visual CNC self-verification bypass: BLOCKED BY DESIGN
+
+CONTROL KITCHEN
+- width: 1800 mm (600 sink + 600 LEGRABOX + 600 oven)
+- Engineering physical panel parts: 30
+- paired front leaves: 2
+- physical worktop parts: 3
+- Blum hinge quantity: 4
+- adjustable kitchen leg quantity: 12
+- Engineering Production READY: true
+- Engineering CNC READY: false (expected trust gate)
+- Manual Workshop Pack READY: true
+- Outsource cutting+edging READY: true
+- Outsource drilling READY: false (expected trust gate)
+
+AUTOMATED VALIDATION
+- TypeScript strict typecheck: PASS
+- TypeScript build: PASS
+- Browser app.js syntax: PASS
+- Automated tests: 150/150 PASS
+- JSON schemas: 26/26 parse PASS
+- Visual command schema branches: 29
+- OpenAPI: 2.5.0 / 70 paths / YAML PASS
+- HTTP Pro Engineering E2E: PASS 23/23
+- Clean dist-only runtime smoke (without node_modules): PASS
+- Visual golden demo: PASS
+- Commercial demo: PASS
+- Expected outsource-drilling HOLD CLI exit: 3 (nonzero by design)
+
+TRUST BOUNDARY
+- Old prototype drilling coordinates are not promoted to production truth.
+- CAD cannot set CNC verified=true for a cutout.
+- Exact runner/cutout/machine release still requires trusted manufacturer/catalog/BXF/manual-verified evidence.
+- Live Supabase was not modified in this release.
+- 1.7/1.8 business persistence remains memory-mode in the local demo unless persistent repositories are deployed.

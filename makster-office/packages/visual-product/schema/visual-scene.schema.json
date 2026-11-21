@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "visualVersion",
+    "projectId",
+    "revision",
+    "room",
+    "furniture",
+    "warnings"
+  ],
+  "properties": {
+    "visualVersion": {
+      "const": "2.5.0"
+    },
+    "projectId": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "room": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "furniture": {
+      "type": "array"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "release": "Makster AI 2.6.1 Golden Project Hardening",
+  "coreVersion": "2.6.1",
+  "visualProductVersion": "2.6.1",
+  "kitchenRuleset": "kitchen-pro-engineering-v2.6.1",
+  "engineeringCoreVersion": "0.7.0",
+  "productionPackVersion": "1.0.0",
+  "tests": {
+    "passed": 170,
+    "failed": 0
+  },
+  "schemas": {
+    "passed": 26,
+    "failed": 0
+  },
+  "openapiPaths": 70,
+  "goldenProject001": {
+    "revision": 4,
+    "confirmedLowerWidthMm": 4190,
+    "readyForProduction": false,
+    "blockingChecks": 10,
+    "panelParts": 46,
+    "machiningOperations": 0
+  },
+  "supabaseMigrationRequired": false
+}

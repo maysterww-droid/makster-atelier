@@ -1,0 +1,16 @@
+MAKSTER AI 2.6.4 VERIFICATION
+=============================
+Core TypeScript (ProjectModel + Engineering Engine): PASS
+L-shape geometry smoke: PASS
+Parallel aisle guard (700 < 900): PASS / BLOCKED AS DESIGNED
+Island fit guard: PASS
+Utility proximity warning: PASS
+Golden Project #1 -> U-layout -> Engineering Engine: PASS
+Golden generated runs: 3
+Golden generated furniture items: 3
+Golden generated parts: 79
+MODULE_WIDTH_SUM_MISMATCH: NONE
+Ruleset: kitchen-pro-engineering-v2.6.4
+
+FULL NPM REGRESSION: NOT RE-RUN
+Reason: @types/node is not bundled; dependency install timed out in isolated environment.

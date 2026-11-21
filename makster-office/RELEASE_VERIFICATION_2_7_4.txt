@@ -1,0 +1,26 @@
+MAKSTER AI 2.7.4 RELEASE VERIFICATION
+======================================
+PASS: master-catalog.ts + catalog-compatibility.ts + catalog-auto-selection.ts isolated strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled dist Core API syntax
+PASS: actual bundled Core API startup
+PASS: GET /api/v1/health -> 2.7.4
+PASS: hardware auto-select runtime endpoint
+PASS: appliance auto-select runtime endpoint
+
+Hardware smoke:
+- 550 mm / 35 kg runner -> Blum LEGRABOX and MOVENTO compatible, GTV UNKNOWN because exact dimensional facts are not normalized in master catalog.
+- same request + production drilling required -> READY=false / no candidates.
+  This is intentional: SKU geometry compatibility and drilling-profile trust are separate gates.
+
+Appliance smoke:
+- dishwasher niche 600×820×560 -> Bosch SMV6ZCX10E compatible
+- Miele G 7191 SCVi AD 125 Edition compatible
+- Siemens SN65ZX07CE remains UNKNOWN
+- appliance result READY=true because confirmed compatible candidates exist.
+
+PASS: archive integrity
+
+Full historical npm test:
+NOT EXECUTED because the source archive does not contain node_modules/@types/node.
+New core compiled separately and actual bundled runtime endpoints were smoke-tested.

@@ -1,0 +1,49 @@
+{
+  "catalog": "Blum catalogue and technical manual 2027/2028",
+  "normalizedBy": "Makster Engineering 0.5",
+  "scope": "pilot planning profiles; not a replacement for Blum Product Configurator",
+  "profiles": [
+    {
+      "id": "blum-clip-top-blumotion-110-overlay",
+      "role": "hinge",
+      "manufacturer": "Blum",
+      "family": "CLIP top BLUMOTION",
+      "openingAngleDeg": 110,
+      "application": "overlay",
+      "cupDiameterMm": 35,
+      "cupDepthMm": 13,
+      "defaultDrillingDistanceMm": 5,
+      "mountingPlateSystemLineMm": 37,
+      "mountingPlateHoleSpacingMm": 32,
+      "source": "https://publications.blum.com/2026/catalogue/en/71/"
+    },
+    {
+      "id": "blum-movento-760h-wooden-drawer",
+      "role": "runner",
+      "manufacturer": "Blum",
+      "family": "MOVENTO 760H",
+      "drawerSideThicknessMm": "12-15, max 16",
+      "drawerOuterWidthFormula": "SKW = LW - 42 mm",
+      "drawerLengthFormula": "SKL = NL - 10 mm",
+      "cabinetDepthEnvelopeFormula": "NL + 3 mm",
+      "source": "https://publications.blum.com/2026/catalogue/en/421/"
+    },
+    {
+      "id": "blum-legrabox-standard-chipboard",
+      "role": "runner",
+      "manufacturer": "Blum",
+      "family": "LEGRABOX",
+      "chipboardThicknessMm": 16,
+      "bottomWidthFormula": "LW - 35 mm",
+      "bottomLengthFormula": "NL - 10 mm",
+      "backWidthFormula": "LW - 38 mm",
+      "backHeightsMm": {
+        "M": 63,
+        "K": 101,
+        "C": 148,
+        "F": 212
+      },
+      "source": "https://publications.blum.com/2026/catalogue/en/203/"
+    }
+  ]
+}

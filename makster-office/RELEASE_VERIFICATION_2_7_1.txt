@@ -1,0 +1,17 @@
+MAKSTER AI 2.7.1 RELEASE VERIFICATION
+======================================
+Implemented:
+- Room obstacle input -> KitchenConstraintInput.obstacles
+- Opening-zone input -> KitchenConstraintInput.openingZones
+- Utility point input -> KitchenLayoutPlanner utilities
+- Appliance binding input -> Mixed Height applianceBindings
+- Studio UI sends all four groups to the existing design generator
+- API reports Studio version 2.7.1
+- Engineering ruleset bumped to kitchen-pro-engineering-v2.7.1
+- Added 2.7.1 regression scenarios for obstacle, opening-zone and utility propagation
+
+Verification limitation:
+This archive does not contain node_modules. Full npm test was not executed in this packaging environment because dependencies are unavailable locally. Existing 2.7.0 release had 219/219 green before these changes. Do not represent 2.7.1 as full-suite green until npm install + npm test completes in a dependency-enabled environment.
+
+UI note:
+2.7.1 uses advanced JSON setup fields rather than a graphical room editor. This is intentional: it wires real measured data into the engines first.

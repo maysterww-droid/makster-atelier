@@ -1,0 +1,41 @@
+MAKSTER AI 2.8.9 RELEASE VERIFICATION
+======================================
+PASS: Conflict Resolution core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API syntax
+PASS: bundled conflict-resolution module syntax
+PASS: actual bundled Core API startup
+PASS: health -> 2.8.9
+PASS: Resolve UI served by actual runtime
+PASS: Resolve tab routed
+PASS: explicit apply approval gate present
+
+Runtime conflict-resolution scenario:
+- initial confirmed door collision: blocking = 1
+- resolver found one auto-applicable move
+- proposed command:
+  set_furniture_position -> X 0 / Y 100 mm
+- expected blocking reduction = 1
+- after applying the command in memory: blocking = 0
+PASS
+
+Server-side safety:
+- expectedRevision required
+- stale suggestion is rebuilt from current Revision
+- only safeToAutoApply suggestion accepted
+- application rejected if collision count no longer improves
+- accepted fix creates a new Project Revision
+PASS
+
+Manual resolution remains required for:
+- worktop/window/sill conflicts
+- ceiling-height conflicts
+- service access/cutouts
+- hood-vent routing
+- complex layout changes
+
+PASS: archive integrity
+
+Full historical npm test:
+NOT EXECUTED because supplied archive does not contain node_modules/@types/node.
+Changed resolution core compiled independently and bundled runtime/server/UI were smoke-tested.

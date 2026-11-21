@@ -1,0 +1,72 @@
+MAKSTER AI 4.6.0 RELEASE VERIFICATION
+======================================
+
+DECISION EXECUTION CORE
+PASS: strict TypeScript compile
+PASS: Scenario -> Decision Plan
+PASS: item-level approval/reject
+PASS: Decision Plan status transitions
+PASS: persistent queue-priority override
+PASS: Owner Command honors approved priority
+
+EXTERNAL ACTION SAFETY
+Runtime scenario:
+- project received amount before execution: 200,000 minor units
+- Cash Protection decision approved
+- plan applied
+
+PASS: collect_client_payment -> ready_external
+PASS: ProjectModel received amount remains 200,000
+PASS: no fake payment created
+PASS: no external communication sent
+PASS: no supplier purchase automatically awarded by Decision Center
+PASS: no cash injection automatically recorded
+
+INTERNAL ACTION EXECUTION
+PASS: approved Capacity Relief action applied
+PASS: work-center capacity updated
+PASS: internal action -> applied
+PASS: non-approved items are not executed
+
+ACTUAL BUNDLED API
+PASS: health -> 4.6.0
+PASS: POST Decision Plan -> 201
+PASS: approve item -> 200
+PASS: apply plan -> 200
+PASS: GET Decision Plans -> 200
+PASS: persisted plans = 2 in runtime smoke
+
+4.6 REGRESSION
+3 tests
+3 passed
+0 failed
+
+CROSS-VERSION REGRESSION
+25 tests
+25 passed
+0 failed
+
+WEB UI
+PASS: Decision Execution Center
+PASS: Create Decision Plan
+PASS: Approve / Reject controls
+PASS: Apply approved actions
+PASS: internal/external labels
+PASS: MAKSTER AI 4.6 branding
+
+SUPABASE
+PASS: prepared 4.6 migration
+PASS: owner_queue_priority_overrides
+PASS: owner_decision_plans
+PASS: RLS enabled
+PASS: owner/admin read policy
+PASS: service-role mutation pattern
+PASS: staging smoke SQL prepared
+
+NOT LIVE-APPLIED
+No production/staging Supabase credentials were used in this sandbox.
+
+CORE TYPESCRIPT
+PASS: Owner Operations strict compile
+PASS: zero new structural Core API TypeScript errors
+Known supplied-archive limitation remains: @types/node is absent.

@@ -1,0 +1,51 @@
+MAKSTER AI 3.2.0 RELEASE VERIFICATION
+======================================
+PASS: changed ProjectModel / Costing / Purchasing core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: bundled Costing module syntax
+PASS: bundled ProjectModel runtime syntax
+PASS: bundled Production Pack generator syntax
+PASS: actual bundled Core API startup
+PASS: health -> 3.2.0
+PASS: Costing UI served and routed
+
+Runtime costing scenario:
+- contract = EUR 10,000
+- purchasing committed = EUR 2,500
+- purchasing actual after 50% receipt = EUR 1,250
+- manual labor estimate = EUR 1,500
+- manual labor actual = EUR 1,400
+- total estimate = EUR 4,000
+- total actual = EUR 2,650
+- forecast margin = EUR 6,000 / 60%
+- current actual margin = EUR 7,350 / 73.5%
+- Job Control actualCostMinor = EUR 2,650
+PASS
+
+Important accounting rule:
+- ordered supplier value is NOT treated as fully actual
+- actual procurement uses received quantity only
+PASS
+
+Production Pack:
+- costing.json generated
+- cost-entries.csv generated
+PASS
+
+Actual API smoke:
+- empty project totalEstimateMinor = 0
+- manual transport estimate creation -> Revision 2
+- entry persisted with correct amount
+PASS
+
+Safety / integrity:
+- no double counting between PO committed and PO received
+- manual estimate and actual remain separate
+- Job Control actual cost is derived from actual sources
+- all cost mutations are revision-safe
+PASS
+
+Full historical npm test:
+NOT EXECUTED because supplied archive still does not contain node_modules/@types/node.
+Changed Costing core compiled independently and actual bundled API/runtime were smoke-tested.

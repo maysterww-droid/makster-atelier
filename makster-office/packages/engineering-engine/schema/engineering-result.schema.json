@@ -1,0 +1,758 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schemas/engineering-result-1.3.0.json",
+  "title": "Makster Engineering Compile Result 1.3.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactVersion",
+    "engineVersion",
+    "ruleSetId",
+    "projectId",
+    "revision",
+    "generatedAt",
+    "inputChecksum",
+    "readyForProduction",
+    "cncReady",
+    "cncRelease",
+    "furniture",
+    "parts",
+    "hardware",
+    "machining",
+    "bom",
+    "issues",
+    "checks",
+    "stats"
+  ],
+  "properties": {
+    "artifactVersion": {
+      "const": "1.3.0"
+    },
+    "engineVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ruleSetId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "projectId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "inputChecksum": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "readyForProduction": {
+      "type": "boolean"
+    },
+    "furniture": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "furnitureId",
+          "name",
+          "parts",
+          "hardware",
+          "machining",
+          "issues"
+        ],
+        "properties": {
+          "furnitureId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/panelPart"
+            }
+          },
+          "hardware": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/hardwareRequirement"
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/issue"
+            }
+          },
+          "machining": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/machiningOperation"
+            }
+          }
+        }
+      }
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/panelPart"
+      }
+    },
+    "hardware": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/hardwareRequirement"
+      }
+    },
+    "bom": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/bomItem"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "info",
+        "warnings",
+        "errors",
+        "blocking",
+        "passed"
+      ],
+      "properties": {
+        "info": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warnings": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "errors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocking": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "furnitureCount",
+        "moduleCount",
+        "panelPartCount",
+        "uniquePanelCount",
+        "hardwareRequirementCount",
+        "machiningOperationCount",
+        "totalPanelAreaMm2"
+      ],
+      "properties": {
+        "furnitureCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "panelPartCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "uniquePanelCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hardwareRequirementCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalPanelAreaMm2": {
+          "type": "number",
+          "minimum": 0
+        },
+        "machiningOperationCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "machining": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/machiningOperation"
+      }
+    },
+    "cncReady": {
+      "type": "boolean"
+    },
+    "cncRelease": {
+      "$ref": "#/$defs/cncReleaseStatus"
+    }
+  },
+  "$defs": {
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "side"
+      ],
+      "properties": {
+        "side": {
+          "enum": [
+            "top",
+            "right",
+            "bottom",
+            "left"
+          ]
+        },
+        "materialSelectionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "thickness": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "panelPart": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "furnitureId",
+        "kind",
+        "name",
+        "quantity",
+        "length",
+        "width",
+        "thickness",
+        "grainDirection",
+        "edges",
+        "estimated"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "furnitureId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "moduleId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sourceElementId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sourceFrontId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "enum": [
+            "side",
+            "top",
+            "bottom",
+            "shelf",
+            "back",
+            "front",
+            "drawer_side",
+            "drawer_back",
+            "drawer_bottom",
+            "drawer_front",
+            "plinth",
+            "worktop",
+            "custom"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "materialSelectionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "thickness": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "grainDirection": {
+          "enum": [
+            "none",
+            "vertical",
+            "horizontal",
+            "fixed"
+          ]
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/edge"
+          }
+        },
+        "estimated": {
+          "type": "boolean"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "hardwareRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "furnitureId",
+        "role",
+        "name",
+        "quantity",
+        "unit",
+        "estimated"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "furnitureId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "moduleId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sourceElementId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sourceFrontId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "role": {
+          "enum": [
+            "hinge",
+            "runner",
+            "lift",
+            "handle",
+            "rail",
+            "connector",
+            "leg",
+            "other"
+          ]
+        },
+        "hardwareSelectionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "enum": [
+            "pcs",
+            "set",
+            "mm"
+          ]
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "estimated": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "code",
+        "severity",
+        "category",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error",
+            "blocking"
+          ]
+        },
+        "category": {
+          "enum": [
+            "input",
+            "geometry",
+            "construction",
+            "material",
+            "hardware",
+            "edge",
+            "manufacturing"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "furnitureId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "moduleId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "targetId": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "bomItem": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "thickness",
+            "grainDirection",
+            "quantity",
+            "totalAreaMm2",
+            "partIds"
+          ],
+          "properties": {
+            "kind": {
+              "const": "panel_material"
+            },
+            "materialSelectionId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "thickness": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "grainDirection": {
+              "enum": [
+                "none",
+                "vertical",
+                "horizontal",
+                "fixed"
+              ]
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "totalAreaMm2": {
+              "type": "number",
+              "minimum": 0
+            },
+            "partIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "role",
+            "name",
+            "quantity",
+            "unit",
+            "requirementIds"
+          ],
+          "properties": {
+            "kind": {
+              "const": "hardware"
+            },
+            "hardwareSelectionId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "role": {
+              "enum": [
+                "hinge",
+                "runner",
+                "lift",
+                "handle",
+                "rail",
+                "connector",
+                "leg",
+                "other"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "quantity": {
+              "type": "number",
+              "minimum": 0
+            },
+            "unit": {
+              "enum": [
+                "pcs",
+                "set",
+                "mm"
+              ]
+            },
+            "requirementIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "machiningOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "furnitureId",
+        "targetPartId",
+        "kind",
+        "face",
+        "x",
+        "y",
+        "estimated"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "furnitureId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "moduleId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "targetPartId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceFrontId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sourceElementId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "enum": [
+            "drill",
+            "hinge_cup",
+            "groove",
+            "cutout",
+            "reference_line"
+          ]
+        },
+        "face": {
+          "enum": [
+            "front",
+            "back",
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ]
+        },
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "diameter": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reference": {
+          "type": "string"
+        },
+        "hardwareSelectionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "estimated": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": "string"
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "toolWidth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "verificationSource": {
+          "enum": [
+            "makster_rule",
+            "manufacturer_catalog",
+            "manufacturer_bxf",
+            "manual_verified",
+            "fixture_only",
+            "estimated"
+          ]
+        },
+        "verificationDetail": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "manufacturer": {
+              "type": "string"
+            },
+            "hardwareCode": {
+              "type": "string"
+            },
+            "catalogVersion": {
+              "type": "string"
+            },
+            "sourceChecksumSha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "schemaFingerprint": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "adapterId": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "cncReleaseBlocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetId": {
+          "type": "string"
+        },
+        "hardwareSelectionId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "cncReleaseStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ready",
+        "blockers"
+      ],
+      "properties": {
+        "ready": {
+          "type": "boolean"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/cncReleaseBlocker"
+          }
+        }
+      }
+    }
+  }
+}

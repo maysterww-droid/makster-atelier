@@ -1,0 +1,48 @@
+MAKSTER AI 3.1.0 RELEASE VERIFICATION
+======================================
+PASS: changed ProjectModel / Purchasing core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: bundled Purchasing module syntax
+PASS: bundled ProjectModel runtime syntax
+PASS: bundled Production Pack generator syntax
+PASS: actual bundled Core API startup
+PASS: health -> 3.1.0
+PASS: Purchasing UI served and routed
+
+Runtime purchasing scenario:
+- Engineering material requirements generated from actual compiler BOM
+- Makster-supplied appliance count = 1
+- customer-supplied appliance count = 1
+- only Makster-supplied appliance became appliance purchase requirement
+- verified appliance purchase price EUR 600 -> 60000 minor units
+- draft order -> Revision 2
+- approved -> Revision 3
+- ordered -> Revision 4
+- received -> Revision 5
+- committedPurchaseMinor = 60000
+- final order status = received
+- received quantity = 1
+PASS
+
+Production Pack:
+- purchasing.json generated
+- supplier-orders.csv generated
+PASS
+
+Actual API smoke:
+- new project purchasing report -> 0 orders
+- supplier order creation -> Revision 2
+- supplier persisted correctly
+PASS
+
+Safety:
+- customer-supplied appliance is not auto-purchased
+- undecided appliance is not auto-purchased
+- unverified appliance price is not invented
+- all purchasing mutations are revision-safe
+PASS
+
+Full historical npm test:
+NOT EXECUTED because supplied archive still does not contain node_modules/@types/node.
+Changed Purchasing core compiled independently and actual bundled API/runtime were smoke-tested.

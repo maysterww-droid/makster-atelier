@@ -1,0 +1,14 @@
+MAKSTER AI 2.6.0 — PERSISTENCE RESTART PROOF
+
+Automated test file: tests/persistent-business-2.6.test.ts
+Result: 5/5 PASS
+
+Proof contract:
+1. Store instance A writes quote/package + immutable requote context + contract/change-order state to a deterministic PostgREST/RPC backend.
+2. Store instance A is discarded.
+3. Store instance B is constructed against the same backend, simulating a new Core API process after restart.
+4. Store B rehydrates the exact persisted business state.
+5. Raw approval token is absent from persistence requests; only hash state is stored.
+6. Accepted Change Order application is idempotent through the atomic RPC contract.
+
+This proves the application/repository restart contract. It does not replace the required real staging-Supabase restart acceptance before production deployment.

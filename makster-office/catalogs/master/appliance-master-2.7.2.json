@@ -1,0 +1,153 @@
+{
+  "catalogVersion": "2.7.2",
+  "policy": {
+    "sourceRule": "Manufacturer or manufacturer-hosted technical source required for manufacturer_verified.",
+    "fitRule": "Verified niche/envelope dimensions may drive fit validation. Missing installation constraints remain unknown, never inferred."
+  },
+  "manufacturers": [
+    "Bosch",
+    "Siemens",
+    "Miele",
+    "Liebherr",
+    "NEFF",
+    "AEG",
+    "Electrolux",
+    "Whirlpool",
+    "Samsung",
+    "LG",
+    "Beko"
+  ],
+  "items": [
+    {
+      "id": "bosch-smv6zcx10e",
+      "manufacturer": "Bosch",
+      "model": "SMV6ZCX10E",
+      "kind": "dishwasher",
+      "installation": "cabinet",
+      "trust": "manufacturer_verified",
+      "source": "https://media3.bosch-home.com/Documents/specsheet/sl-SI/SMV6ZCX10E.pdf",
+      "applianceDimensionsMm": {
+        "width": 598,
+        "heightRange": [
+          815,
+          875
+        ],
+        "depth": 550
+      },
+      "niche": {
+        "widthMm": 600,
+        "minDepthMm": 550,
+        "heightRangeMm": [
+          815,
+          875
+        ]
+      },
+      "notes": "Fully integrated 60 cm dishwasher. Preserve installation drawing as authority for final fit."
+    },
+    {
+      "id": "siemens-sn65zx07ce",
+      "manufacturer": "Siemens",
+      "model": "SN65ZX07CE",
+      "kind": "dishwasher",
+      "installation": "cabinet",
+      "trust": "manufacturer_verified",
+      "source": "https://www.siemens-home.bsh-group.com/es/es/product/SN65ZX07CE",
+      "applianceDimensionsMm": {
+        "width": 598,
+        "height": 815,
+        "depth": 550
+      },
+      "niche": {
+        "referenceInstallationDimensionsMm": {
+          "height": 815,
+          "width": 598,
+          "depth": 550
+        }
+      },
+      "notes": "Manufacturer product page reports required installation dimensions 815×598×550 mm."
+    },
+    {
+      "id": "liebherr-irbd-5120",
+      "manufacturer": "Liebherr",
+      "model": "IRBd 5120",
+      "kind": "fridge",
+      "installation": "cabinet",
+      "trust": "manufacturer_verified",
+      "source": "https://www.liebherr.com/en-gb/p/irbd-5120-3011695",
+      "applianceDimensionsMm": {
+        "width": 559,
+        "height": 1770,
+        "depth": 546
+      },
+      "niche": {
+        "heightRangeMm": [
+          1772,
+          1788
+        ],
+        "widthRangeMm": [
+          560,
+          570
+        ],
+        "minDepthMm": 550,
+        "ventilationAreaMinCm2": 200
+      },
+      "notes": "Built-in refrigerator. Technical drawing also limits furniture-door load; retain manufacturer installation document for production."
+    },
+    {
+      "id": "miele-g7191-scvi-ad-125",
+      "manufacturer": "Miele",
+      "model": "G 7191 SCVi AD 125 Edition",
+      "kind": "dishwasher",
+      "installation": "cabinet",
+      "trust": "manufacturer_verified",
+      "source": "https://media.miele.com/downloads/n-/ie/FS_12469660_IEE_IE-en-IE.pdf",
+      "applianceDimensionsMm": {
+        "width": 598,
+        "heightRange": [
+          805,
+          870
+        ],
+        "depth": 550
+      },
+      "niche": {
+        "widthMm": 600,
+        "minDepthMm": 560,
+        "heightRangeMm": [
+          805,
+          870
+        ]
+      },
+      "notes": "Fully integrated 60 cm dishwasher; exact plinth/front arrangement must follow the installation drawing."
+    }
+  ],
+  "registryOnlyBrands": [
+    {
+      "manufacturer": "NEFF",
+      "trust": "planning_only"
+    },
+    {
+      "manufacturer": "AEG",
+      "trust": "planning_only"
+    },
+    {
+      "manufacturer": "Electrolux",
+      "trust": "planning_only"
+    },
+    {
+      "manufacturer": "Whirlpool",
+      "trust": "planning_only"
+    },
+    {
+      "manufacturer": "Samsung",
+      "trust": "planning_only"
+    },
+    {
+      "manufacturer": "LG",
+      "trust": "planning_only"
+    },
+    {
+      "manufacturer": "Beko",
+      "trust": "planning_only"
+    }
+  ]
+}

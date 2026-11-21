@@ -1,0 +1,56 @@
+MAKSTER AI 3.3.0 RELEASE VERIFICATION
+======================================
+PASS: changed ProjectModel / Client Portal / Job Control core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: bundled Client Portal module syntax
+PASS: bundled ProjectModel runtime syntax
+PASS: bundled Production Pack generator syntax
+PASS: actual bundled Core API startup
+PASS: health -> 3.3.0
+PASS: Client Portal UI served and routed
+
+Runtime privacy smoke:
+- internal supplier = "Secret Supplier"
+- internal actual labor cost present
+- committed purchase / actual cost present internally
+- ClientPortalView DOES NOT contain supplier name
+- ClientPortalView DOES NOT contain internal labor entry
+- ClientPortalView DOES NOT expose actualCostMinor
+- ClientPortalView DOES NOT expose committedPurchaseMinor
+PASS
+
+Commercial public view:
+- contract EUR 10,000
+- received EUR 2,000
+- outstanding EUR 8,000
+PASS
+
+Approval lifecycle:
+- contract stage before approval -> blocker: Client design approval is missing
+- pending approval -> Job Control warning
+- client approves exact requested design Revision
+- response creates new Revision
+- contract-stage design-approval blocker removed
+PASS
+
+Actual API smoke:
+- portal enabled through API
+- design approval request created
+- client response recorded as approved
+- final API portal view shows approved
+PASS
+
+Production Pack:
+- client-approvals.csv generated
+- client-portal-snapshot.json generated
+PASS
+
+Security boundary:
+- public-safe view is structurally filtered
+- external share-token/authentication layer intentionally NOT implemented in 3.3
+PASS
+
+Full historical npm test:
+NOT EXECUTED because supplied archive still does not contain node_modules/@types/node.
+Changed Client Portal core compiled independently and actual bundled API/runtime were smoke-tested.

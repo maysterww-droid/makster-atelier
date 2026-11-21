@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schema/production-pack-manifest-1.0.json",
+  "title": "Makster Production Pack Manifest 1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packVersion","packId","route","services","projectId","revision","projectTitle","generatedAt","engineeringEngineVersion","engineeringRulesetId","engineeringInputChecksum","ready","blockers","warnings","summary","files"],
+  "properties": {
+    "packVersion": {"const":"1.0.0"},
+    "packId": {"type":"string","minLength":1},
+    "route": {"enum":["manual_workshop","outsource"]},
+    "outsourcePreset": {"enum":["cutting_only","cutting_edging","cutting_edging_drilling"]},
+    "services": {"type":"array","items":{"enum":["cutting","edging","drilling"]},"uniqueItems":true},
+    "projectId": {"type":"string"},
+    "revision": {"type":"integer","minimum":1},
+    "projectTitle": {"type":"string"},
+    "generatedAt": {"type":"string"},
+    "engineeringEngineVersion": {"type":"string"},
+    "engineeringRulesetId": {"type":"string"},
+    "engineeringInputChecksum": {"type":"string"},
+    "ready": {"type":"boolean"},
+    "blockers": {"type":"array","items":{"type":"object","required":["code","message"],"properties":{"code":{"type":"string"},"message":{"type":"string"},"targetId":{"type":"string"}},"additionalProperties":false}},
+    "warnings": {"type":"array","items":{"type":"string"}},
+    "summary": {"type":"object","additionalProperties":false,"required":["physicalPanelParts","uniquePanelRows","edgeOperations","edgeLengthMm","machiningOperations","exactMachiningOperations","unresolvedMachiningOperations","hardwareRequirementRows"],"properties":{"physicalPanelParts":{"type":"integer","minimum":0},"uniquePanelRows":{"type":"integer","minimum":0},"edgeOperations":{"type":"integer","minimum":0},"edgeLengthMm":{"type":"number","minimum":0},"machiningOperations":{"type":"integer","minimum":0},"exactMachiningOperations":{"type":"integer","minimum":0},"unresolvedMachiningOperations":{"type":"integer","minimum":0},"hardwareRequirementRows":{"type":"integer","minimum":0}}},
+    "files": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["name","mediaType","purpose","sha256","byteLength"],"properties":{"name":{"type":"string"},"mediaType":{"type":"string"},"purpose":{"type":"string"},"sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"byteLength":{"type":"integer","minimum":0}}}}
+  },
+  "allOf": [
+    {"if":{"properties":{"route":{"const":"outsource"}}},"then":{"required":["outsourcePreset"]}}
+  ]
+}

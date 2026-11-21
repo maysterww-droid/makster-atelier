@@ -1,0 +1,53 @@
+MAKSTER AI 4.4.0 RELEASE VERIFICATION
+======================================
+
+PREDICTIVE OWNER CONTROL
+PASS: strict TypeScript compile
+PASS: cross-system risk aggregation
+PASS: cash-gap -> collection action
+PASS: BOM shortage -> dated procurement action
+PASS: supplier quote included when available
+PASS: TIGHT/LATE capacity -> capacity action
+PASS: weak/negative margin -> margin protection action
+PASS: per-project risk score
+PASS: company overall risk score
+
+4.4 REGRESSION
+3 tests
+3 passed
+0 failed
+
+RUNTIME SMOKE
+PASS: bundled Core API startup
+PASS: health -> 4.4.0
+PASS: GET predictive-owner-control -> 200
+PASS: report version -> 4.4.0
+PASS: cash-gap runtime -> collect_cash action
+PASS: schedule-risk runtime -> add_capacity action
+PASS: Owner Command Predictive UI
+PASS: MAKSTER AI 4.4 branding
+
+CROSS-VERSION REGRESSION SWEEP
+PASS: Golden Project 3.5
+PASS: Owner Operations 4.1
+PASS: Owner Operations 4.2
+PASS: Owner Operations 4.3
+PASS: Owner Operations 4.4
+18 tests
+18 passed
+0 failed
+
+CORE TYPESCRIPT
+PASS: Owner Operations strict compile
+PASS: 0 new structural Core API TypeScript errors
+Known archive limitation remains: @types/node is not supplied.
+
+SAFETY OF ACTIONS
+4.4 recommendations are advisory.
+They do not automatically:
+- contact a client
+- reorder project priority
+- award a supplier quote
+- spend money
+- create overtime
+without explicit owner action.

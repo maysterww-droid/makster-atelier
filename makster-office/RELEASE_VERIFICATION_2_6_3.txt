@@ -1,0 +1,12 @@
+Makster AI 2.6.3 — Kitchen Run Composer
+
+Verification performed 2026-09-06
+
+PASS: strict TypeScript check of ProjectModel + Kitchen Module Library + Kitchen Run Composer core.
+PASS: runtime composer smoke — Golden Project #1 exact 4190 mm / 6 modules.
+PASS: runtime composer smoke — standard-width auto-fill + explicit technical remainder.
+PASS: runtime composer smoke — incompatible base/wall module blocked.
+PASS: existing compiled regression suite: 182/182 tests.
+
+Environment note:
+Full root `tsc -p tsconfig.json` cannot be run in this sandbox without local @types/node. The Composer core itself was typechecked with strict/noUncheckedIndexedAccess/exactOptionalPropertyTypes, and the shipped compiled regression suite is green.

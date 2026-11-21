@@ -1,0 +1,35 @@
+# Makster AI 2.6.0 — BUILD STATUS
+
+Release: Persistent Unified Core 2.6.0
+Status: READY FOR STAGING ACCEPTANCE
+
+## Completed
+- Unified business persistence abstraction replaces in-process quote/contract/change-order maps.
+- MemoryUnifiedBusinessStore remains as local/offline fallback.
+- SupabaseUnifiedBusinessStore persists commercial packages, quote lifecycle/context/lineage, change reports, contracts/payment schedules, change orders, token hashes and client revision authorizations.
+- Raw client approval tokens are never persisted; only SHA-256 hash state is stored.
+- Accepted Change Order application is designed as one Supabase transaction/RPC: decision + contract update + authorization + quote lifecycle.
+- Public client decision retries are idempotent: same decision + same token returns the already persisted result; conflicting replay is rejected.
+- Internal business routes re-check Project access even though server-side Supabase writes use privileged credentials.
+- Existing Kitchen/Pro Engineering 2.5 and manufacturing trust gates are preserved.
+
+## Verification
+- TypeScript typecheck: PASS
+- Automated regression: 155/155 PASS
+- Persistent Supabase adapter tests: 5/5 PASS
+- Client decision HTTP replay acceptance: 6/6 PASS
+- OpenAPI: 2.6.0, 70 paths
+- ProjectModel JSON Schemas: 26 files retained
+- Frontend JavaScript syntax: PASS
+- Built dist Core API health: PASS
+- Clean release start without node_modules: PASS (UI HTTP 200)
+
+## Persistence proof
+A deterministic fake PostgREST/RPC backend is shared by two independent SupabaseUnifiedBusinessStore instances. State written through the first instance is read back through a newly-created instance, proving the restart/rehydration contract for quote context, contract, Change Order and authorization logic.
+
+## Deployment boundary
+LIVE SUPABASE WAS NOT MODIFIED BY THIS BUILD.
+Migration `supabase/migration_source/makster_persistent_unified_business_2_6.sql` is prepared for staging first. Real Supabase staging restart acceptance must pass before production promotion.
+
+## Known scope boundary
+2.6.0 persists the unified commercial/client-approval core. Some production-control, supplier/procurement runtime maps remain outside this persistence step and are documented in KNOWN_LIMITS_2_6.md. Kitchen Engineering rules remain 2.5 by design.

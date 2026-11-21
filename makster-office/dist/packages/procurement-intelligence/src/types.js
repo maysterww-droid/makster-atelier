@@ -1,0 +1,1 @@
+export const PROCUREMENT_INTELLIGENCE_VERSION = '1.2.0';

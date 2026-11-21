@@ -1,0 +1,1685 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schemas/project-model/1.0.0.json",
+  "title": "Makster ProjectModel v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "projectId",
+    "revision",
+    "title",
+    "locale",
+    "currency",
+    "unitSystem",
+    "geometryUnit",
+    "coordinateSystem",
+    "projectType",
+    "site",
+    "furniture",
+    "selections",
+    "constraints",
+    "facts",
+    "notes"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "projectId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 20
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "unitSystem": {
+      "const": "metric"
+    },
+    "geometryUnit": {
+      "const": "0.1mm"
+    },
+    "coordinateSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "handedness",
+        "x",
+        "y",
+        "z"
+      ],
+      "properties": {
+        "handedness": {
+          "const": "right"
+        },
+        "x": {
+          "const": "right"
+        },
+        "y": {
+          "const": "forward"
+        },
+        "z": {
+          "const": "up"
+        }
+      }
+    },
+    "projectType": {
+      "enum": [
+        "wardrobe",
+        "walk_in",
+        "kitchen",
+        "cabinet",
+        "sideboard",
+        "built_in",
+        "mixed"
+      ]
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rooms"
+      ],
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/room"
+          }
+        }
+      }
+    },
+    "furniture": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/furnitureItem"
+      }
+    },
+    "selections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "materials",
+        "hardware"
+      ],
+      "properties": {
+        "materials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/materialSelection"
+          }
+        },
+        "hardware": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hardwareSelection"
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/projectConstraint"
+      }
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/factProvenance"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/projectNote"
+      }
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "isoDateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mm10": {
+      "type": "integer",
+      "description": "Canonical geometry unit: 1 = 0.1 mm."
+    },
+    "measuredMm10": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "state"
+      ],
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Canonical geometry unit: 1 = 0.1 mm."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "enum": [
+            "confirmed",
+            "observed",
+            "estimated",
+            "unknown"
+          ]
+        },
+        "tolerance": {
+          "type": "integer",
+          "description": "Canonical geometry unit: 1 = 0.1 mm."
+        }
+      }
+    },
+    "vector3Mm10": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "Canonical geometry unit: 1 = 0.1 mm."
+        },
+        "y": {
+          "type": "integer",
+          "description": "Canonical geometry unit: 1 = 0.1 mm."
+        },
+        "z": {
+          "type": "integer",
+          "description": "Canonical geometry unit: 1 = 0.1 mm."
+        }
+      }
+    },
+    "dimensions3D": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height",
+        "depth"
+      ],
+      "properties": {
+        "width": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "height": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "depth": {
+          "$ref": "#/$defs/measuredMm10"
+        }
+      }
+    },
+    "box3D": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "size"
+      ],
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/vector3Mm10"
+        },
+        "size": {
+          "$ref": "#/$defs/dimensions3D"
+        }
+      }
+    },
+    "transform3D": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "rotationZDeg"
+      ],
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/vector3Mm10"
+        },
+        "rotationZDeg": {
+          "enum": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    "wallSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "start",
+        "end",
+        "height"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "start": {
+          "$ref": "#/$defs/vector3Mm10"
+        },
+        "end": {
+          "$ref": "#/$defs/vector3Mm10"
+        },
+        "height": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "thickness": {
+          "$ref": "#/$defs/measuredMm10"
+        }
+      }
+    },
+    "wallOpening": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "bounds"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "kind": {
+          "enum": [
+            "door",
+            "window",
+            "niche",
+            "passage",
+            "other"
+          ]
+        },
+        "hostWallId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "bounds": {
+          "$ref": "#/$defs/box3D"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "obstacle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "bounds"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "kind": {
+          "enum": [
+            "socket",
+            "switch",
+            "pipe",
+            "radiator",
+            "vent",
+            "window",
+            "door",
+            "column",
+            "duct",
+            "boiler",
+            "other"
+          ]
+        },
+        "hostWallId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "bounds": {
+          "$ref": "#/$defs/box3D"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "room": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "origin",
+        "walls",
+        "openings",
+        "obstacles"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "origin": {
+          "$ref": "#/$defs/vector3Mm10"
+        },
+        "dimensions": {
+          "$ref": "#/$defs/dimensions3D"
+        },
+        "walls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/wallSegment"
+          }
+        },
+        "openings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/wallOpening"
+          }
+        },
+        "obstacles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/obstacle"
+          }
+        }
+      }
+    },
+    "backPanelSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "overlay",
+            "groove",
+            "recessed",
+            "none"
+          ]
+        },
+        "thickness": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "materialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "grooveInset": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "grooveDepth": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "grooveClearance": {
+          "$ref": "#/$defs/measuredMm10"
+        }
+      }
+    },
+    "plinthSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "none",
+            "integrated",
+            "separate"
+          ]
+        },
+        "height": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "setback": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "materialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        }
+      }
+    },
+    "constructionSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "carcassThickness",
+        "backPanel"
+      ],
+      "properties": {
+        "carcassThickness": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "backPanel": {
+          "$ref": "#/$defs/backPanelSpec"
+        },
+        "plinth": {
+          "$ref": "#/$defs/plinthSpec"
+        },
+        "defaultCarcassMaterialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "defaultFrontMaterialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "defaultEdgeMaterialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        }
+      }
+    },
+    "moduleWidthSpec": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "value"
+          ],
+          "properties": {
+            "mode": {
+              "const": "fixed"
+            },
+            "value": {
+              "$ref": "#/$defs/measuredMm10"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode"
+          ],
+          "properties": {
+            "mode": {
+              "const": "fill"
+            },
+            "min": {
+              "$ref": "#/$defs/measuredMm10"
+            },
+            "max": {
+              "$ref": "#/$defs/measuredMm10"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "ratio"
+          ],
+          "properties": {
+            "mode": {
+              "const": "ratio"
+            },
+            "ratio": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "min": {
+              "$ref": "#/$defs/measuredMm10"
+            },
+            "max": {
+              "$ref": "#/$defs/measuredMm10"
+            }
+          }
+        }
+      ]
+    },
+    "interiorElement": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "kind",
+            "count",
+            "adjustable"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "kind": {
+              "const": "shelf_stack"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "adjustable": {
+              "type": "boolean"
+            },
+            "elevationsFromBottom": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/measuredMm10"
+              }
+            },
+            "materialSelectionId": {
+              "$ref": "#/$defs/uuid"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "kind",
+            "count",
+            "frontMode"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "kind": {
+              "const": "drawer_stack"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "frontMode": {
+              "enum": [
+                "internal",
+                "external"
+              ]
+            },
+            "runnerHardwareSelectionId": {
+              "$ref": "#/$defs/uuid"
+            },
+            "drawerBox": {
+              "$ref": "#/$defs/drawerBoxConfig"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "kind",
+            "count"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "kind": {
+              "const": "clothes_rail"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "railHardwareSelectionId": {
+              "$ref": "#/$defs/uuid"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "kind",
+            "applianceKind"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "kind": {
+              "const": "appliance_space"
+            },
+            "applianceKind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "requiredSpace": {
+              "$ref": "#/$defs/dimensions3D"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "kind"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "kind": {
+              "const": "open_space"
+            },
+            "label": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "kind",
+            "label"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "kind": {
+              "const": "custom"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "furnitureModule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "width",
+        "contents"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "kind": {
+          "enum": [
+            "shelves",
+            "drawers",
+            "short_clothes",
+            "long_clothes",
+            "appliance",
+            "sink",
+            "open",
+            "mixed",
+            "custom"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "width": {
+          "$ref": "#/$defs/moduleWidthSpec"
+        },
+        "height": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "depth": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "contents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/interiorElement"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "kitchen": {
+          "$ref": "#/$defs/kitchenModuleSpec"
+        },
+        "libraryModuleId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "frontHandleSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "handle",
+            "profile",
+            "gola",
+            "push_to_open",
+            "none"
+          ]
+        },
+        "hardwareSelectionId": {
+          "$ref": "#/$defs/uuid"
+        }
+      }
+    },
+    "frontSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "moduleIds",
+        "kind",
+        "count",
+        "split",
+        "opening"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "moduleIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "kind": {
+          "enum": [
+            "hinged",
+            "sliding",
+            "drawer_front",
+            "fixed_panel",
+            "open"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "split": {
+          "enum": [
+            "none",
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "opening": {
+          "enum": [
+            "left",
+            "right",
+            "paired",
+            "mixed",
+            "not_applicable"
+          ]
+        },
+        "materialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "handle": {
+          "$ref": "#/$defs/frontHandleSpec"
+        },
+        "note": {
+          "type": "string"
+        },
+        "hingeSides": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "left",
+              "right"
+            ]
+          }
+        }
+      }
+    },
+    "furnitureStyle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "colorNote": {
+          "type": "string"
+        },
+        "finishNote": {
+          "type": "string"
+        },
+        "referenceFileIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        }
+      }
+    },
+    "furnitureItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "transform",
+        "dimensions",
+        "mounting",
+        "construction",
+        "modules",
+        "fronts"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "kind": {
+          "enum": [
+            "wardrobe",
+            "walk_in",
+            "kitchen",
+            "cabinet",
+            "sideboard",
+            "built_in",
+            "custom"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "roomId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "transform": {
+          "$ref": "#/$defs/transform3D"
+        },
+        "dimensions": {
+          "$ref": "#/$defs/dimensions3D"
+        },
+        "mounting": {
+          "enum": [
+            "freestanding",
+            "built_in",
+            "wall_hung",
+            "base_supported"
+          ]
+        },
+        "construction": {
+          "$ref": "#/$defs/constructionSpec"
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/furnitureModule"
+          }
+        },
+        "fronts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/frontSpec"
+          }
+        },
+        "style": {
+          "$ref": "#/$defs/furnitureStyle"
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "materialSelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "role",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "role": {
+          "enum": [
+            "carcass",
+            "front",
+            "back",
+            "worktop",
+            "edge",
+            "glass",
+            "profile",
+            "other"
+          ]
+        },
+        "source": {
+          "enum": [
+            "catalog",
+            "manual"
+          ]
+        },
+        "catalogMaterialId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "manufacturer": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "thickness": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "finish": {
+          "type": "string"
+        },
+        "grainDirection": {
+          "enum": [
+            "none",
+            "vertical",
+            "horizontal",
+            "fixed"
+          ]
+        },
+        "note": {
+          "type": "string"
+        },
+        "densityKgM3": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5000
+        }
+      }
+    },
+    "hardwareSelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "role",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "role": {
+          "enum": [
+            "hinge",
+            "runner",
+            "lift",
+            "handle",
+            "rail",
+            "connector",
+            "leg",
+            "other"
+          ]
+        },
+        "source": {
+          "enum": [
+            "catalog",
+            "manual"
+          ]
+        },
+        "catalogHardwareId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "manufacturer": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "technical": {
+          "$ref": "#/$defs/hardwareTechnicalSpec"
+        },
+        "machiningMethod": {
+          "enum": [
+            "manufacturer_cnc",
+            "manual_template",
+            "manual_measure"
+          ]
+        }
+      }
+    },
+    "projectConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "targetIds",
+        "severity",
+        "params"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "kind": {
+          "enum": [
+            "installation_gap",
+            "wall_clearance",
+            "ceiling_clearance",
+            "minimum_module_width",
+            "maximum_module_width",
+            "material_restriction",
+            "hardware_restriction",
+            "custom"
+          ]
+        },
+        "targetIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "blocking"
+          ]
+        },
+        "params": {
+          "type": "object"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "factProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "source",
+        "confidence",
+        "confirmed"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "source": {
+          "enum": [
+            "manual",
+            "ai_text",
+            "ai_image",
+            "import",
+            "derived",
+            "engineering"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "confirmed": {
+          "type": "boolean"
+        },
+        "evidenceFileIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "projectNote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "text",
+        "authorType",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorType": {
+          "enum": [
+            "user",
+            "agent",
+            "system"
+          ]
+        },
+        "authorId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/isoDateTime"
+        }
+      }
+    },
+    "drawerBoxConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sideHeight": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "sideThickness": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "bottomThickness": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "frontHeight": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "materialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "bottomMaterialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "runnerLinesFromBottom": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/measuredMm10"
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "bottomInstallation": {
+          "$ref": "#/$defs/drawerBottomInstallationSpec"
+        }
+      }
+    },
+    "blumHingeTechnicalSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "system",
+        "application"
+      ],
+      "properties": {
+        "kind": {
+          "const": "blum_hinge"
+        },
+        "system": {
+          "const": "clip_top_blumotion"
+        },
+        "application": {
+          "enum": [
+            "overlay",
+            "inset",
+            "dual"
+          ]
+        },
+        "openingAngleDeg": {
+          "enum": [
+            100,
+            107,
+            110,
+            120,
+            155,
+            170
+          ]
+        },
+        "drillingDistance": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "mountingPlateSpacing": {
+          "$ref": "#/$defs/measuredMm10"
+        }
+      }
+    },
+    "blumRunnerTechnicalSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "system",
+        "nominalLength"
+      ],
+      "properties": {
+        "kind": {
+          "const": "blum_runner"
+        },
+        "system": {
+          "enum": [
+            "movento",
+            "tandem",
+            "legrabox"
+          ]
+        },
+        "nominalLength": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "motion": {
+          "enum": [
+            "blumotion",
+            "tip_on",
+            "tip_on_blumotion"
+          ]
+        },
+        "capacityKg": {
+          "enum": [
+            30,
+            40,
+            60,
+            65,
+            70
+          ]
+        },
+        "legraboxHeightCode": {
+          "enum": [
+            "M",
+            "K",
+            "C",
+            "F"
+          ]
+        }
+      }
+    },
+    "hardwareTechnicalSpec": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/blumHingeTechnicalSpec"
+        },
+        {
+          "$ref": "#/$defs/blumRunnerTechnicalSpec"
+        },
+        {
+          "$ref": "#/$defs/gtvModernSlideTechnicalSpec"
+        }
+      ]
+    },
+    "kitchenCutoutSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "kind": {
+          "enum": [
+            "sink",
+            "hob",
+            "custom"
+          ]
+        },
+        "width": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "depth": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "offsetX": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "offsetY": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "verifiedForCnc": {
+          "type": "boolean"
+        },
+        "execution": {
+          "enum": [
+            "workshop",
+            "on_site"
+          ]
+        }
+      }
+    },
+    "kitchenWorktopSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "materialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "thickness": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "depth": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "frontOverhang": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "cutouts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/kitchenCutoutSpec"
+          }
+        },
+        "wallTrim": {
+          "$ref": "#/$defs/kitchenWallTrimSpec"
+        }
+      }
+    },
+    "kitchenPlinthSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "height": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "setback": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "legHardwareSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "legCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        }
+      }
+    },
+    "kitchenApplianceSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "oven",
+            "dishwasher",
+            "fridge",
+            "hood",
+            "microwave",
+            "hob",
+            "other"
+          ]
+        },
+        "manufacturer": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "requiredSpace": {
+          "$ref": "#/$defs/dimensions3D"
+        },
+        "installation": {
+          "enum": [
+            "cabinet",
+            "worktop",
+            "wall"
+          ]
+        },
+        "fitMode": {
+          "enum": [
+            "preverified",
+            "site_fit"
+          ]
+        }
+      }
+    },
+    "kitchenModuleSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "function",
+        "hasTop",
+        "hasBottom",
+        "hasBack"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "base",
+            "wall",
+            "tall"
+          ]
+        },
+        "function": {
+          "enum": [
+            "storage",
+            "drawers",
+            "sink",
+            "hob",
+            "oven",
+            "dishwasher",
+            "fridge",
+            "hood",
+            "microwave",
+            "pantry",
+            "open"
+          ]
+        },
+        "hasTop": {
+          "type": "boolean"
+        },
+        "hasBottom": {
+          "type": "boolean"
+        },
+        "hasBack": {
+          "type": "boolean"
+        },
+        "opening": {
+          "enum": [
+            "handle",
+            "profile",
+            "gola",
+            "push_to_open",
+            "none"
+          ]
+        },
+        "worktop": {
+          "$ref": "#/$defs/kitchenWorktopSpec"
+        },
+        "plinth": {
+          "$ref": "#/$defs/kitchenPlinthSpec"
+        },
+        "appliance": {
+          "$ref": "#/$defs/kitchenApplianceSpec"
+        },
+        "appliances": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/kitchenApplianceSpec"
+          }
+        },
+        "backPanelMode": {
+          "enum": [
+            "overlay",
+            "groove",
+            "recessed",
+            "none"
+          ]
+        },
+        "wallHangerHardwareSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "wallHangerCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        }
+      }
+    },
+    "kitchenWallTrimSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "materialSelectionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "height": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "depth": {
+          "$ref": "#/$defs/measuredMm10"
+        }
+      }
+    },
+    "drawerBottomInstallationSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "overlay",
+            "groove"
+          ]
+        },
+        "machiningMethod": {
+          "enum": [
+            "manufacturer_cnc",
+            "manual_template",
+            "manual_measure"
+          ]
+        },
+        "grooveWidth": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "grooveDepth": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "bottomRecessFromLowerEdge": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "boxJoint": {
+          "enum": [
+            "front_back_between_sides",
+            "custom"
+          ]
+        }
+      }
+    },
+    "gtvModernSlideTechnicalSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "family",
+        "nominalLength",
+        "drawerInternalWidthReduction",
+        "boxLengthReduction"
+      ],
+      "properties": {
+        "kind": {
+          "const": "gtv_modern_slide"
+        },
+        "family": {
+          "const": "modern_slide_18"
+        },
+        "nominalLength": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "motion": {
+          "enum": [
+            "soft_close",
+            "push_to_open"
+          ]
+        },
+        "drawerInternalWidthReduction": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "boxLengthReduction": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "maxSideThickness": {
+          "$ref": "#/$defs/measuredMm10"
+        },
+        "maxBottomRecess": {
+          "$ref": "#/$defs/measuredMm10"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1071 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Makster Visual Editor Command 2.6.1",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "widthMm",
+        "depthMm",
+        "heightMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "create_rect_room"
+        },
+        "name": {
+          "type": "string"
+        },
+        "widthMm": {
+          "type": "number",
+          "minimum": 500
+        },
+        "depthMm": {
+          "type": "number",
+          "minimum": 500
+        },
+        "heightMm": {
+          "type": "number",
+          "minimum": 1500
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_room_dimensions"
+        },
+        "roomIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "widthMm": {
+          "type": "number"
+        },
+        "depthMm": {
+          "type": "number"
+        },
+        "heightMm": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_furniture_dimensions"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "widthMm": {
+          "type": "number"
+        },
+        "heightMm": {
+          "type": "number"
+        },
+        "depthMm": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "edge",
+        "deltaMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "resize_furniture_edge"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "edge": {
+          "enum": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ]
+        },
+        "deltaMm": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "duplicate_furniture"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "offsetXMm": {
+          "type": "number"
+        },
+        "offsetYMm": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rotationZDeg": {
+          "enum": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "remove_furniture"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex",
+        "widthMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_module_width"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "widthMm": {
+          "type": "number",
+          "minimum": 100
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "leftModuleIndex",
+        "deltaMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "move_module_divider"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "leftModuleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deltaMm": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex",
+        "shelfIndex",
+        "elevationMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_shelf_elevation"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shelfIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "elevationMm": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex",
+        "kind"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_module_content"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "enum": [
+            "open",
+            "shelves",
+            "drawers",
+            "short_clothes",
+            "long_clothes",
+            "mixed"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "count"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_module_count"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "kind",
+        "xMm",
+        "yMm",
+        "widthMm",
+        "depthMm",
+        "heightMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "add_room_opening"
+        },
+        "roomIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "enum": [
+            "door",
+            "window",
+            "niche",
+            "passage",
+            "other"
+          ]
+        },
+        "xMm": {
+          "type": "number"
+        },
+        "yMm": {
+          "type": "number"
+        },
+        "zMm": {
+          "type": "number"
+        },
+        "widthMm": {
+          "type": "number",
+          "minimum": 10
+        },
+        "depthMm": {
+          "type": "number",
+          "minimum": 10
+        },
+        "heightMm": {
+          "type": "number",
+          "minimum": 10
+        },
+        "hostWallId": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "openingIndex"
+      ],
+      "properties": {
+        "type": {
+          "const": "move_room_opening"
+        },
+        "roomIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "openingIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "xMm": {
+          "type": "number"
+        },
+        "yMm": {
+          "type": "number"
+        },
+        "zMm": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "openingIndex"
+      ],
+      "properties": {
+        "type": {
+          "const": "remove_room_opening"
+        },
+        "roomIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "openingIndex": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "kind",
+        "xMm",
+        "yMm",
+        "widthMm",
+        "depthMm",
+        "heightMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "add_room_obstacle"
+        },
+        "roomIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "enum": [
+            "socket",
+            "switch",
+            "pipe",
+            "radiator",
+            "vent",
+            "window",
+            "door",
+            "column",
+            "duct",
+            "boiler",
+            "other"
+          ]
+        },
+        "xMm": {
+          "type": "number"
+        },
+        "yMm": {
+          "type": "number"
+        },
+        "zMm": {
+          "type": "number"
+        },
+        "widthMm": {
+          "type": "number",
+          "minimum": 10
+        },
+        "depthMm": {
+          "type": "number",
+          "minimum": 10
+        },
+        "heightMm": {
+          "type": "number",
+          "minimum": 10
+        },
+        "hostWallId": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "obstacleIndex"
+      ],
+      "properties": {
+        "type": {
+          "const": "move_room_obstacle"
+        },
+        "roomIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "obstacleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "xMm": {
+          "type": "number"
+        },
+        "yMm": {
+          "type": "number"
+        },
+        "zMm": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "obstacleIndex"
+      ],
+      "properties": {
+        "type": {
+          "const": "remove_room_obstacle"
+        },
+        "roomIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "obstacleIndex": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "add_module",
+            "remove_module",
+            "equalize_modules",
+            "set_style_note",
+            "set_hinged_fronts",
+            "set_furniture_position"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "thicknessMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_carcass_thickness"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "thicknessMm": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 60
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "wall",
+        "clearanceMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_furniture_wall_clearance"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wall": {
+          "enum": [
+            "left",
+            "right",
+            "back",
+            "front"
+          ]
+        },
+        "clearanceMm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "targetFurnitureIndex",
+        "side"
+      ],
+      "properties": {
+        "type": {
+          "const": "align_furniture_to_furniture"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "targetFurnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "side": {
+          "enum": [
+            "left",
+            "right",
+            "back",
+            "front"
+          ]
+        },
+        "gapMm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2000
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "hand"
+      ],
+      "properties": {
+        "type": {
+          "const": "create_l_corner_layout"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hand": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "returnWidthMm": {
+          "type": "number",
+          "minimum": 200,
+          "maximum": 12000
+        },
+        "gapMm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2000
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "widthsMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "configure_kitchen_run"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "widthsMm": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 100,
+            "maximum": 4000
+          }
+        },
+        "moduleType": {
+          "enum": [
+            "base",
+            "wall",
+            "tall"
+          ]
+        },
+        "heightMm": {
+          "type": "number",
+          "minimum": 200,
+          "maximum": 3000
+        },
+        "depthMm": {
+          "type": "number",
+          "minimum": 200,
+          "maximum": 900
+        },
+        "opening": {
+          "enum": [
+            "handle",
+            "profile",
+            "gola",
+            "push_to_open",
+            "none"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_kitchen_module"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleType": {
+          "enum": [
+            "base",
+            "wall",
+            "tall"
+          ]
+        },
+        "function": {
+          "enum": [
+            "storage",
+            "drawers",
+            "sink",
+            "hob",
+            "oven",
+            "dishwasher",
+            "fridge",
+            "hood",
+            "microwave",
+            "pantry",
+            "open"
+          ]
+        },
+        "heightMm": {
+          "type": "number",
+          "minimum": 200,
+          "maximum": 3000
+        },
+        "depthMm": {
+          "type": "number",
+          "minimum": 200,
+          "maximum": 900
+        },
+        "hasTop": {
+          "type": "boolean"
+        },
+        "hasBottom": {
+          "type": "boolean"
+        },
+        "hasBack": {
+          "type": "boolean"
+        },
+        "opening": {
+          "enum": [
+            "handle",
+            "profile",
+            "gola",
+            "push_to_open",
+            "none"
+          ]
+        },
+        "worktop": {
+          "type": "boolean"
+        },
+        "plinth": {
+          "type": "boolean"
+        },
+        "backPanelMode": {
+          "enum": [
+            "overlay",
+            "groove",
+            "recessed",
+            "none"
+          ]
+        },
+        "wallHangerHardwareSelectionId": {
+          "type": "string"
+        },
+        "wallHangerCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex",
+        "count",
+        "runnerHardwareSelectionId"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_kitchen_drawers"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "runnerHardwareSelectionId": {
+          "type": "string"
+        },
+        "frontHeightMm": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 1200
+        },
+        "sideHeightMm": {
+          "type": "number",
+          "minimum": 40,
+          "maximum": 400
+        },
+        "sideThicknessMm": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 30
+        },
+        "bottomThicknessMm": {
+          "type": "number",
+          "minimum": 3,
+          "maximum": 30
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex",
+        "kind",
+        "widthMm",
+        "heightMm",
+        "depthMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_kitchen_appliance"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "enum": [
+            "oven",
+            "dishwasher",
+            "fridge",
+            "hood",
+            "microwave",
+            "hob",
+            "other"
+          ]
+        },
+        "manufacturer": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "widthMm": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 3000
+        },
+        "heightMm": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 3000
+        },
+        "depthMm": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 3000
+        },
+        "installation": {
+          "enum": [
+            "cabinet",
+            "worktop",
+            "wall"
+          ]
+        },
+        "append": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex",
+        "kind",
+        "widthMm",
+        "depthMm"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_kitchen_cutout"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "enum": [
+            "sink",
+            "hob",
+            "custom"
+          ]
+        },
+        "widthMm": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 1800
+        },
+        "depthMm": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 900
+        },
+        "offsetXMm": {
+          "type": "number",
+          "minimum": 0
+        },
+        "offsetYMm": {
+          "type": "number",
+          "minimum": 0
+        },
+        "verifiedForCnc": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "carcassMaterialSelectionId"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_kitchen_materials"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "carcassMaterialSelectionId": {
+          "type": "string"
+        },
+        "frontMaterialSelectionId": {
+          "type": "string"
+        },
+        "backMaterialSelectionId": {
+          "type": "string"
+        },
+        "edgeMaterialSelectionId": {
+          "type": "string"
+        },
+        "worktopMaterialSelectionId": {
+          "type": "string"
+        },
+        "legHardwareSelectionId": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex",
+        "mode"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_kitchen_front"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mode": {
+          "enum": [
+            "none",
+            "single_left",
+            "single_right",
+            "double"
+          ]
+        },
+        "materialSelectionId": {
+          "type": "string"
+        },
+        "openingMode": {
+          "enum": [
+            "handle",
+            "profile",
+            "gola",
+            "push_to_open",
+            "none"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "moduleIndex",
+        "enabled"
+      ],
+      "properties": {
+        "type": {
+          "const": "set_kitchen_wall_trim"
+        },
+        "furnitureIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moduleIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "heightMm": {
+          "type": "number",
+          "minimum": 5,
+          "maximum": 500
+        },
+        "depthMm": {
+          "type": "number",
+          "minimum": 2,
+          "maximum": 100
+        },
+        "materialSelectionId": {
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

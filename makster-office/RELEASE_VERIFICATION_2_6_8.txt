@@ -1,0 +1,17 @@
+Makster AI 2.6.8 — Kitchen Ergonomics & Design Intelligence
+Verification record
+
+PASS — strict TypeScript compile of the modified kitchen contour using tsconfig.kitchen268.json with no Node test type dependency.
+PASS — 6/6 focused runtime scenarios:
+  1. derives continuous sink-to-cooking prep surface;
+  2. blocks a configured too-small prep surface;
+  3. warns when dishwasher is too far from sink;
+  4. detects opposing dishwasher/refrigerator opening-envelope conflict;
+  5. detects wall cabinet bottom outside configured reach band;
+  6. evaluates actual mixed-height sink/cooking/refrigerator work triangle.
+PASS — internal Mm10 → mm conversion verified for wall Z coordinates (1450 mm remains 1450 mm).
+
+NOT CLAIMED — full repository npm test regression.
+Reason: source archive contains no node_modules. `npm install --ignore-scripts` timed out in the isolated execution environment while fetching @types/node/typescript. Existing test suite therefore could not be honestly re-run end-to-end in this environment.
+
+New test source included: tests/kitchen-ergonomics-design-2.6.8.test.ts

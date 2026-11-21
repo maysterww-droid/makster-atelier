@@ -1,0 +1,1 @@
+export const SUPPLIER_OPERATIONS_VERSION = '1.1.0';

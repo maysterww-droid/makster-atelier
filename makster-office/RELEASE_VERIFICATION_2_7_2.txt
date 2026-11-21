@@ -1,0 +1,30 @@
+MAKSTER AI 2.7.2 RELEASE VERIFICATION
+======================================
+New master catalog layer:
+- Hardware manufacturer registry: Blum, Hettich, Häfele, GTV, GRASS, Salice
+- Appliance manufacturer registry: Bosch, Siemens, Miele, Liebherr, NEFF, AEG, Electrolux, Whirlpool, Samsung, LG, Beko
+- Hardware search / appliance search
+- Trust provenance per record
+- Production drilling authorization gate
+- Initial exact appliance records: Bosch SMV6ZCX10E, Siemens SN65ZX07CE, Miele G 7191 SCVi AD 125 Edition, Liebherr IRBd 5120
+- Initial hardware normalization preserves existing Blum/GTV engineering data
+- API endpoints /api/v1/catalogs/hardware and /api/v1/catalogs/appliances
+- ruleset kitchen-pro-engineering-v2.7.2
+
+Verification completed:
+PASS: master-catalog.ts strict isolated TypeScript compile
+PASS: runtime catalog smoke lookup
+PASS: productionReadyOnly trust gate smoke check
+PASS: Bosch exact-model lookup smoke check
+PASS: JSON catalog parse
+PASS: archive integrity
+
+Full historical npm test:
+NOT EXECUTED. The source archive does not contain node_modules/@types/node.
+Global tsc reaches TS2688 before project compilation because the Node type definition package is missing.
+Do not represent 2.7.2 as full-suite green until dependencies are installed and npm test is run.
+
+Data safety:
+Manufacturer registry presence does not imply a complete imported product catalog.
+Planning-only brands must not authorize drilling/CNC.
+Missing manufacturer drilling or installation data stays unknown; Makster must never fabricate it.

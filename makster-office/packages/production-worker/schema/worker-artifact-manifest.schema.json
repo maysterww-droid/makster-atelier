@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://makster.ai/schemas/worker-artifact-manifest.v1.json",
+  "title": "Makster Machine Package Manifest",
+  "type": "object",
+  "required": ["manifestVersion", "productionWorkerVersion", "jobId", "projectId", "revision", "releaseId", "machineId", "releaseManifestSha256", "machinePackageSha256", "files"],
+  "properties": {
+    "manifestVersion": { "const": "1.0.0" },
+    "productionWorkerVersion": { "type": "string" },
+    "jobId": { "type": "string", "minLength": 1 },
+    "projectId": { "type": "string", "minLength": 1 },
+    "revision": { "type": "integer", "minimum": 1 },
+    "releaseId": { "type": "string", "minLength": 1 },
+    "machineId": { "type": "string", "minLength": 1 },
+    "releaseManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "machinePackageSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "mediaType", "sha256", "byteLength"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "mediaType": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "byteLength": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

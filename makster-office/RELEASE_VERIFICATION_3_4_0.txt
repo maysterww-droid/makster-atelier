@@ -1,0 +1,105 @@
+MAKSTER AI 3.4.0 RELEASE VERIFICATION
+======================================
+CORE / BUILD
+PASS: Secure-share / Client Portal / Job Control strict TypeScript compile
+PASS: Core API emitted JavaScript syntax
+PASS: Memory repository privileged-path syntax
+PASS: Supabase repository privileged-path syntax
+PASS: Web UI JavaScript syntax
+PASS: Production Pack generator syntax
+PASS: actual bundled Core API startup
+PASS: health -> 3.4.0
+
+Core TypeScript:
+- 0 structural/type errors introduced by 3.4
+- remaining Core tsc errors are exclusively missing Node declaration files in supplied archive
+  (`@types/node`: node:http, node:crypto, Buffer, process, NodeJS namespace)
+
+TOKEN CRYPTOGRAPHY
+PASS: token entropy = 256 bits
+PASS: SHA-256 hash implementation verified against Python hashlib / standard vectors:
+- empty string
+- "abc"
+- Makster sample text
+- 64-character sample
+PASS: constant-time stored-hash comparison
+PASS: raw token absent from public HTML
+PASS: raw token absent from owner link listing
+PASS: raw token absent from Production Pack
+PASS: token hash absent from Production Pack
+
+TOKEN TRANSPORT
+PASS: share URL uses `/client/<project>#<token>`
+PASS: token is in URL fragment, not request path
+PASS: public API receives token through `x-client-share-token`
+PASS: public page HTML contains no embedded raw token
+
+PUBLIC VIEW PRIVACY
+PASS: external ClientPortalView does not expose:
+- supplier/order data
+- costEntries
+- actualCostMinor
+- committedPurchaseMinor
+- margin data
+
+EXTERNAL APPROVAL FLOW
+PASS: public page loads without normal Makster Bearer auth
+PASS: valid token -> HTTP 200
+PASS: external approval -> HTTP 201
+PASS: approval status -> approved
+PASS: audit `respondedBy` ignores spoofed client input and uses Job Control client name
+PASS: response creates immutable client-source Revision
+
+ONE-TIME LINK
+PASS: one-time link valid before response
+PASS: link consumed after successful response
+PASS: subsequent public access -> HTTP 404
+PASS: owner metadata status -> expired
+
+READ-ONLY / REVOKE / EXPIRY
+PASS: read-only link can view portal
+PASS: read-only link cannot submit approval -> HTTP 404
+PASS: revoked link -> HTTP 404
+PASS: past/invalid expiration creation -> HTTP 400
+
+APPROVAL SCOPE
+PASS: approval-enabled link is scoped to pending approvals at link creation
+PASS: later-created approval is not visible through old link
+PASS: later-created approval response through old link -> HTTP 404
+PASS: scoped approval response -> HTTP 201
+
+TECHNICAL APPROVAL FINGERPRINT
+PASS: fingerprint length = 64 hex characters / SHA-256
+PASS: approved design -> status approved
+PASS: administrative Job Control revision preserves approval
+PASS: technical project change -> approval status stale
+PASS: Job Control blocker:
+  `Project design changed after client approval. New approval is required.`
+
+RATE LIMIT
+PASS: public GET request 1 -> 200
+PASS: public GET request 60 -> 200
+PASS: public GET request 61 -> 429
+
+PUBLIC PAGE SECURITY HEADERS
+PASS: Content-Security-Policy
+PASS: Referrer-Policy: no-referrer
+PASS: Cache-Control: no-store
+PASS: X-Content-Type-Options: nosniff
+
+PRODUCTION PACK
+PASS: client-approvals.csv
+PASS: client-portal-snapshot.json
+PASS: client-share-links.csv
+PASS: approval fingerprint recorded
+PASS: no raw token
+PASS: no token hash
+
+SUPABASE
+PASS: server-only privileged repository methods implemented
+PASS: public-share Supabase path requires SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY
+NOT LIVE-TESTED: no external Supabase credentials were used in this sandbox.
+
+FULL HISTORICAL NPM TEST
+NOT EXECUTED because supplied archive still lacks node_modules/@types/node.
+Changed 3.4 engineering core was strict-compiled independently and actual bundled API/runtime paths were smoke-tested.

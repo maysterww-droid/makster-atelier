@@ -1,0 +1,28 @@
+MAKSTER AI 2.8.0 RELEASE VERIFICATION
+======================================
+PASS: catalog registry store strict TypeScript compile
+PASS: catalog import/master catalog strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled catalog registry store syntax
+PASS: bundled Core API syntax
+PASS: actual bundled Core API startup
+PASS: health -> 2.8.0
+PASS: memory registry import -> review queue -> promotion -> queue removal
+PASS: imported candidate persisted in store abstraction before review
+PASS: promotion uses stored candidate
+PASS: Supabase migration included
+PASS: promoted-record restore bootstrap included
+PASS: archive integrity
+
+Runtime smoke:
+- registryMode: memory
+- parsed: 1
+- review queue before promotion: 1
+- promoted trust: manufacturer_verified
+- review queue after promotion: 0
+
+Supabase live persistence was not exercised because no Supabase credentials were supplied to this build environment.
+The Supabase store follows the same REST pattern already used by Makster server stores and is backed by the included migration.
+
+Full historical npm test:
+NOT EXECUTED because the supplied archive still does not contain node_modules/@types/node.

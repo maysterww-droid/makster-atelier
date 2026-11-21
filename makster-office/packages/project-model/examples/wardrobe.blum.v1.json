@@ -1,0 +1,497 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "11111111-1111-4111-8111-111111111111",
+  "revision": 1,
+  "title": "Golden wardrobe 3360 · Blum Intelligence 0.4",
+  "locale": "cs-CZ",
+  "currency": "EUR",
+  "unitSystem": "metric",
+  "geometryUnit": "0.1mm",
+  "coordinateSystem": {
+    "handedness": "right",
+    "x": "right",
+    "y": "forward",
+    "z": "up"
+  },
+  "projectType": "wardrobe",
+  "site": {
+    "rooms": [
+      {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "name": "Bedroom",
+        "origin": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dimensions": {
+          "width": {
+            "value": 45000,
+            "state": "observed",
+            "tolerance": 20
+          },
+          "height": {
+            "value": 27000,
+            "state": "observed",
+            "tolerance": 20
+          },
+          "depth": {
+            "value": 40000,
+            "state": "observed",
+            "tolerance": 50
+          }
+        },
+        "walls": [],
+        "openings": [],
+        "obstacles": []
+      }
+    ]
+  },
+  "furniture": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "kind": "wardrobe",
+      "name": "Main wardrobe",
+      "roomId": "22222222-2222-4222-8222-222222222222",
+      "transform": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationZDeg": 0
+      },
+      "dimensions": {
+        "width": {
+          "value": 33600,
+          "state": "confirmed",
+          "tolerance": 10
+        },
+        "height": {
+          "value": 26500,
+          "state": "confirmed",
+          "tolerance": 10
+        },
+        "depth": {
+          "value": 6000,
+          "state": "confirmed",
+          "tolerance": 10
+        }
+      },
+      "mounting": "built_in",
+      "construction": {
+        "carcassThickness": {
+          "value": 180,
+          "state": "confirmed"
+        },
+        "backPanel": {
+          "mode": "groove",
+          "thickness": {
+            "value": 80,
+            "state": "confirmed"
+          },
+          "grooveInset": {
+            "value": 100,
+            "state": "confirmed"
+          },
+          "grooveDepth": {
+            "value": 80,
+            "state": "confirmed"
+          },
+          "grooveClearance": {
+            "value": 5,
+            "state": "confirmed"
+          },
+          "materialSelectionId": "44444444-4444-4444-8444-444444444443"
+        },
+        "plinth": {
+          "mode": "separate",
+          "height": {
+            "value": 800,
+            "state": "confirmed"
+          },
+          "setback": {
+            "value": 500,
+            "state": "estimated"
+          }
+        },
+        "defaultCarcassMaterialSelectionId": "44444444-4444-4444-8444-444444444441",
+        "defaultFrontMaterialSelectionId": "44444444-4444-4444-8444-444444444442",
+        "defaultEdgeMaterialSelectionId": "44444444-4444-4444-8444-444444444444"
+      },
+      "modules": [
+        {
+          "id": "55555555-5555-4555-8555-555555555551",
+          "kind": "short_clothes",
+          "name": "Left short clothes",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 5600,
+              "state": "confirmed"
+            }
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666611",
+              "kind": "clothes_rail",
+              "count": 1
+            },
+            {
+              "id": "66666666-6666-4666-8666-666666666612",
+              "kind": "drawer_stack",
+              "count": 3,
+              "frontMode": "internal",
+              "runnerHardwareSelectionId": "88888888-8888-4888-8888-888888888882",
+              "drawerBox": {
+                "sideHeight": {
+                  "value": 1400,
+                  "state": "confirmed"
+                },
+                "sideThickness": {
+                  "value": 160,
+                  "state": "confirmed"
+                },
+                "bottomThickness": {
+                  "value": 80,
+                  "state": "confirmed"
+                },
+                "frontHeight": {
+                  "value": 1800,
+                  "state": "confirmed"
+                },
+                "materialSelectionId": "44444444-4444-4444-8444-444444444441",
+                "bottomMaterialSelectionId": "44444444-4444-4444-8444-444444444441",
+                "runnerLinesFromBottom": [
+                  {
+                    "value": 1500,
+                    "state": "confirmed"
+                  },
+                  {
+                    "value": 3500,
+                    "state": "confirmed"
+                  },
+                  {
+                    "value": 5500,
+                    "state": "confirmed"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "55555555-5555-4555-8555-555555555552",
+          "kind": "long_clothes",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 5600,
+              "state": "confirmed"
+            }
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666621",
+              "kind": "clothes_rail",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "55555555-5555-4555-8555-555555555553",
+          "kind": "shelves",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 5600,
+              "state": "confirmed"
+            }
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666631",
+              "kind": "shelf_stack",
+              "count": 5,
+              "adjustable": true
+            }
+          ]
+        },
+        {
+          "id": "55555555-5555-4555-8555-555555555554",
+          "kind": "shelves",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 5600,
+              "state": "confirmed"
+            }
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666641",
+              "kind": "shelf_stack",
+              "count": 5,
+              "adjustable": true
+            }
+          ]
+        },
+        {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "kind": "long_clothes",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 5600,
+              "state": "confirmed"
+            }
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666651",
+              "kind": "clothes_rail",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "55555555-5555-4555-8555-555555555556",
+          "kind": "short_clothes",
+          "name": "Right short clothes",
+          "width": {
+            "mode": "fixed",
+            "value": {
+              "value": 5600,
+              "state": "confirmed"
+            }
+          },
+          "contents": [
+            {
+              "id": "66666666-6666-4666-8666-666666666661",
+              "kind": "clothes_rail",
+              "count": 1
+            },
+            {
+              "id": "66666666-6666-4666-8666-666666666662",
+              "kind": "drawer_stack",
+              "count": 3,
+              "frontMode": "internal",
+              "runnerHardwareSelectionId": "88888888-8888-4888-8888-888888888883",
+              "drawerBox": {
+                "sideThickness": {
+                  "value": 160,
+                  "state": "confirmed"
+                },
+                "bottomThickness": {
+                  "value": 160,
+                  "state": "confirmed"
+                },
+                "frontHeight": {
+                  "value": 1800,
+                  "state": "confirmed"
+                },
+                "materialSelectionId": "44444444-4444-4444-8444-444444444441",
+                "bottomMaterialSelectionId": "44444444-4444-4444-8444-444444444441",
+                "runnerLinesFromBottom": [
+                  {
+                    "value": 1500,
+                    "state": "confirmed"
+                  },
+                  {
+                    "value": 3500,
+                    "state": "confirmed"
+                  },
+                  {
+                    "value": 5500,
+                    "state": "confirmed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "fronts": [
+        {
+          "id": "77777777-7777-4777-8777-777777777771",
+          "moduleIds": [
+            "55555555-5555-4555-8555-555555555551",
+            "55555555-5555-4555-8555-555555555552",
+            "55555555-5555-4555-8555-555555555553",
+            "55555555-5555-4555-8555-555555555554",
+            "55555555-5555-4555-8555-555555555555",
+            "55555555-5555-4555-8555-555555555556"
+          ],
+          "kind": "hinged",
+          "count": 6,
+          "split": "vertical",
+          "opening": "mixed",
+          "materialSelectionId": "44444444-4444-4444-8444-444444444442",
+          "handle": {
+            "mode": "handle"
+          },
+          "hingeSides": [
+            "left",
+            "right",
+            "left",
+            "right",
+            "left",
+            "right"
+          ]
+        }
+      ],
+      "style": {
+        "colorNote": "Graphite fronts, light oak carcass"
+      },
+      "tags": [
+        "real-project",
+        "golden-test"
+      ]
+    }
+  ],
+  "selections": {
+    "materials": [
+      {
+        "id": "44444444-4444-4444-8444-444444444441",
+        "role": "carcass",
+        "source": "manual",
+        "name": "Light oak board",
+        "thickness": {
+          "value": 180,
+          "state": "confirmed"
+        },
+        "grainDirection": "vertical"
+      },
+      {
+        "id": "44444444-4444-4444-8444-444444444442",
+        "role": "front",
+        "source": "manual",
+        "name": "Graphite front",
+        "thickness": {
+          "value": 180,
+          "state": "estimated"
+        },
+        "grainDirection": "none",
+        "densityKgM3": 700
+      },
+      {
+        "id": "44444444-4444-4444-8444-444444444443",
+        "role": "back",
+        "source": "manual",
+        "name": "HDF back panel",
+        "thickness": {
+          "value": 80,
+          "state": "confirmed"
+        },
+        "grainDirection": "none"
+      },
+      {
+        "id": "44444444-4444-4444-8444-444444444444",
+        "role": "edge",
+        "source": "manual",
+        "name": "Matching ABS edge 0.8 mm",
+        "thickness": {
+          "value": 8,
+          "state": "confirmed"
+        },
+        "grainDirection": "none"
+      }
+    ],
+    "hardware": [
+      {
+        "id": "88888888-8888-4888-8888-888888888881",
+        "role": "hinge",
+        "source": "manual",
+        "manufacturer": "Blum",
+        "code": "CLIP-TOP-BLUMOTION-110",
+        "name": "Blum CLIP top BLUMOTION 110°",
+        "technical": {
+          "kind": "blum_hinge",
+          "system": "clip_top_blumotion",
+          "application": "overlay",
+          "openingAngleDeg": 110,
+          "drillingDistance": {
+            "value": 50,
+            "state": "confirmed"
+          },
+          "mountingPlateSpacing": {
+            "value": 0,
+            "state": "confirmed"
+          }
+        }
+      },
+      {
+        "id": "88888888-8888-4888-8888-888888888882",
+        "role": "runner",
+        "source": "manual",
+        "manufacturer": "Blum",
+        "code": "760H5500S",
+        "name": "Blum MOVENTO 760H 550 BLUMOTION",
+        "technical": {
+          "kind": "blum_runner",
+          "system": "movento",
+          "nominalLength": {
+            "value": 5500,
+            "state": "confirmed"
+          },
+          "motion": "blumotion",
+          "capacityKg": 40
+        }
+      },
+      {
+        "id": "88888888-8888-4888-8888-888888888883",
+        "role": "runner",
+        "source": "manual",
+        "manufacturer": "Blum",
+        "code": "750.5501S",
+        "name": "Blum LEGRABOX cabinet profile 750 550 BLUMOTION",
+        "technical": {
+          "kind": "blum_runner",
+          "system": "legrabox",
+          "nominalLength": {
+            "value": 5500,
+            "state": "confirmed"
+          },
+          "motion": "blumotion",
+          "capacityKg": 40,
+          "legraboxHeightCode": "C"
+        }
+      }
+    ]
+  },
+  "constraints": [
+    {
+      "id": "88888888-8888-4888-8888-888888888881",
+      "kind": "ceiling_clearance",
+      "targetIds": [
+        "33333333-3333-4333-8333-333333333333"
+      ],
+      "severity": "blocking",
+      "params": {
+        "minimumMm10": 100
+      },
+      "note": "Must remain installable below ceiling"
+    }
+  ],
+  "facts": [
+    {
+      "path": "/furniture/0/dimensions/width/value",
+      "source": "manual",
+      "confidence": 1,
+      "confirmed": true
+    },
+    {
+      "path": "/furniture/0/dimensions/height/value",
+      "source": "manual",
+      "confidence": 1,
+      "confirmed": true
+    },
+    {
+      "path": "/furniture/0/dimensions/depth/value",
+      "source": "manual",
+      "confidence": 1,
+      "confirmed": true
+    }
+  ],
+  "notes": []
+}

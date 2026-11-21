@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MaksterBxfFixture schemaVersion="fixture-v1" catalogVersion="2027/2028" data-trust="fixture-only">
+  <ProjectReference>TEST-ONLY-3360-WARDROBE</ProjectReference>
+  <RunnerDrillingProfile manufacturer="Blum" hardwareCode="760H5500S">
+    <Hole fromFrontMm="37" diameterMm="5" depthMm="12" fastener="chipboard_screw" />
+    <Hole fromFrontMm="293" diameterMm="5" depthMm="12" fastener="chipboard_screw" />
+  </RunnerDrillingProfile>
+  <RunnerDrillingProfile manufacturer="Blum" hardwareCode="750.5501S">
+    <Hole fromFrontMm="37" diameterMm="5" depthMm="12" fastener="chipboard_screw" />
+    <Hole fromFrontMm="320" diameterMm="5" depthMm="12" fastener="chipboard_screw" />
+  </RunnerDrillingProfile>
+</MaksterBxfFixture>

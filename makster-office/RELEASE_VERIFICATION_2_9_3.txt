@@ -1,0 +1,12 @@
+MAKSTER AI 2.9.3 RELEASE VERIFICATION
+PASS strict TypeScript compile: changed ProjectModel/Engineering core
+PASS Web UI syntax
+PASS bundled Core API syntax/startup
+PASS health 2.9.3
+PASS Closeout UI served
+PASS confirmed room + completed tasks -> READY_TO_SIGN
+PASS add MAJOR punch item -> NOT_READY / Revision 2
+PASS close punch item -> READY_TO_SIGN / Revision 3
+PASS sign handover -> SIGNED / Revision 4
+PASS Production Pack generator syntax
+PASS archive integrity

@@ -1,0 +1,7 @@
+Makster AI 2.6.5 verification
+- Core strict TypeScript compile (constraint/layout/composer/library/project model): PASS
+- Runtime scenario: L-shape corner auto-selection @ 600 mm -> carousel: PASS
+- Runtime scenario: radiator collision -> blocking issue: PASS
+- Runtime scenario: door opening zone collision -> blocking issue: PASS
+- Full npm test: NOT COMPLETED because source archive contains no node_modules/@types/node and npm install timed out in isolated environment.
+- No claim of full green regression is made.

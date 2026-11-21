@@ -1,0 +1,28 @@
+MAKSTER AI 2.7.6 RELEASE VERIFICATION
+======================================
+PASS: assignment/catalog/project-aware core isolated strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled dist ProjectModel validation syntax
+PASS: bundled Engineering wardrobe hinge-resolution syntax
+PASS: bundled Core API syntax
+PASS: runtime assignment smoke:
+  - Project Revision 1 -> 2
+  - hardware selection added
+  - front.hingeHardwareSelectionId assigned
+  - validateProjectModel -> OK
+PASS: bundled Core API startup
+PASS: GET /api/v1/health -> 2.7.6
+PASS: archive integrity
+
+Approval/security behavior:
+- explicit approved=true required
+- server recomputes current recommendations
+- stale/non-current candidate rejected
+- UNKNOWN candidate rejected
+- INCOMPATIBLE candidate rejected
+- assignment always creates a new project Revision
+- Engineering recalculated from the saved new Revision
+
+Full historical npm test:
+NOT EXECUTED because source archive does not contain node_modules/@types/node.
+Changed core was compiled independently; bundled runtime and assignment path were smoke-tested.

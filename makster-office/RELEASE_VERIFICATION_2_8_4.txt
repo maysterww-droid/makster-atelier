@@ -1,0 +1,29 @@
+MAKSTER AI 2.8.4 RELEASE VERIFICATION
+======================================
+PASS: Production Readiness core strict TypeScript compile
+PASS: Web UI JavaScript syntax
+PASS: bundled Core API JavaScript syntax
+PASS: bundled Production Readiness module syntax
+PASS: actual bundled Core API startup
+PASS: GET /api/v1/health -> 2.8.4
+PASS: Production Readiness UI served by actual runtime
+PASS: server contains hard `production_readiness_hold` gate
+PASS: CNC-specific `cnc_readiness_hold` gate
+PASS: incomplete kitchen project -> HOLD
+  blockers include:
+  - CARCASS_MATERIAL_UNRESOLVED
+  - KITCHEN_MODULE_SPEC_REQUIRED
+  - AUTO_COMPLETE_NEEDS_APPROVAL
+PASS: empty project -> HOLD / NO_PRODUCTION_CONTENT
+PASS: archive integrity
+
+Security / workflow:
+- UI state does not authorize production.
+- Server recalculates Engineering + Readiness from the saved current Revision.
+- NEEDS_APPROVAL is a production blocker until the assignment is explicitly accepted into a new Revision.
+- NEEDS_MEASUREMENT cannot be bypassed by a guessed value.
+- CNC drilling has an additional gate beyond generic production readiness.
+
+Full historical npm test:
+NOT EXECUTED because the supplied archive does not contain node_modules/@types/node.
+Changed readiness core was compiled independently and bundled runtime/server gates were smoke-tested.
