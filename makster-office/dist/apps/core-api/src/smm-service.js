@@ -99,7 +99,7 @@ export class SmmService {
             const ident = p.smm.publishedUrl ? p.smm.network + ':' + canonicalUrl(p.smm.publishedUrl) : p.smm.canonicalKey;
             const old = calendarMap.get(ident);
             if (old) {
-                old.smm = { ...old.smm, metrics: p.smm.metrics || old.smm.metrics, analyticsCanonicalKey: p.smm.source === 'METRICOOL_ANALYTICS_READ_ONLY' ? p.smm.canonicalKey : old.smm.analyticsCanonicalKey, aliases: [...(old.smm.aliases || []), p.smm.canonicalKey] };
+                old.smm = { ...old.smm, metrics: p.smm.metrics || old.smm.metrics, analyticsPublishedTimestamp: p.smm.publishedTimestamp || old.smm.analyticsPublishedTimestamp, analyticsCanonicalKey: p.smm.source === 'METRICOOL_ANALYTICS_READ_ONLY' ? p.smm.canonicalKey : old.smm.analyticsCanonicalKey, aliases: [...(old.smm.aliases || []), p.smm.canonicalKey] };
                 continue;
             }
             calendarMap.set(ident, { ...p, smm: { ...p.smm }, observedInLatest: p.smm.source !== 'METRICOOL_READ_ONLY' || snapshot?.smm.scheduledKeys.includes(p.smm.canonicalKey) });
